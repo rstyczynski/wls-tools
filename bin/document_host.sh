@@ -207,6 +207,7 @@ EOF
 
     # domain discovery
     echo -n "*** WebLogic domain discovery in progress..."
+    source resource_adapter_cfg_dump.sh
     source domain_discovery.sh INIT
     domain_home=$(getWLSjvmAttr $wls_name domain_home)
     discoverDomain $domain_home
