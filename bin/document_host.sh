@@ -181,6 +181,8 @@ function documentDomain() {
 
 function document_host() {
 
+    wlsdoc_bin="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
     wlsdoc_root=~/oracle/weblogic
     mkdir -p $wlsdoc_root
 
@@ -201,14 +203,15 @@ EOF
 
     # wls discovery
     echo -n "*** WebLogic server discovery in progress..."
-    source wls_process_discovery.sh INIT
+    source $wlsdoc_bin/wls_process_discovery.sh INIT
     discoverWLS
     echo "OK"
 
     # domain discovery
     echo -n "*** WebLogic domain discovery in progress..."
-    source resource_adapter_cfg_dump.sh
-    source domain_discovery.sh INIT
+    source $wlsdoc_bin/resource_adapter_cfg_dump.sh
+    source $wlsdoc_bin/domain_discovery.sh INIT
+    
     domain_home=$(getWLSjvmAttr $wls_name domain_home)
     discoverDomain $domain_home
     echo "OK"
