@@ -43,7 +43,7 @@ function collectAttrGroup() {
         touch $tmp/skiplines.$$
     fi
 
-    if [ "$group" != OTHER ]; then
+    if [ "$attrGroup" != OTHER ]; then
         attrs=$(echo $proc_cmd | tr ' ' '\n' | grep -v -f $tmp/skiplines.$$ | grep "\-$attrGroup")
         if [ ! -z "$attrs" ]; then
             for attr in $attrs; do
@@ -54,6 +54,10 @@ function collectAttrGroup() {
 
                 echo $attr >>$tmp/skiplines.$$
             done
+        else
+            attr_name='(none)'
+            attr_value='(none)'
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim$attr_name]=$attr_value
         fi
 
     else
@@ -77,7 +81,7 @@ function analyzeWLSjava() {
     attr_groups=$2
 
     if [ -z "$attr_groups" ]; then
-        attr_groups='Xm server cp Dlaunch da java Xloggc verbose Djava XX:+ XX Doracle DHTTPClient Dorg.apache.commons.logging DJAAS DUSE_JAAS Djps Dweblogic Ddomain.home Dwls Dtangosol Dmft Dums Dem Dcommon Djrf Dopss Dadf'
+        attr_groups='Xm server cp Dlaunch da java Xloggc verbose Djava XX:+ XX:- XX Doracle DHTTPClient Dorg.apache.commons.logging DJAAS DUSE_JAAS Djps Dweblogic Ddomain.home Dwls Dtangosol Dmft Dums Dem Dcommon Djrf Dopss Dadf'
     fi
 
     #echo "=== $wls_server"
@@ -135,7 +139,7 @@ function discoverWLSjvmCfg() {
         echo "====== $wls_server"
         echo "================================"
         echo "================================"
-        analyzeWLSjava $wls_server 'Xm server cp Dlaunch da java Xloggc verbose Djava XX:+ XX Doracle DHTTPClient Dorg.apache.commons.logging DJAAS DUSE_JAAS Djps Dweblogic Ddomain.home Dwls Dtangosol Dmft Dums Dem Dcommon Djrf Dopss Dadf'
+        analyzeWLSjava $wls_server 'Xm server cp Dlaunch da java Xloggc verbose Djava XX:+ XX:- XX Doracle DHTTPClient Dorg.apache.commons.logging DJAAS DUSE_JAAS Djps Dweblogic Ddomain.home Dwls Dtangosol Dmft Dums Dem Dcommon Djrf Dopss Dadf'
     done
 }
 
