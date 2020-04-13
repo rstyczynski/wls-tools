@@ -211,7 +211,7 @@ EOF
     echo -n "*** WebLogic domain discovery in progress..."
     source $wlsdoc_bin/resource_adapter_cfg_dump.sh
     source $wlsdoc_bin/domain_discovery.sh INIT
-    
+
     domain_home=$(getWLSjvmAttr $wls_name domain_home)
     discoverDomain $domain_home
     echo "OK"
@@ -261,9 +261,17 @@ EOF
     cp -r $wlsdoc_now $wlsdoc_root/current
     rm -rf $wlsdoc_root/current.prv
 
-    # delete old files
+    # delete old files; checking few dirs to protects against error leading to removel of wrong files
     if [ ! -z "$wlsdoc_root" ]; then
-        find $wlsdoc_root -mtime +30 -exec rm -f {} \;
+        if [ -d $wlsdoc_root/current ]; then
+            if [ -f $wlsdoc_root/README ]; then
+                if [ -d $wlsdoc_root/history ]; then
+                    echo -n "Removing snapshots older than 30 days..."
+                    find $wlsdoc_root/history -mtime +30 -exec rm -f {} \;
+                    echo "Done"
+                fi
+            fi
+        fi
     fi
 
     # make archive
@@ -277,7 +285,8 @@ EOF
     if [ $? -eq 0 ]; then
         rm -rf /var/wls-index-dropbox/*
         #cp -R $wlsdoc_root /var/wls-index-dropbox
-        cp $wlsdoc_root/$(hostname)-document_host-all.tar.gz /var/wls-index-dropbox
+        cp $wlsdoc_root/$(hostname)-document_host-history.tar.gz /var/wls-index-dropbox
+        cp $wlsdoc_root/$(hostname)-document_host-current.tar.gz /var/wls-index-dropbox
     else
         echo "Snapshot not available for central manager as /var/wls-index-dropbox does not exist."
     fi
