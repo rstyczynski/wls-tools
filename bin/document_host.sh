@@ -176,10 +176,16 @@ function documentDomain() {
         mkdir -p $dst
         apps=$(getDomainGroupAttrs | grep "^deployment$delim\type$delim$type" | cut -f4 -d$delim)
         for app in $apps; do
-            dst=$wlsdoc_now/$domain_name/deployments/$type/$app
-            mkdir -p $dst
             plan_file=${domain_attr_groups[deployment$delim\type$delim$type$delim$app$delim\plan]}
+            
+            dst=$wlsdoc_now/$domain_name/deployments/$type; mkdir -p $dst
+            echo "$app $delim $plan_file" >>$dst/plan_files
 
+            substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/variables 
+            substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+
+            dst=$wlsdoc_now/$domain_name/deployments/$type/$app; mkdir -p $dst
+        
             case $type in
             rar)
                 echo -n ">> decoding rar $plan_file..."
@@ -189,8 +195,13 @@ function documentDomain() {
                 else
                     echo Error
                 fi
+
+                substituteStrings $dst/properties $wlsdoc_now/$domain_name/variables 
+                substituteStrings $dst/properties $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+
                 ;;
             esac
+
             echo -n ">> decoding generic $plan_file..."
             decode_deployment_plan $plan_file >$dst/config
             if [ $? -eq 0 ]; then
@@ -198,6 +209,10 @@ function documentDomain() {
             else
                 echo Error
             fi
+
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+
         done
     done
 
@@ -256,6 +271,7 @@ domain_name=$(getDomainAttr info name)
 admin_host=${wls_attributes[$wls_name$delim\admin_host_name]}
 admin_port=${wls_attributes[$wls_name$delim\admin_host_port]}
 mw_home=${wls_attributes[$wls_name$delim\mw_home]}
+assword, *********=assword",.*$
 EOF
     }
 
