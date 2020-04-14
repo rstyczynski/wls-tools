@@ -116,6 +116,7 @@ function getWLS_ra_properties() {
 
     cat $tmp/modul_cfg |
         removeStr '/weblogic-connector/outbound-resource-adapter/connection-definition-group/[connection-factory-interface="javax.resource.cci.ConnectionFactory"]/connection-instance/[jndi-name=' |
+        removeStr '/weblogic-connector/outbound-resource-adapter/connection-definition-group/[connection-factory-interface="oracle.tip.adapter.jms.IJmsConnectionFactory"]/connection-instance/[jndi-name=' |
         cat |                                                                  # remove ra cfg prefix
         replaceStr ']/connection-properties/properties/property/[name=' ', ' | # remove ra cfg decorations
         removeStr ']/value' |                                                  # remove ra cfg decorations
