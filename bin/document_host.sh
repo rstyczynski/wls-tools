@@ -120,7 +120,7 @@ function documentDomain() {
     getDomainGroupAttrs info >$dst/info
 
     # substitute
-    substituteStrings $dst/info  $wlsdoc_now/$domain_name/variables >$dst/info
+    substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
 
     echo "OK"
 
@@ -133,7 +133,7 @@ function documentDomain() {
     # substitute
     cd $dst
     for script in $(ls *.sh); do
-        substituteStrings $script  $wlsdoc_now/$domain_name/variables >$script 
+        substituteStrings $script  $wlsdoc_now/$domain_name/variables 
     done
     cd -
     echo "OK"
@@ -149,7 +149,7 @@ function documentDomain() {
         # substitute
         cd $dst
         for script in $(ls *.sh); do
-            substituteStrings $script $wlsdoc_now/$domain_name/variables >$script 
+            substituteStrings $script $wlsdoc_now/$domain_name/variables
         done
         cd -
 
@@ -199,14 +199,14 @@ function documentDomain() {
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
-        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name > $dst/config
+        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name 
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
             dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
             getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name > $dst/config
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name
         done
     done
     echo OK
@@ -227,7 +227,7 @@ function substituteStrings() {
         cat $tmp/substituteStrings_src_file | replaceStr $value $key >$tmp/substituteStrings_src_file.new
         mv $tmp/substituteStrings_src_file.new $tmp/substituteStrings_src_file
     done
-    cat $tmp/substituteStrings_src_file
+    cat $tmp/substituteStrings_src_file >$src_file
 }
 
     function prepareDomainSubstitutions() {
@@ -319,7 +319,7 @@ EOF
         touch $wlsdoc_now/admin_not_found
     else
         wls_name=${wls_admin[0]}
-        documentMW $wls_name
+        ##documentMW $wls_name
         domain_name=$(getWLSjvmAttr $wls_name domain_name)
     fi
     # check existence of managed servers
@@ -327,7 +327,7 @@ EOF
         touch $wlsdoc_now/managed_not_found
     else
         wls_name=${wls_managed[0]}
-        documentMW $wls_name
+        ##documentMW $wls_name
         domain_name=$(getWLSjvmAttr $wls_name domain_name)
     fi
 
