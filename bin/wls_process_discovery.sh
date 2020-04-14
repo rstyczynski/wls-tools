@@ -253,6 +253,14 @@ function printAttrGroup() {
 
 }
 
+function getDomainHome() {
+    local domain_home=$(getWLSjvmAttr ${wls_admin[0]} domain_home)
+    if [ -z "domain_home" ]; then
+        domain_home=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
+    fi
+    echo $domain_home
+}
+
 function discoverWLS() {
     discoverWLSnames
     discoverWLSjvmCfg

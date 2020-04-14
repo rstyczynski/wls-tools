@@ -11,7 +11,7 @@ function utc::now() {
 ## specialized functions
 ##
 
-function documentWLS() {
+function documentWLSruntime() {
     local wls_name=$1
 
     if [ -z "$wlsdoc_now" ]; then
@@ -171,6 +171,20 @@ function documentDomain() {
         done
     done
 
+    echo -n ">> getting server details..."
+    for wls_name in $(getWLSnames); do
+        echo -n "$wls_name "
+        dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
+        getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim") >$dst/config
+
+        cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
+        for cfg_group in $cfg_groups; do
+            dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
+            getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" > $dst/config
+        done
+    done
+    echo OK
+
     echo "*** Domain snapshot done."
     dst=$oldDst
 }
@@ -217,7 +231,8 @@ EOF
     source $wlsdoc_bin/resource_adapter_cfg_dump.sh
     source $wlsdoc_bin/domain_discovery.sh INIT
 
-    domain_home=$(getWLSjvmAttr $wls_name domain_home)
+    domain_home=$(getDomainHome)
+
     discoverDomain $domain_home
     echo "OK"
 
@@ -250,10 +265,10 @@ EOF
         echo "************************************************************"
 
         # document servers
-        for wls_name in ${wls_managed[*]}; do
+        for wls_name in $(getWLSnames); do
             echo "************************************************************"
             echo "*** WebLogic server snapshot started for: $wls_name"
-            documentWLS $wls_name
+            documentWLSruntime $wls_name
 
             echo "*** WebLogic server snapshot completed for: $wls_name"
             echo "************************************************************"

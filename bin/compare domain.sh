@@ -83,19 +83,43 @@ function compareDomains() {
 
                     # apart from differences, compare files
                     for file in $files_left; do
+
+
+                        #
+                        # add to report
+                        #
+
+                        anchorCnt=$((anchorCnt+1))
+
+                        # Actual data
+                        echo "<a id=\"$anchorCnt\"></a>" >> $report_root/report.html
+                        echo "<h1>" >> $report_root/report.html
+                        echo $directory/$file >> $report_root/report.html
+                        echo "</h1>" >> $report_root/report.html
+
                         echo "======================================================="
                         echo Left: $left_domain_home/$directory/$file
                         echo Right: $right_domain_home/$directory/$file
                         echo "======================================================="
                         diff $left_domain_home/$directory/$file $right_domain_home/$directory/$file >$tmp/diff_file
                         if [ $? -eq 0 ]; then
+                            diff_result=NO
                             echo OK
 
                             report_root=$base_dir/report/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
                             mkdir -p $report_root/$directory
-                            git diff --color-words --no-index $left_domain_home/$directory/$file $right_domain_home/$directory/$file > $report_root/$directory/$file.txt
-                            ansifilter -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
+
+                            cat $left_domain_home/$directory/$file > $report_root/$directory/$file.txt
+
+                            cat $left_domain_home/$directory/$file | sed 's|$|</br>|g' > $report_root/$directory/$file.html
+
+                            # report
+                            text_style='style="color:green;"'
+                            echo "<p $text_style>" >> $report_root/report.html
+                            cat $report_root/$directory/$file.html >> $report_root/report.html
+                            echo "</p>" >> $report_root/report.html
                         else
+                            diff_result=YES
                             echo "MISMATCH detected."
                             cat $tmp/diff_file
 
@@ -103,7 +127,25 @@ function compareDomains() {
                             mkdir -p $report_root/$directory
                             git diff --color-words --no-index $left_domain_home/$directory/$file $right_domain_home/$directory/$file > $report_root/$directory/$file.txt
                             ansifilter -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
+
+                            # report
+                            cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
+
                         fi
+
+
+                        # ToC
+                        if [ $diff_result == YES ]; then
+                            text_style='style="color:red;"'
+                        else
+                            text_style='style="color:green;"'
+                        fi
+
+                        echo "<li $text_style>"  >> $report_root/index.html
+                        echo  "<a href=\"#$anchorCnt\">" >> $report_root/index.html
+                        echo $directory/$file >> $report_root/index.html
+                        echo "</a>" >> $report_root/index.html
+                        echo "</li>" >> $report_root/index.html
                     done
 
                 else
@@ -125,6 +167,10 @@ base_dir=/Users/rstyczynski/Developer/diff-test/wls-index
 left=10.106.3.15
 right=10.106.4.14
 
+rm -f $report_root/report.html
+rm -f $report_root/index.html
+anchorCnt=0
+
 cd $base_dir/servers/$left/current
 for left_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
     cd $base_dir/servers/$right/current
@@ -135,6 +181,38 @@ for left_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
         $right $right_domain_name current
     done
 done
+
+echo "<html>" > $report_root/diff_report.html
+
+echo "<head>"                >>$report_root/diff_report.html
+echo "<title>"               >>$report_root/diff_report.html
+echo "$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot"  >>$report_root/diff_report.html
+echo "</title>"              >>$report_root/diff_report.html
+echo "</head>"               >>$report_root/diff_report.html
+
+echo "<body>"                >>$report_root/diff_report.html
+
+
+echo "<p style=\"font-size:20px\">" >>$report_root/diff_report.html
+
+date  >>$report_root/diff_report.html
+echo "</br>"              >>$report_root/diff_report.html
+
+echo "<h1>"                  >>$report_root/diff_report.html
+echo "Weblogic compare report for: " >>$report_root/diff_report.html
+echo "$left_host | $left_domain | $left_snapshot vs." >>$report_root/diff_report.html
+echo "$right_host | $right_domain | $right_snapshot </br>"  >>$report_root/diff_report.html
+echo "</h1>"                  >>$report_root/diff_report.html
+
+echo "</p>"              >>$report_root/diff_report.html
+
+echo "<h1>Compared files:</h1>"                  >>$report_root/diff_report.html
+echo "<ul>"                  >>$report_root/diff_report.html
+cat $report_root/index.html  >>$report_root/diff_report.html
+echo "</ul>"                 >>$report_root/diff_report.html
+cat $report_root/report.html >>$report_root/diff_report.html
+echo "</body>"               >>$report_root/diff_report.html
+echo "</html>"               >> $report_root/diff_report.html
 
 cd $base_dir
 
