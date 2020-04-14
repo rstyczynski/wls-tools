@@ -33,8 +33,10 @@ function documentWLSruntime() {
     echo -n ">> top level information..."
     printAttrGroup $wls_name info >$dst/info
 
-    substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
-    substituteStrings $dst/info $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
+    #substituteStrings $dst/info $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+    substituteStringsGlobal $dst/info
+
     echo "Completed."
 
     echo -n ">> jvm details..."
@@ -43,16 +45,19 @@ function documentWLSruntime() {
     # jvm version
     $(getWLSjvmAttr $wls_name java_bin) -version >$dst/version 2>&1
 
-    substituteStrings $dst/version $wlsdoc_now/$domain_name/variables 
-    substituteStrings $dst/version $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+    #substituteStrings $dst/version $wlsdoc_now/$domain_name/variables 
+    #substituteStrings $dst/version $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+    substituteStringsGlobal $dst/version
 
     # jvm arguments
     rm -f $dst/args
     for group in $(getWLSjvmGroups $wls_name); do
         printAttrGroup $wls_name $group >>$dst/args
 
-        substituteStrings $dst/args $wlsdoc_now/$domain_name/variables 
-        substituteStrings $dst/args $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+        #substituteStrings $dst/args $wlsdoc_now/$domain_name/variables 
+        #substituteStrings $dst/args $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+        substituteStringsGlobal $dst/args
+
     done
     echo "Completed."
 
@@ -92,8 +97,9 @@ function documentMW() {
         dst=$wlsdoc_now/$domain_name/middleware/opatch; mkdir -p $dst
         $mw_home/OPatch/opatch lsinventory >$dst/inventory
 
-        substituteStrings $dst/inventory $wlsdoc_now/$domain_name/variables 
-        substituteStrings $dst/inventory $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+        #substituteStrings $dst/inventory $wlsdoc_now/$domain_name/variables 
+        #substituteStrings $dst/inventory $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+        substituteStringsGlobal $dst/inventory
 
         if [ $? -eq 0 ]; then
             echo "Completed"
@@ -131,7 +137,8 @@ function documentDomain() {
     getDomainGroupAttrs info >$dst/info
 
     # substitute
-    substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
+    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
+    substituteStringsGlobal $dst/info
 
     echo "OK"
 
@@ -144,7 +151,8 @@ function documentDomain() {
     # substitute
     cd $dst
     for script in $(ls *.sh); do
-        substituteStrings $script  $wlsdoc_now/$domain_name/variables 
+        #substituteStrings $script  $wlsdoc_now/$domain_name/variables 
+        substituteStringsGlobal $script
     done
     cd -
     echo "OK"
@@ -160,7 +168,8 @@ function documentDomain() {
         # substitute
         cd $dst
         for script in $(ls *.sh); do
-            substituteStrings $script $wlsdoc_now/$domain_name/variables
+            #substituteStrings $script $wlsdoc_now/$domain_name/variables
+            substituteStringsGlobal $script
         done
         cd -
 
@@ -181,8 +190,9 @@ function documentDomain() {
             dst=$wlsdoc_now/$domain_name/deployments/$type; mkdir -p $dst
             echo "$app $delim $plan_file" >>$dst/plan_files
 
-            substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/variables 
-            substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+            #substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/variables 
+            #substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+            substituteStringsGlobal $dst/plan_files
 
             dst=$wlsdoc_now/$domain_name/deployments/$type/$app; mkdir -p $dst
         
@@ -196,9 +206,9 @@ function documentDomain() {
                     echo Error
                 fi
 
-                substituteStrings $dst/properties $wlsdoc_now/$domain_name/variables 
-                substituteStrings $dst/properties $wlsdoc_now/$domain_name/servers/$wls_name/variables 
-
+                #substituteStrings $dst/properties $wlsdoc_now/$domain_name/variables 
+                #substituteStrings $dst/properties $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+                substituteStringsGlobal $dst/properties
                 ;;
             esac
 
@@ -210,9 +220,9 @@ function documentDomain() {
                 echo Error
             fi
 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
-
+            #substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
+            #substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+            substituteStringsGlobal $dst/config 
         done
     done
 
@@ -225,22 +235,32 @@ function documentDomain() {
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
-        substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-        substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+        #substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
+        #substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+        substituteStringsGlobal $dst/config 
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
             dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
             getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+            #substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
+            #substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+            substituteStringsGlobal $dst/config 
         done
     done
     echo OK
 
     echo "*** Domain snapshot done."
     dst=$oldDst
+}
+
+function substituteStringsGlobal() {
+    target_file=$1
+
+    substituteStrings $target_file $wlsdoc_now/variables     
+    substituteStrings $target_file $wlsdoc_now/$domain_name/variables 
+    substituteStrings $target_file $wlsdoc_now/$domain_name/servers/$wls_name/variables   
 }
 
 function substituteStrings() {
@@ -261,6 +281,16 @@ function substituteStrings() {
     cat $tmp/substituteStrings_src_file >$src_file
 }
 
+    function prepareSystemSubstitutions() {
+        dst=$wlsdoc_now; mkdir -p $dst
+        
+        cat >$dst/variables <<EOF
+Password, *********=assword",.*$
+[name="Password"]/value, *********=[name="Password"]/value,.*$
+{AES}********={AES}.*$
+EOF
+    }
+
     function prepareDomainSubstitutions() {
         dst=$wlsdoc_now/$domain_name; mkdir -p $dst
         wls_name=${wls_names[0]}
@@ -271,7 +301,6 @@ domain_name=$(getDomainAttr info name)
 admin_host=${wls_attributes[$wls_name$delim\admin_host_name]}
 admin_port=${wls_attributes[$wls_name$delim\admin_host_port]}
 mw_home=${wls_attributes[$wls_name$delim\mw_home]}
-assword, *********=assword",.*$
 EOF
     }
 
@@ -344,6 +373,7 @@ EOF
     #
     # prepare domain substitutes
     #
+    prepareSystemSubstitutions
     prepareDomainSubstitutions
 
     unset domain_name

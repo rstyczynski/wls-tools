@@ -208,6 +208,9 @@ echo "</h1>"                  >>$report_root/diff_report.html
 echo "</p>"              >>$report_root/diff_report.html
 
 echo "<h1>Substituted variables</h1>"  >>$report_root/diff_report.html
+echo "<h2>Global</h2>"  >>$report_root/diff_report.html
+cat $base_dir/servers/$left/$snapshot/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+
 echo "<h2>$left</h2>"  >>$report_root/diff_report.html
 echo "<h3>domain</h3>"  >>$report_root/diff_report.html
 cat $base_dir/servers/$left/$snapshot/$left_domain_name/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
