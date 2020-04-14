@@ -238,11 +238,11 @@ function substituteStrings() {
         wls_name=${wls_names[0]}
         
         cat >$dst/variables <<EOF
->>domain_name<<=$(getDomainAttr info name)
 >>domain_home<<=$(getDomainHome)
->>mw_home<<=${wls_attributes[$wls_name$delim\mw_home]}
+>>domain_name<<=$(getDomainAttr info name)
 >>admin_host<<=${wls_attributes[$wls_name$delim\admin_host_name]}
 >>admin_port<<=${wls_attributes[$wls_name$delim\admin_host_port]}
+>>mw_home<<=${wls_attributes[$wls_name$delim\mw_home]}
 EOF
     }
 

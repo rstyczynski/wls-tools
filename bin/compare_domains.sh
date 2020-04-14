@@ -48,7 +48,7 @@ function compareDomains() {
         echo Checking $directory
         cd $left_domain_home/$directory
         find . -type f -depth 1 | cut -d'/' -f2 | sort >$tmp/files_left
-        files_left=$(cat $tmp/files_left)
+        files_left=$(cat $tmp/files_left | grep -v variables)
 
         if [ ! -z "$files_left" ]; then
             if [ -d $right_domain_home/$directory ]; then
