@@ -219,6 +219,9 @@ function substituteStrings() {
     src_file=$1 
     variables=$2
 
+    tmp=/tmp/$$
+    mkdir -p $tmp
+    
     cat $src_file > $tmp/substituteStrings_src_file
     for var in $(cat $variables); do
         key=$(cat $variables | grep $var | cut -f1 -d=  )
