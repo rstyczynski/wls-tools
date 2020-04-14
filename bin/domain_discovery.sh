@@ -177,12 +177,13 @@ case $1 in
 
 INIT)
 
-    domain_home=$(getDomainHome)
+    # domain_name is set by wls_process_discovery
+    domain_name=${wls_attributes[$wls_name$delim\domain_name]}
     if [ -z "$domain_name" ]; then
-        echo "Error. WLS servers not discovered. Did you run discoverWLS?"
+        echo "Error. WLS servers not discovered. Did you run wls_process_discovery?"
         return 1
     else
-        domain_home=$(getWLSjvmAttr $wls_name domain_home)
+        domain_home=$(getDomainHome)
         discoverDomain $domain_home
         echo "Discovered domain: $domain_name."
     fi

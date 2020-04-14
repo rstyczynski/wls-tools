@@ -118,6 +118,10 @@ function documentDomain() {
     dst=$wlsdoc_now/$domain_name
     mkdir -p $dst
     getDomainGroupAttrs info >$dst/info
+
+    # substitute
+    substituteStrings $dst/info  $wlsdoc_now/$domain_name/variables
+
     echo "OK"
 
     echo -n ">> domain bin scripts..."
@@ -125,6 +129,13 @@ function documentDomain() {
     mkdir -p $dst
     domain_home=$(getDomainAttr info home)
     cp -f $domain_home/bin/*.sh $dst
+
+    # substitute
+    cd $dst
+    for script in $(ls *.sh); do
+        substituteStrings $script  $wlsdoc_now/$domain_name/variables
+    done
+    cd -
     echo "OK"
 
     echo -n ">> domain nodemanager bin scripts..."
@@ -134,6 +145,14 @@ function documentDomain() {
 
     if [ -d $domain_home/bin/nodemanager ]; then
         cp -f $domain_home/bin/nodemanager/*.sh $dst
+
+        # substitute
+        cd $dst
+        for script in $(ls *.sh); do
+            substituteStrings $script  $wlsdoc_now/$domain_name/variables
+        done
+        cd -
+
         echo "OK"
     else
         echo "Skipped"
@@ -173,14 +192,21 @@ function documentDomain() {
 
     echo -n ">> getting server details..."
     for wls_name in $(getWLSnames); do
+
+        prepareServerSubstitutions $wls_name
+
         echo -n "$wls_name "
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
+        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name
+
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
             dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
-            getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" > $dst/config
+            getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
+
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name
         done
     done
     echo OK
@@ -188,6 +214,47 @@ function documentDomain() {
     echo "*** Domain snapshot done."
     dst=$oldDst
 }
+
+function substituteStrings() {
+    src_file=$1 
+    variables=$2
+
+    cat $src_file > $tmp/substituteStrings_src_file
+    for var in $(cat $variables); do
+        key=$(cat $variables | grep $var | cut -f1 -d=  )
+        value=$(cat $variables | grep $var | cut -f2 -d=  )
+        #echo "$key, $value"
+        cat $tmp/substituteStrings_src_file | replaceStr $value $key >$tmp/substituteStrings_src_file.new
+        mv $tmp/substituteStrings_src_file.new $tmp/substituteStrings_src_file
+    done
+    cat $tmp/substituteStrings_src_file
+}
+
+    function prepareDomainSubstitutions() {
+        dst=$wlsdoc_now/$domain_name; mkdir -p $dst
+        wls_name=${wls_names[0]}
+        
+        cat >$dst/variables <<EOF
+>>domain_name<<=$(getDomainAttr info name)
+>>domain_home<<=$(getDomainHome)
+>>mw_home<<=${wls_attributes[$wls_name$delim\mw_home]}
+>>admin_host<<=${wls_attributes[$wls_name$delim\admin_host_name]}
+>>admin_port<<=${wls_attributes[$wls_name$delim\admin_host_port]}
+EOF
+    }
+
+    function prepareServerSubstitutions() {
+        local wls_name=$1
+
+        dst=$wlsdoc_now/$domain_name/$wls_name; mkdir -p $dst
+        
+        cat >$dst/variables <<EOF
+>>server_host<<=$(getDomainGroupAttrs "server|$wls_name|listen-address$" | cut -f2)
+>>server_port<<=$(getDomainGroupAttrs "server|$wls_name|listen-port$" | cut -f2)
+EOF
+    }    
+
+
 
 ##
 ## Process discovery
@@ -231,10 +298,20 @@ EOF
     source $wlsdoc_bin/resource_adapter_cfg_dump.sh
     source $wlsdoc_bin/domain_discovery.sh INIT
 
+
+    #
+    # proceed
+    #
+
     domain_home=$(getDomainHome)
 
     discoverDomain $domain_home
     echo "OK"
+
+    #
+    # prepare domain substitutes
+    #
+    prepareDomainSubstitutions
 
     unset domain_name
     # check existence of admin server
