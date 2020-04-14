@@ -28,24 +28,31 @@ function documentWLSruntime() {
     echo "*** WebLogic server discovery started"
     domain_name=$(getWLSjvmAttr $wls_name domain_name)
 
-    dst=$wlsdoc_now/$domain_name/servers/$wls_name
-    mkdir -p $dst
+    dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
 
     echo -n ">> top level information..."
     printAttrGroup $wls_name info >$dst/info
+
+    substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
+    substituteStrings $dst/info $wlsdoc_now/$domain_name/$wls_name/variables 
     echo "Completed."
 
     echo -n ">> jvm details..."
-    dst=$wlsdoc_now/$domain_name/servers/$wls_name/jvm
-    mkdir -p $dst
+    dst=$wlsdoc_now/$domain_name/servers/$wls_name/jvm; mkdir -p $dst
 
     # jvm version
     $(getWLSjvmAttr $wls_name java_bin) -version >$dst/version 2>&1
+
+    substituteStrings $dst/version $wlsdoc_now/$domain_name/variables 
+    substituteStrings $dst/version $wlsdoc_now/$domain_name/$wls_name/variables 
 
     # jvm arguments
     rm -f $dst/args
     for group in $(getWLSjvmGroups $wls_name); do
         printAttrGroup $wls_name $group >>$dst/args
+
+        substituteStrings $dst/args $wlsdoc_now/$domain_name/variables 
+        substituteStrings $dst/args $wlsdoc_now/$domain_name/$wls_name/variables 
     done
     echo "Completed."
 
@@ -84,6 +91,10 @@ function documentMW() {
         echo -n ">> opatch inventory in progress..."
         dst=$wlsdoc_now/$domain_name/middleware/opatch; mkdir -p $dst
         $mw_home/OPatch/opatch lsinventory >$dst/inventory
+
+        substituteStrings $dst/inventory $wlsdoc_now/$domain_name/variables 
+        substituteStrings $dst/inventory $wlsdoc_now/$domain_name/$wls_name/variables 
+
         if [ $? -eq 0 ]; then
             echo "Completed"
         else
@@ -199,6 +210,7 @@ function documentDomain() {
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
+        substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
         substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name/variables 
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
@@ -206,6 +218,7 @@ function documentDomain() {
             dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
             getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
 
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
             substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name/variables 
         done
     done
@@ -322,7 +335,7 @@ EOF
         touch $wlsdoc_now/admin_not_found
     else
         wls_name=${wls_admin[0]}
-        ##documentMW $wls_name
+        documentMW $wls_name
         domain_name=$(getWLSjvmAttr $wls_name domain_name)
     fi
     # check existence of managed servers
@@ -330,7 +343,7 @@ EOF
         touch $wlsdoc_now/managed_not_found
     else
         wls_name=${wls_managed[0]}
-        ##documentMW $wls_name
+        documentMW $wls_name
         domain_name=$(getWLSjvmAttr $wls_name domain_name)
     fi
 
