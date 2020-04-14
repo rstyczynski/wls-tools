@@ -199,14 +199,14 @@ function documentDomain() {
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
-        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name 
+        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name/variables 
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
             dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
             getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name/variables 
         done
     done
     echo OK
@@ -221,7 +221,7 @@ function substituteStrings() {
 
     tmp=/tmp/$$
     mkdir -p $tmp
-    
+
     cat $src_file > $tmp/substituteStrings_src_file
     for var in $(cat $variables); do
         key=$(cat $variables | grep $var | cut -f1 -d=  )
