@@ -181,6 +181,11 @@ function documentDomain() {
 
 function document_host() {
 
+    echo "========================================================================================="
+    echo "============================= Document host started ====================================="
+    echo "========================================================================================="
+    echo
+
     wlsdoc_bin="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
     wlsdoc_root=~/oracle/weblogic
@@ -281,18 +286,32 @@ EOF
     tar -zcvf $wlsdoc_root/$(hostname)-document_host-current.tar.gz .
 
     # copy to dropbox
+    dropbox=NO
     touch /var/wls-index-dropbox/test
     if [ $? -eq 0 ]; then
         rm -rf /var/wls-index-dropbox/*
         #cp -R $wlsdoc_root /var/wls-index-dropbox
         cp $wlsdoc_root/$(hostname)-document_host-history.tar.gz /var/wls-index-dropbox
         cp $wlsdoc_root/$(hostname)-document_host-current.tar.gz /var/wls-index-dropbox
+        dropbox=YES
     else
         echo "Snapshot not available for central manager as /var/wls-index-dropbox does not exist."
     fi
 
-    echo "Done. Snapshot written here: $wlsdoc_root/current"
-
+    echo
+    echo "========================================================================================="
+    echo "============================ Document host completed ===================================="
+    echo "========================================================================================="
+    echo "Snapshot is written here: $wlsdoc_root/current."
+    if [ $dropbox == NO ]; then 
+    echo "Snapshot archive is here: $wlsdoc_root/$(hostname)-document_host-current.tar.gz "
+    echo "All collected snapshots are here:. $wlsdoc_root/$(hostname)-document_host-history.tar.gz"
+    else
+    echo "Snapshot archive is here: /var/wls-index-dropbox/$(hostname)-document_host-current.tar.gz"
+    echo "All collected snapshots are here:. /var/wls-index-dropbox/$(hostname)-document_host-history.tar.gz"
+    fi
+    echo "========================================================================================="
+    echo "========================================================================================="
 }
 
 document_host
