@@ -122,6 +122,4 @@ function getWLS_ra_properties() {
         grep -v '/name, ' |                                                    # remove ra cfg name variable as not necessary here
         cat                                                                    # Done.
 
-    rm -rf $tmp
-    unset tmp
 }
