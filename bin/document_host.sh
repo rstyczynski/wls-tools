@@ -285,9 +285,9 @@ function substituteStrings() {
         dst=$wlsdoc_now; mkdir -p $dst
         
         cat >$dst/variables <<EOF
-Password, *********=assword",.*$
-[name="Password"]/value, *********=[name="Password"]/value,.*$
-{AES}********={AES}.*$
+Password, *********=assword",.*
+[name="Password"]/value, *********=[name="Password"]/value,.*
+{AES}********={AES}.*
 EOF
     }
 
