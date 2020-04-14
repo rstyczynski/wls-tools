@@ -302,13 +302,17 @@ EOF
     echo "========================================================================================="
     echo "============================ Document host completed ===================================="
     echo "========================================================================================="
-    echo "Snapshot is written here: $wlsdoc_root/current."
-    if [ $dropbox == NO ]; then 
-    echo "Snapshot archive is here: $wlsdoc_root/$(hostname)-document_host-current.tar.gz "
-    echo "All collected snapshots are here:. $wlsdoc_root/$(hostname)-document_host-history.tar.gz"
+    echo "Snapshot is available here: $wlsdoc_root/current."
+    echo
+
+    if [ $dropbox == NO ]; then
+    echo "As /var/wls-index-dropbox is not available, transfter below files manually to host doing compare operation."
+    echo "- current archive:    $wlsdoc_root/$(hostname)-document_host-current.tar.gz "
+    echo "- historical archive: $wlsdoc_root/$(hostname)-document_host-history.tar.gz"
     else
-    echo "Snapshot archive is here: /var/wls-index-dropbox/$(hostname)-document_host-current.tar.gz"
-    echo "All collected snapshots are here:. /var/wls-index-dropbox/$(hostname)-document_host-history.tar.gz"
+    echo "Snapshots for remote access via /var/wls-index-dropbox are ready."
+    echo "- current archive:    /var/wls-index-dropbox/$(hostname)-document_host-current.tar.gz"
+    echo "- historical archive: /var/wls-index-dropbox/$(hostname)-document_host-history.tar.gz"
     fi
     echo "========================================================================================="
     echo "========================================================================================="
