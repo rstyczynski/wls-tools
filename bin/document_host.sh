@@ -260,7 +260,10 @@ function substituteStringsGlobal() {
 
     substituteStrings $target_file $wlsdoc_now/variables     
     substituteStrings $target_file $wlsdoc_now/$domain_name/variables 
-    substituteStrings $target_file $wlsdoc_now/$domain_name/servers/$wls_name/variables   
+
+    if [ -f $wlsdoc_now/$domain_name/servers/$wls_name/variables ]; then
+        substituteStrings $target_file $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+    fi  
 }
 
 function substituteStrings() {
@@ -272,8 +275,8 @@ function substituteStrings() {
 
     cat $src_file > $tmp/substituteStrings_src_file
     for var in $(cat $variables); do
-        key=$(cat $variables | grep $var | cut -f1 -d=  )
-        value=$(cat $variables | grep $var | cut -f2 -d=  )
+        key=$(cat $variables | grep -F "$var" | cut -f1 -d=  )
+        value=$(cat $variables | grep -F "$var" | cut -f2 -d=  )
         #echo "$key, $value"
         cat $tmp/substituteStrings_src_file | replaceStr $value "\$[$key]" >$tmp/substituteStrings_src_file.new
         mv $tmp/substituteStrings_src_file.new $tmp/substituteStrings_src_file
