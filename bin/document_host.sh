@@ -175,7 +175,7 @@ function documentDomain() {
     for wls_name in $(getWLSnames); do
         echo -n "$wls_name "
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
-        getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim") >$dst/config
+        getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
