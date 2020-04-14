@@ -166,19 +166,20 @@ mkdir -p $tmp
 base_dir=/Users/rstyczynski/Developer/diff-test/wls-index
 left=10.106.3.15
 right=10.106.4.14
+snapshot=current
 
 rm -f $report_root/report.html
 rm -f $report_root/index.html
 anchorCnt=0
 
-cd $base_dir/servers/$left/current
+cd $base_dir/servers/$left/$snapshot
 for left_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
-    cd $base_dir/servers/$right/current
+    cd $base_dir/servers/$right/$snapshot
     for right_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
         echo $left_domain_name vs. $right_domain_name
         compareDomains \
-        $left  $left_domain_name  current \
-        $right $right_domain_name current
+        $left  $left_domain_name  $snapshot \
+        $right $right_domain_name $snapshot
     done
 done
 
@@ -206,7 +207,24 @@ echo "</h1>"                  >>$report_root/diff_report.html
 
 echo "</p>"              >>$report_root/diff_report.html
 
-echo "<h1>Compared files:</h1>"                  >>$report_root/diff_report.html
+echo "<h1>Substituted variables</h1>"  >>$report_root/diff_report.html
+echo "<h2>$left</h2>"  >>$report_root/diff_report.html
+echo "<h3>domain</h3>"  >>$report_root/diff_report.html
+cat $base_dir/servers/$left/$snapshot/$left_domain_name/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+for wls_name in $(ls $base_dir/servers/$left/$snapshot/$left_domain_name/servers); do
+   echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
+   cat $base_dir/servers/$left/$snapshot/$left_domain_name/servers/$wls_name/variables >>$report_root/diff_report.html
+done
+
+echo "<h2>$right</h2>"  >>$report_root/diff_report.html
+echo "<h3>domain</h3>"  >>$report_root/diff_report.html
+cat $base_dir/servers/$right/$snapshot/$right_domain_name/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+for wls_name in $(ls $base_dir/servers/$right/$snapshot/$right_domain_name/servers); do
+   echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
+   cat $base_dir/servers/$right/$snapshot/$right_domain_name/servers/$wls_name/variables >>$report_root/diff_report.html
+done
+
+echo "<h1>Compared files</h1>"  >>$report_root/diff_report.html
 echo "<ul>"                  >>$report_root/diff_report.html
 cat $report_root/index.html  >>$report_root/diff_report.html
 echo "</ul>"                 >>$report_root/diff_report.html

@@ -34,7 +34,7 @@ function documentWLSruntime() {
     printAttrGroup $wls_name info >$dst/info
 
     substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
-    substituteStrings $dst/info $wlsdoc_now/$domain_name/$wls_name/variables 
+    substituteStrings $dst/info $wlsdoc_now/$domain_name/servers/$wls_name/variables 
     echo "Completed."
 
     echo -n ">> jvm details..."
@@ -44,7 +44,7 @@ function documentWLSruntime() {
     $(getWLSjvmAttr $wls_name java_bin) -version >$dst/version 2>&1
 
     substituteStrings $dst/version $wlsdoc_now/$domain_name/variables 
-    substituteStrings $dst/version $wlsdoc_now/$domain_name/$wls_name/variables 
+    substituteStrings $dst/version $wlsdoc_now/$domain_name/servers/$wls_name/variables 
 
     # jvm arguments
     rm -f $dst/args
@@ -52,7 +52,7 @@ function documentWLSruntime() {
         printAttrGroup $wls_name $group >>$dst/args
 
         substituteStrings $dst/args $wlsdoc_now/$domain_name/variables 
-        substituteStrings $dst/args $wlsdoc_now/$domain_name/$wls_name/variables 
+        substituteStrings $dst/args $wlsdoc_now/$domain_name/servers/$wls_name/variables 
     done
     echo "Completed."
 
@@ -93,7 +93,7 @@ function documentMW() {
         $mw_home/OPatch/opatch lsinventory >$dst/inventory
 
         substituteStrings $dst/inventory $wlsdoc_now/$domain_name/variables 
-        substituteStrings $dst/inventory $wlsdoc_now/$domain_name/$wls_name/variables 
+        substituteStrings $dst/inventory $wlsdoc_now/$domain_name/servers/$wls_name/variables 
 
         if [ $? -eq 0 ]; then
             echo "Completed"
@@ -211,7 +211,7 @@ function documentDomain() {
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
         substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name/variables 
+        substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
@@ -219,7 +219,7 @@ function documentDomain() {
             getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
 
             substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name/variables 
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
         done
     done
     echo OK
@@ -240,7 +240,7 @@ function substituteStrings() {
         key=$(cat $variables | grep $var | cut -f1 -d=  )
         value=$(cat $variables | grep $var | cut -f2 -d=  )
         #echo "$key, $value"
-        cat $tmp/substituteStrings_src_file | replaceStr $value $key >$tmp/substituteStrings_src_file.new
+        cat $tmp/substituteStrings_src_file | replaceStr $value "\$[$key]" >$tmp/substituteStrings_src_file.new
         mv $tmp/substituteStrings_src_file.new $tmp/substituteStrings_src_file
     done
     cat $tmp/substituteStrings_src_file >$src_file
@@ -251,22 +251,23 @@ function substituteStrings() {
         wls_name=${wls_names[0]}
         
         cat >$dst/variables <<EOF
->>domain_home<<=$(getDomainHome)
->>domain_name<<=$(getDomainAttr info name)
->>admin_host<<=${wls_attributes[$wls_name$delim\admin_host_name]}
->>admin_port<<=${wls_attributes[$wls_name$delim\admin_host_port]}
->>mw_home<<=${wls_attributes[$wls_name$delim\mw_home]}
+domain_home=$(getDomainHome)
+domain_name=$(getDomainAttr info name)
+admin_host=${wls_attributes[$wls_name$delim\admin_host_name]}
+admin_port=${wls_attributes[$wls_name$delim\admin_host_port]}
+mw_home=${wls_attributes[$wls_name$delim\mw_home]}
 EOF
     }
 
     function prepareServerSubstitutions() {
         local wls_name=$1
 
-        dst=$wlsdoc_now/$domain_name/$wls_name; mkdir -p $dst
+        dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         
         cat >$dst/variables <<EOF
->>server_host<<=$(getDomainGroupAttrs "server|$wls_name|listen-address$" | cut -f2)
->>server_port<<=$(getDomainGroupAttrs "server|$wls_name|listen-port$" | cut -f2)
+server_host=$(getDomainGroupAttrs "server|$wls_name|listen-address$" | cut -f2)
+server_port=$(getDomainGroupAttrs "server|$wls_name|listen-port$" | cut -f2)
+os_pid=${wls_attributes[$wls_name$delim\os_pid]}
 EOF
     }    
 
