@@ -120,7 +120,7 @@ function documentDomain() {
     getDomainGroupAttrs info >$dst/info
 
     # substitute
-    substituteStrings $dst/info  $wlsdoc_now/$domain_name/variables
+    substituteStrings $dst/info  $wlsdoc_now/$domain_name/variables >$dst/info
 
     echo "OK"
 
@@ -133,7 +133,7 @@ function documentDomain() {
     # substitute
     cd $dst
     for script in $(ls *.sh); do
-        substituteStrings $script  $wlsdoc_now/$domain_name/variables
+        substituteStrings $script  $wlsdoc_now/$domain_name/variables >$script 
     done
     cd -
     echo "OK"
@@ -149,7 +149,7 @@ function documentDomain() {
         # substitute
         cd $dst
         for script in $(ls *.sh); do
-            substituteStrings $script  $wlsdoc_now/$domain_name/variables
+            substituteStrings $script $wlsdoc_now/$domain_name/variables >$script 
         done
         cd -
 
@@ -199,14 +199,14 @@ function documentDomain() {
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
 
-        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name
+        substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name > $dst/config
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
             dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
             getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
 
-            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name
+            substituteStrings $dst/config $wlsdoc_now/$domain_name/$wls_name > $dst/config
         done
     done
     echo OK
@@ -289,14 +289,14 @@ EOF
 
     # wls discovery
     echo -n "*** WebLogic server discovery in progress..."
-    source $wlsdoc_bin/wls_process_discovery.sh INIT
+    source $wlsdoc_bin/discover_processes.sh INIT
     discoverWLS
     echo "OK"
 
     # domain discovery
     echo -n "*** WebLogic domain discovery in progress..."
-    source $wlsdoc_bin/resource_adapter_cfg_dump.sh
-    source $wlsdoc_bin/domain_discovery.sh INIT
+    source $wlsdoc_bin/decode_resource_adapter_cfg.sh
+    source $wlsdoc_bin/discover_domain.sh INIT
 
 
     #
