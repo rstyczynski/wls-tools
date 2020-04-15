@@ -51,3 +51,5 @@ function wls_top() {
     fi
 }
 
+wls_top $@
+
