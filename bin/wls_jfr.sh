@@ -8,8 +8,8 @@ function makePublicRead() {
         sleep 1
     done
 
-    chmod o+r $file_name
-    chmod g+r $file_name
+    chmod o+r $file_fullpath
+    chmod g+r $file_fullpath
 }
 
 unset wls_jfr
