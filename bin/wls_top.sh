@@ -32,7 +32,7 @@ function wls_top() {
     $java_bin/jstack $os_pid | t0 | grep -z RUNNABLE | f0 >$tmp/tdump
 
     rm -f $tmp/modules
-
+    
     _threadGetOwner 'java.lang.Thread.run' >> $tmp/modules
     _threadGetOwner 'weblogic.kernel.ExecuteThread.execute' >> $tmp/modules
     _threadGetOwner 'weblogic.server.channels.ServerListenThread.selectFrom' >> $tmp/modules
@@ -43,7 +43,7 @@ function wls_top() {
     for module in $(cat $tmp/modules | sort -u); do
         echo -n "$module: "
         cat $tmp/tdump | grep "$module" | cut -f1 -d'(' | wc -l
-    done | sort -k3 -t':' -r -n
+    done | sort -k3 -t':' -r -n 
     unset IFS
 
     if [ ! "$opt" == debug ]; then
