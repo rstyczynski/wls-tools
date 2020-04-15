@@ -4,6 +4,7 @@ function makePublicRead() {
     file_fullpath=$1
 
     while [ ! -f $file_fullpath ]; do
+        echo "waiting for file..."
         sleep 1
     done
 
@@ -68,8 +69,8 @@ function wls_jfr() {
                 echo "scp -o \"ProxyJump \$user@\$jumpserver\" \$user@$host_ip:$HOME/outbox/public/$file_name ."
                 echo 
                 echo "Once collected open with Java Mission Control - jmc / jmc.exe"
+                makePublicRead $HOME/outbox/public/$file_name
 
-                makePublicRead $HOME/outbox/public/$file_name &
             else
                 echo "Error starting recording."
             fi
