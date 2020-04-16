@@ -113,7 +113,7 @@ for module in $(cat $tmp/modules | head -10 ); do
    cut -d'<' -f6 | \
    cut -b1-140 | \
    # replace identifiers to masks
-   # sed 's/[0-9]\{2\}\+/99/g' | \
+   # sed 's/[0-9]\{2\}\+/99/g' |
    sort | uniq -c | sort -nr | head -20
 done
 

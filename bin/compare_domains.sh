@@ -48,7 +48,7 @@ function compareDomains() {
         echo Checking $directory
         cd $left_domain_home/$directory
         find . -type f -depth 1 | cut -d'/' -f2 | sort >$tmp/files_left
-        files_left=$(cat $tmp/files_left | grep -v variables)
+        files_left=$(cat $tmp/files_left | grep -v variables | grep -v '.DS_Store')
 
         if [ ! -z "$files_left" ]; then
             if [ -d $right_domain_home/$directory ]; then
@@ -83,7 +83,6 @@ function compareDomains() {
 
                     # apart from differences, compare files
                     for file in $files_left; do
-
 
                         #
                         # add to report
@@ -163,10 +162,19 @@ function compareDomains() {
 tmp=/tmp/$$
 mkdir -p $tmp
 
-base_dir=/Users/rstyczynski/Developer/diff-test/wls-index
+wls_diff_root=/Users/rstyczynski/Documents/Alshaya/diff-test
+
+base_dir=$wls_diff_root/wls-index
+report_root=$wls_diff_root/report
+
 left=10.106.3.15
 right=10.106.4.14
+
+left=prod-node1
+right=prod-node2
+
 snapshot=current
+
 
 rm -f $report_root/report.html
 rm -f $report_root/index.html
