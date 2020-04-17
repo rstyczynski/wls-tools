@@ -49,10 +49,11 @@ function collectAttrGroup() {
             for attr in $attrs; do
                 attr_name=$(echo $attr | cut -f1 -d'=')
                 attr_value=$(echo $attr | cut -f2 -d'=')
+
                 wls_attributes[$wls_server$delim$attr_name]=$attr_value
                 wls_attributes_groups[$wls_server$delim$attrGroup$delim$attr_name]=$attr_value
 
-                echo $attr >>$tmp/skiplines.$$
+                #echo $attr >>$tmp/skiplines.$$
             done
         else
             attr_name='(none)'
@@ -86,7 +87,7 @@ function analyzeWLSjava() {
 
     #echo "=== $wls_server"
     export wls_server
-    domain_config=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=([\w\/]+)} && print "$1 "')
+    domain_config=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=([\w\/]+)} && print "$1"')
     #echo $domain_path
 
     wls_attributes[$wls_server$delim\domain_config]=$domain_config
@@ -94,13 +95,13 @@ function analyzeWLSjava() {
 
     export wls_server
     #regexp="(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=$domain_config"
-    os_user=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server} && print "$1 "')
+    os_user=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
     wls_attributes[$wls_server$delim\os_user]=$os_user
     wls_attributes_groups[$wls_server$delim\info$delim\os_user]=$os_user
 
     export wls_server
     #regexp="\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=$domain_config"
-    os_pid=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1 "')
+    os_pid=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
 
     #echo $os_pid
     wls_attributes[$wls_server$delim\os_pid]=$os_pid
@@ -124,7 +125,9 @@ function analyzeWLSjava() {
 
     proc_cmd=$(echo $proc_cmd | tr ' ' '\n' | grep -v -f $tmp/skiplines.$$ | sort -u)
 
+    unset IFS
     for attrGroup in $attr_groups; do
+        echo $attrGroup
         collectAttrGroup $attrGroup
     done
 
@@ -291,7 +294,13 @@ case $1 in
 
 INIT)
     discoverWLS
-    echo "Discovered servers: $(getWLSnames)."
+
+    if [ -z "${wls_names[0]}" ] ; then
+        echo "Error: No WebLogic server found on this host."
+        return 1
+    else  
+        echo "Discovered servers: $(getWLSnames)."
+    fi
     ;;
 
 *)
@@ -301,43 +310,57 @@ INIT)
 
     echo
     echo "================================"
-    echo "====== $wls_server attributes"
+    echo "====== ${wls_names[0]} attributes"
     echo "================================"
-    getWLSjvmAttrs ${wls_names[0]}
-    echo
-    echo "================================"
-    echo "====== $wls_server attributes get groups"
-    echo "================================"
-    getWLSjvmGroups ${wls_names[0]}
-    echo
-    echo "================================"
-    echo "====== $wls_server group attributes"
-    echo "================================"
-    getWLSjvmGroupAttr ${wls_names[0]}
+    if [ -z "${wls_names[0]}" ] ; then
+        echo "Error: No WebLogic server found on this host."
+    else   
+        getWLSjvmAttrs ${wls_names[0]}
+        echo
+        echo "================================"
+        echo "====== ${wls_names[0]}  attributes get groups"
+        echo "================================"
+        getWLSjvmGroups ${wls_names[0]}
+        echo
+        echo "================================"
+        echo "====== ${wls_names[0]}  group attributes"
+        echo "================================"
+        getWLSjvmGroupAttr ${wls_names[0]}
 
-    echo "================================"
-    echo "====== $wls_server attributes from XX group"
-    echo "================================"
-    getWLSjvmGroupAttr ${wls_names[0]} XX
-    echo
-    echo "================================"
-    echo "====== ${wls_names[0]} get all attribute groups"
-    echo "================================"
-    for group in $(getWLSjvmGroups ${wls_names[0]}); do
-        printAttrGroup ${wls_names[0]} $group
-    done
-    echo
-    echo "================================"
-    echo "====== ${wls_admin[0]} attributes from given group"
-    echo "================================"
-    printAttrGroup ${wls_admin[0]} info
-    printAttrGroup ${wls_admin[0]} main
-    echo
-    echo "================================"
-    echo "====== ${wls_managed[0]} attributes from given group"
-    echo "================================"
-    printAttrGroup ${wls_managed[0]} info
-    printAttrGroup ${wls_managed[0]} main
+        echo "================================"
+        echo "====== ${wls_names[0]} attributes from XX group"
+        echo "================================"
+        getWLSjvmGroupAttr ${wls_names[0]} XX
+        echo
+        echo "================================"
+        echo "====== ${wls_names[0]} get all attribute groups"
+        echo "================================"
+        for group in $(getWLSjvmGroups ${wls_names[0]}); do
+            printAttrGroup ${wls_names[0]} $group
+        done
+        echo
+        echo "================================"
+        echo "====== Admin attributes ========" 
+        echo "===== from given group ========="
+        echo "================================"
+        if [ -z "${wls_admin[0]}" ]; then
+            echo "Info: No admin server found on this host."
+        else
+            printAttrGroup ${wls_admin[0]} info
+            printAttrGroup ${wls_admin[0]} main
+        fi
+        echo
+        echo "================================"
+        echo "==== First managed server ======"
+        echo "==attributes from given group ="
+        echo "================================"
+        if [ -z "${wls_managed[0]}" ]; then
+            echo "Info: No managed server found on this host."
+        else
+            printAttrGroup ${wls_managed[0]} info
+            printAttrGroup ${wls_managed[0]} main
+        fi
+    fi
     ;;
 
 esac
