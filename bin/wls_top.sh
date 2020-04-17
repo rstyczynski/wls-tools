@@ -29,6 +29,16 @@ function wls_top() {
         return 1
     fi
 
+    echo "======================================="
+    echo "====== WebLogic RUNNING thread ========"
+    echo "======================================="
+    echo "== host: $(hostname)"
+    echo "== user: $(whoami)"
+    echo "== date: $(date)"
+    echo "======================================="
+    echo "======================================="
+    echo "======================================="
+
     mkdir -p /tmp/$$
     tmp=/tmp/$$
 
