@@ -268,7 +268,7 @@ function getDomainHome() {
 
 function showSample() {
 
-            getWLSjvmAttrs ${wls_names[0]}
+        getWLSjvmAttrs ${wls_names[0]}
         echo
         echo "================================"
         echo "====== ${wls_names[0]}  attributes get groups"
@@ -313,7 +313,6 @@ function showSample() {
             printAttrGroup ${wls_managed[0]} info
             printAttrGroup ${wls_managed[0]} main
         fi
-    fi
 }
 
 function discoverWLS() {
