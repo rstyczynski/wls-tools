@@ -29,7 +29,7 @@ function harvester::getDSV() {
     machines=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/machine/name" - | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
 
     for machine in $machines; do
-        echo -n "$machine$delim"
+        echo -n "machine$delim$machine$delim"
         cat $tmp/clean_config.xml | xmllint --xpath "/domain/machine/name[text()='$machine']/../node-manager/listen-address" - | removeStr '<listen-address>' | replaceStr '</listen-address>' '\n'
     done
 }

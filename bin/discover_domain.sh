@@ -196,7 +196,7 @@ function discoverDomain() {
         sed -e 's/xmlns=".*"//g' | # remove namespace definitions
         sed -E 's/\w+://g' |       # remove namespace use TODO: must be fixed, as not removes all words suffixed by :
         sed -E 's/nil="\w+"//g' |       # remove nil="true"
-        cat >$tmp/clean_config.xml
+        cat | xmllint --format - >$tmp/clean_config.xml
 
     harvesters=$(ls $wlsdoc_bin/../harvesters | sort -n)
 

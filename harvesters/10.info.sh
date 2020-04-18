@@ -26,9 +26,9 @@ function harvester::header() {
 
 function harvester::getDSV() {
 
-    echo "name$delim$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/name/text()" -)"
-    echo "version$delim$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/domain-version/text()" -)"
-    echo "home$delim$domain_home"
+    echo "info$delim\name$delim$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/name/text()" -)"
+    echo "info$delim\version$delim$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/domain-version/text()" -)"
+    echo "info$delim\home$delim$domain_home"
 }
 
 function harvester::attachToDAG() {
@@ -39,9 +39,9 @@ function harvester::attachToDAG() {
     domain_attr_groups[info$delim\home]=$domain_home
 
     if [ "$action" == print ]; then
-        echo name$delim${domain_attr_groups[info$delim\name]}
-        echo version$delim${domain_attr_groups[info$delim\version]}
-        echo home$delim${domain_attr_groups[info$delim\home]}
+        echo info$delim\name$delim${domain_attr_groups[info$delim\name]}
+        echo info$delim\version$delim${domain_attr_groups[info$delim\version]}
+        echo info$delim\home$delim${domain_attr_groups[info$delim\home]}
     fi 
 }
 
