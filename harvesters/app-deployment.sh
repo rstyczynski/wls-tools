@@ -25,7 +25,7 @@ function harvester::header() {
 
 function harvester::getDSV() {
 
-    category=cluster
+    category=app-deployment
 
     source $wlsdoc_bin/../lib/xml_tools.sh
 
