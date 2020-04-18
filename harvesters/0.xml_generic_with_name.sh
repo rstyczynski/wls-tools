@@ -71,10 +71,11 @@ function harvester::xml_generic_with_name::attachToDAG() {
         if [ "$key_tail" == 'descriptor-file-name' ]; then
             
             cat $domain_home/config/$value |
+                xmllint --format - |
                 sed -e 's/xmlns=".*"//g' | # remove namespace definitions
                 sed -E 's/\w+://g' |       # remove namespace use TODO: must be fixed, as not removes all words suffixed by :
                 sed -E 's/nil="\w+"//g' |       # remove nil="true"
-                cat | xmllint --exc-c14n - | xmllint --format - >$tmp/clean_$category.xml
+                cat | xmllint --exc-c14n - >$tmp/clean_$category.xml
 
             xml_root_tag=$(cat $tmp/clean_$category.xml | xmllint --xpath "/" - | sed 's/></>\n</g' | grep -v '^ ' | tr -d '<' | tr -d '>' | grep -v '^/' | grep -v '^?xml')
             cfg_name=$(cat $tmp/clean_$category.xml | xmllint --xpath "/$xml_root/name/text()" -)
