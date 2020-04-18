@@ -67,7 +67,7 @@ function harvester::xml_generic_with_name::attachToDAG() {
             echo "$key=${domain_attr_groups[$key]}"
         fi
 
-        key_tail=$(echo $key | rev | cut -f1 -d$delim | rev)
+        key_tail=$(echo $key | rev | cut -f1 -d$delim | rev | tr -d ' ')
         if [ "$key_tail" == 'descriptor-file-name' ]; then
             
             cat $domain_home/config/$value |
