@@ -51,10 +51,11 @@ function xml_tools::node2DSV() {
 
             if [ "$section" != 'properties' ]; then
 
-                echo $section
-                echo $xml_anchor
+                # echo $section
+                # echo $xml_anchor
 
                 basic_nodes=''
+                deep_analysis=no
             else
 
                 if [ "$section" != '.' ]; then
