@@ -20,7 +20,7 @@
 # interface required functions
 #
 function harvester::header() {
-    echo ">> dummy..."
+    echo ">> JTA..."
 }
 
 function harvester::getDSV() {
