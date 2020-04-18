@@ -31,7 +31,7 @@ function harvester::getDSV() {
 function harvester::attachToDAG() {
     action=$1
 
-    domain_attr_groups[dummy$delim\dummy]=value
+    domain_attr_groups[dummy$delim\dummy]=$value
 
     if [ "$action" == print ]; then
         echo dummy$delim${domain_attr_groups[dummy$delim\dummy]}

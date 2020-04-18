@@ -28,9 +28,9 @@ function harvester::getDSV() {
     data=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/jta" - | grep -v 'jta>$' | sed 's/^ *<//g' | cut -f1 -d'<' | tr '>' $delim)
 
     for row in $data; do
-        key=$(echo $data | cut -f1 -d$delim)
-        value=$(echo $data | cut -f1 -d$delim)
-        echo jta$delim\key$delim${domain_attr_groups[jta$delim$key]}
+        key=$(echo $row | cut -f1 -d$delim)
+        value=$(echo $row | cut -f2 -d$delim)
+        echo jta$delim$key$delim$value
     done
 
 }
@@ -41,16 +41,14 @@ function harvester::attachToDAG() {
     data=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/jta" - | grep -v 'jta>$' | sed 's/^ *<//g' | cut -f1 -d'<' | tr '>' $delim)
 
     for row in $data; do
-        key=$(echo $data | cut -f1 -d$delim)
-        value=$(echo $data | cut -f1 -d$delim)
-        domain_attr_groups[jta$delim$key]=value
+        key=$(echo $row | cut -f1 -d$delim)
+        value=$(echo $row | cut -f2 -d$delim)
+        domain_attr_groups[jta$delim$key]=$value
 
         if [ "$action" == print ]; then
-            echo jta$delim\key$delim${domain_attr_groups[jta$delim$key]}
+            echo jta$delim$key$delim${domain_attr_groups[jta$delim$key]}
         fi 
     done
-
-
 }
 
     
