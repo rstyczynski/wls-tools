@@ -20,20 +20,22 @@
 # interface required functions
 #
 function harvester::header() {
-    echo ">> Servers ..."
+    echo ">> Clusters ..."
 }
 
 function harvester::getDSV() {
 
+    category=cluster
+
     source $wlsdoc_bin/../lib/xml_tools.sh
 
-    servers=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/server/name" - | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
+    nodes=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/$category/name" - | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
 
-    for wls_name in $servers; do
-        xml_anchor="/domain/server/name[text()='$wls_name']/.."
+    for name in $nodes; do
+        xml_anchor="/domain/$category/name[text()='$name']/.."
         complex_nodes="."
         # run in subshell
-        (xml_tools::node2DSV $tmp/clean_config.xml "server$delim$wls_name" $xml_anchor "$complex_nodes")
+        (xml_tools::node2DSV $tmp/clean_config.xml "server$delim$name" $xml_anchor "$complex_nodes")
     done
 }
 
