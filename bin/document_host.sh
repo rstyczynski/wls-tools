@@ -354,22 +354,15 @@ EOF
 
     # wls discovery
     echo -n "*** WebLogic server discovery in progress..."
-    source $wlsdoc_bin/discover_processes.sh INIT
+    source $wlsdoc_bin/discover_processes.sh
     discoverWLS
     echo "OK"
 
     # domain discovery
     echo -n "*** WebLogic domain discovery in progress..."
     source $wlsdoc_bin/decode_resource_adapter_cfg.sh
-    source $wlsdoc_bin/discover_domain.sh INIT
-
-
-    #
-    # proceed
-    #
-
+    source $wlsdoc_bin/discover_domain.sh
     domain_home=$(getDomainHome)
-
     discoverDomain $domain_home
     echo "OK"
 
@@ -396,6 +389,7 @@ EOF
         documentMW $wls_name
         domain_name=$(getWLSjvmAttr $wls_name domain_name)
     fi
+
 
     if [ ! -z "$domain_name" ]; then
 

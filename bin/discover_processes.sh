@@ -266,56 +266,9 @@ function getDomainHome() {
     echo $domain_home
 }
 
-function discoverWLS() {
-    discoverWLSnames
-    discoverWLSjvmCfg
-    discoverWLSroles
-}
+fucntion showSample() {
 
-unset wls_names
-wls_names=()
-
-unset wls_attributes
-declare -A wls_attributes
-
-unset wls_attributes_groups
-declare -A wls_attributes_groups
-
-unset wls_managed
-wls_managed=()
-
-unset wls_admin
-wls_admin=()
-
-tmp=/tmp/$$
-mkdir -p $tmp
-
-case $1 in
-
-INIT)
-    discoverWLS
-
-    if [ -z "${wls_names[0]}" ] ; then
-        echo "Error: No WebLogic server found on this host."
-        return 1
-    else  
-        echo "Discovered servers: $(getWLSnames)."
-    fi
-    ;;
-
-*)
-    discoverWLS
-
-    getWLSnames
-
-    echo
-    echo "================================"
-    echo "====== ${wls_names[0]} attributes"
-    echo "================================"
-    if [ -z "${wls_names[0]}" ] ; then
-        echo "Error: No WebLogic server found on this host."
-    else   
-        getWLSjvmAttrs ${wls_names[0]}
+            getWLSjvmAttrs ${wls_names[0]}
         echo
         echo "================================"
         echo "====== ${wls_names[0]}  attributes get groups"
@@ -361,6 +314,34 @@ INIT)
             printAttrGroup ${wls_managed[0]} main
         fi
     fi
-    ;;
+}
 
-esac
+function discoverWLS() {
+
+    unset wls_names
+    wls_names=()
+
+    unset wls_attributes
+    declare -A wls_attributes
+
+    unset wls_attributes_groups
+    declare -A wls_attributes_groups
+
+    unset wls_managed
+    wls_managed=()
+
+    unset wls_admin
+    wls_admin=()
+
+    tmp=/tmp/$$
+    mkdir -p $tmp
+
+
+    discoverWLSnames
+    discoverWLSjvmCfg
+    discoverWLSroles
+}
+
+
+
+

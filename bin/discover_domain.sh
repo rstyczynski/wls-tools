@@ -58,9 +58,8 @@ function getDomainAttr() {
 }
 
 function discoverServer() {
-    wls_name=$1
-
-    domain_home=$(getWLSjvmAttr $wls_name domain_home)
+    domain_home=$1
+    wls_name=$2
 
     if [ ! -f $tmp/clean_config.xml ]; then
         # prepare config.xml
@@ -113,6 +112,16 @@ function discoverServer() {
 function discoverDomain() {
     local domain_home=$1
 
+
+    unset domain_attr_groups
+    declare -A domain_attr_groups
+
+    tmp=/tmp/$$
+    mkdir -p $tmp
+
+    unset IFS
+
+
     # prepare config.xml
     cat $domain_home/config/config.xml |
         sed -e 's/xmlns=".*"//g' | # remove namespace definitions
@@ -158,35 +167,11 @@ function discoverDomain() {
     echo -n ">> server details..."
     for wls_name in $(getWLSnames); do
         echo -n "$wls_name "
-        discoverServer $wls_name
+        discoverServer $domain_home $wls_name
     done
     echo Done.
 
     rm -f $tmp/clean_config.xml
 }
 
-unset domain_attr_groups
-declare -A domain_attr_groups
 
-tmp=/tmp/$$
-mkdir -p $tmp
-
-unset IFS
-
-case $1 in
-
-INIT)
-
-    # domain_name is set by wls_process_discovery
-    domain_name=${wls_attributes[$wls_name$delim\domain_name]}
-    if [ -z "$domain_name" ]; then
-        echo "Error. WLS servers not discovered. Did you run wls_process_discovery?"
-        return 1
-    else
-        domain_home=$(getDomainHome)
-        discoverDomain $domain_home
-        echo "Discovered domain: $domain_name."
-    fi
-    ;;
-
-esac
