@@ -1,26 +1,40 @@
 #!/bin/bash
 
+#
+# interface required tools
+#
+
+# xmllint cat sort tr
+
+#
+# interface required variables
+#
+
 # cat $tmp/clean_config.xml
 # $delim
 # domain_attr_groups
 # $domain_home
+# $wlsdoc_bin
 
-function dummy::header() {
+#
+# interface required functions
+#
+function harvester::header() {
     echo ">> dummy..."
 }
 
-function dummy::getDSV() {
+function harvester::getDSV() {
 
     echo "dummy$delim\value"
 }
 
-function dummy::attachToDAG() {
+function harvester::attachToDAG() {
     action=$1
 
     domain_attr_groups[dummy$delim\dummy]=value
 
     if [ "$action" == print ]; then
-        echo ${domain_attr_groups[dummy$delim\dummy]}
+        echo dummy$delim${domain_attr_groups[dummy$delim\dummy]}
     fi 
 }
 

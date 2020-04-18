@@ -1,15 +1,30 @@
 #!/bin/bash
 
+#
+# interface required tools
+#
+
+# xmllint cat sort tr
+
+#
+# interface required variables
+#
+
 # cat $tmp/clean_config.xml
 # $delim
 # domain_attr_groups
+# $domain_home
+# $wlsdoc_bin
 
+#
+# interface required functions
+#
 
-function machine::header() {
+function harvester::header() {
     echo ">> machines..."
 }
 
-function machine::getDSV() {
+function harvester::getDSV() {
 
     machines=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/machine/name" - | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
 
@@ -19,7 +34,7 @@ function machine::getDSV() {
     done
 }
 
-function machine::attachToDAG() {
+function harvester::attachToDAG() {
     action=$1
 
     machines=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/machine/name" - | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
@@ -34,8 +49,8 @@ function machine::attachToDAG() {
         domain_attr_groups[machine$delim$machine_address]=$machine
 
         if [ "$action" == print ]; then
-            echo ${domain_attr_groups[machine$delim$machine]}
-            echo ${domain_attr_groups[machine$delim$machine_address]}
+            echo machine$delim${domain_attr_groups[machine$delim$machine]}
+            echo machine$delim${domain_attr_groups[machine$delim$machine_address]}
         fi 
 
     done

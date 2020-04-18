@@ -360,7 +360,6 @@ EOF
 
     # domain discovery
     echo -n "*** WebLogic domain discovery in progress..."
-    source $wlsdoc_bin/decode_resource_adapter_cfg.sh
     source $wlsdoc_bin/discover_domain.sh
     domain_home=$(getDomainHome)
     discoverDomain $domain_home

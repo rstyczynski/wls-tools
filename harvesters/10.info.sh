@@ -1,22 +1,37 @@
 #!/bin/bash
 
+#
+# interface required tools
+#
+
+# xmllint cat sort tr
+
+#
+# interface required variables
+#
+
 # cat $tmp/clean_config.xml
 # $delim
 # domain_attr_groups
 # $domain_home
+# $wlsdoc_bin
 
-function info::header() {
+#
+# interface required functions
+#
+
+function harvester::header() {
     echo ">> general info..."
 }
 
-function info::getDSV() {
+function harvester::getDSV() {
 
     echo "name$delim$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/name/text()" -)"
     echo "version$delim$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/domain-version/text()" -)"
     echo "home$delim$domain_home"
 }
 
-function info::attachToDAG() {
+function harvester::attachToDAG() {
     action=$1
 
     domain_attr_groups[info$delim\name]=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/name/text()" -)
@@ -24,9 +39,9 @@ function info::attachToDAG() {
     domain_attr_groups[info$delim\home]=$domain_home
 
     if [ "$action" == print ]; then
-        echo ${domain_attr_groups[info$delim\name]}
-        echo ${domain_attr_groups[info$delim\version]}
-        echo ${domain_attr_groups[info$delim\home]}
+        echo name$delim${domain_attr_groups[info$delim\name]}
+        echo version$delim${domain_attr_groups[info$delim\version]}
+        echo home$delim${domain_attr_groups[info$delim\home]}
     fi 
 }
 

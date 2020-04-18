@@ -1,30 +1,48 @@
 #!/bin/bash
 
+#
+# interface required tools
+#
+
+# xmllint cat sort tr
+
+#
+# interface required variables
+#
+
 # cat $tmp/clean_config.xml
 # $delim
 # domain_attr_groups
 # $domain_home
 # $wlsdoc_bin
 
-# xmllint cat sort tr
+#
+# interface required functions
+#
 
-function deploymentplan::header() {
+function harvester::header() {
     echo ">> deployments with plan..."
 }
 
-function deploymentplan::getDSV() {
+function harvester::getDSV() {
     getDeploymentPlans getDSV
 }
 
-function deploymentplan::attachToDAG() {
+function harvester::attachToDAG() {
     action=$1
 
     getDeploymentPlans attachToDAG $action
 }
 
+#
+# custom functions
+#
+
 function getDeploymentPlans() {
     action=$1; shift
     subaction=$1; shift
+
+    source $wlsdoc_bin/decode_resource_adapter_cfg.sh
 
     deployment_types=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/app-deployment/module-type" - |
     removeStr '<module-type>' | replaceStr '</module-type>' '\n' | sort -u | tr '\n' ' ')
