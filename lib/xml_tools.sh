@@ -46,7 +46,7 @@ function xml_tools::node2DSV() {
         echo $section | grep "/$" >/dev/null
         if [ $? -eq 0 ]; then
             deep_analysis=no
-            basic_nodes=$(echo $section | tr -d '/')
+            basic_nodes=$section  # do not remove / here. it's used later
         else
 
             if [ "$section" == 'properties' ]; then
@@ -88,6 +88,7 @@ function xml_tools::node2DSV() {
             if [ $? -eq 0 ]; then
                 # tag w/o value
                 value="(exist)"
+                node=$(echo $node | tr -d '/')
             else
                 #echo "value:$xml_anchor/$node/text()"
                 value=$(xmllint --xpath "$xml_anchor/$node/text()" $xml_file)
