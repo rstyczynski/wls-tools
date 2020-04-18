@@ -61,9 +61,9 @@ function xml_tools::node2DSV() {
             fi
 
             if [ "$section" != '.' ]; then
-                echo "$key_pfx$delim$section$delim$node = $value"
+                echo "$key_pfx$delim$section$delim$node=$value"
             else
-                echo "$key_pfx$delim$node = $value"
+                echo "$key_pfx$delim$node=$value"
             fi
         done
 
