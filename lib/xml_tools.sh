@@ -30,9 +30,12 @@ function xml_tools::node2DSV() {
     # echo ">> $received_complex_nodes"
     for section in $received_complex_nodes; do
 
+        deep_analysis=yes
+
         # check if section is not final tag <section/>
         echo $section | grep "/$" >/dev/null
         if [ $? -eq 0 ]; then
+            deep_analysis=no
             basic_nodes=$section
         else
             # echo "section:>>$section<<"
@@ -45,6 +48,7 @@ function xml_tools::node2DSV() {
             #echo basic: "$xml_anchor/*[not(*)]"
             basic_nodes=$(xmllint --xpath "$xml_anchor/*[not(*)]" $xml_file 2>/dev/null | sed 's/></>\n</g' | tr '>' '<' | cut -d'<' -f2)
         fi
+
         # print values
         for node in $basic_nodes; do
             echo $node | grep "/$" >/dev/null
@@ -63,26 +67,20 @@ function xml_tools::node2DSV() {
             fi
         done
 
-        #complex
-        # #echo "final complex:$xml_anchor/*[(*)]"
-        # complex_nodes=$(xmllint --xpath "$xml_anchor/*[(*)]" $xml_file 2>/dev/null | 
-        # sed 's/></>\n</g' |      # newlines when tags are one ater another
-        # grep -v '^ ' |           # remove all with indent i.e. children 
-        # tr -d '<' | tr -d '>' |  # remove xml chars
-        # grep -v '^/')            # remove closing tag
+        if [ "$deep_analysis" == "yes" ]; then 
+            #echo xml_tools::getCmplexNodes $xml_file $xml_anchor
+            complex_nodes=$(xml_tools::getCmplexNodes $xml_file $xml_anchor)
+            #echo $complex_nodes
 
-        #echo xml_tools::getCmplexNodes $xml_file $xml_anchor
-        complex_nodes=$(xml_tools::getCmplexNodes $xml_file $xml_anchor)
-        #echo $complex_nodes
+            if [ ! -z "$complex_nodes" ]; then
+                # run in subshell
+                if [ "$section" != "." ]; then
+                    (xml_tools::node2DSV $xml_file "$key_pfx$delim$section" $xml_anchor "$complex_nodes")
+                else
+                    (xml_tools::node2DSV $xml_file "$key_pfx" $xml_anchor "$complex_nodes")
+                fi
 
-        if [ ! -z "$complex_nodes" ]; then
-            # run in subshell
-            if [ "$section" != "." ]; then
-                (xml_tools::node2DSV $xml_file "$key_pfx$delim$section" $xml_anchor "$complex_nodes")
-            else
-                (xml_tools::node2DSV $xml_file "$key_pfx" $xml_anchor "$complex_nodes")
             fi
-
         fi
     done
 }
