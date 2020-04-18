@@ -49,7 +49,7 @@ function xml_tools::node2DSV() {
             basic_nodes=$section
         else
 
-            if [ "$section" != 'properties' ]; then
+            if [ "$section" == 'properties' ]; then
 
                 # echo $section
                 # echo $xml_anchor
