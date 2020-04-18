@@ -63,7 +63,7 @@ function xml_tools::node2DSV() {
 
                 properties=$(xmllint --xpath "$xml_anchor/properties/property/name" $xml_file  | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
                 for property in $properties; do
-                    value=$(xmllint --xpath "$xml_anchor/properties/property/name[text()='$property']/text()" $xml_file )
+                    value=$(xmllint --xpath "$xml_anchor/properties/property/name[text()='$property']/../value/text()" $xml_file )
                     echo "$key_pfx$delim$section$delim$property=$value"
                 done
 
