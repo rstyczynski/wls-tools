@@ -27,7 +27,7 @@ function xml_tools::node2DSV() {
                 value="(exist)"
             else
                 #echo "value:$xml_anchor/$node/text()"
-                value=$(cxmllint --xpath "$xml_anchor/$node/text()" $xml_file)
+                value=$(xmllint --xpath "$xml_anchor/$node/text()" $xml_file)
             fi
 
             if [ "$section" != "." ]; then
