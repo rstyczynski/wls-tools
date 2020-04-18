@@ -266,7 +266,7 @@ function getDomainHome() {
     echo $domain_home
 }
 
-fucntion showSample() {
+function showSample() {
 
             getWLSjvmAttrs ${wls_names[0]}
         echo
