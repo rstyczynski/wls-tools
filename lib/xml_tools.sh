@@ -51,8 +51,21 @@ function xml_tools::node2DSV() {
 
             if [ "$section" == 'properties' ]; then
 
-                # echo $section
-                # echo $xml_anchor
+                #
+                # decode properties
+                #
+
+                # <properties>
+                #     <property>
+                #         <name>user</name>
+                #         <value>DEV12212_SOAINFRA</value>
+                #     </property>
+
+                properties=$(xmllint --xpath "$xml_anchor/properties/property/name" $xml_file  | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
+                for property in $properties; do
+                    value=$(xmllint --xpath "$xml_anchor/properties/property/name[text()='$property']/text()")
+                    echo "$key_pfx$delim$section$delim$property=$value"
+                done
 
                 basic_nodes=''
                 deep_analysis=no
