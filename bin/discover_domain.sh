@@ -6,6 +6,9 @@
 
 delim='|'
 
+unset domain_attr_groups
+declare -A domain_attr_groups
+
 ###
 ### shared functions
 ###
@@ -109,18 +112,15 @@ function discoverServer() {
     done
 }
 
-function discoverDomain() {
+function discoverDomainXX() {
     local domain_home=$1
 
-
-    unset domain_attr_groups
-    declare -A domain_attr_groups
+    domain_attr_groups=()
 
     tmp=/tmp/$$
     mkdir -p $tmp
 
     unset IFS
-
 
     # prepare config.xml
     cat $domain_home/config/config.xml |
@@ -164,14 +164,47 @@ function discoverDomain() {
         fi
     done
 
-    echo -n ">> server details..."
-    for wls_name in $(getWLSnames); do
-        echo -n "$wls_name "
-        discoverServer $domain_home $wls_name
-    done
+    # echo -n ">> server details..."
+    # for wls_name in $(getWLSnames); do
+    #     echo -n "$wls_name "
+    #     discoverServer $domain_home $wls_name
+    # done
+
     echo Done.
 
-    rm -f $tmp/clean_config.xml
+    # rm -f $tmp/clean_config.xml
 }
+
+
+function discoverDomain() {
+    local domain_home=$1
+
+    domain_attr_groups=()
+
+    tmp=/tmp/$$
+    mkdir -p $tmp
+
+    unset IFS
+
+    # prepare config.xml
+    cat $domain_home/config/config.xml |
+        sed -e 's/xmlns=".*"//g' | # remove namespace definitions
+        sed -E 's/\w+://g' |       # remove namespace use TODO: must be fixed, as not removes all words suffixed by :
+        sed -E 's/nil="\w+"//g' |       # remove nil="true"
+        cat >$tmp/clean_config.xml
+
+
+
+    echo Done.
+
+    # rm -f $tmp/clean_config.xml
+}
+
+
+if [[ $0 != $BASH_SOURCE ]]; then
+    wlsdoc_bin="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+else
+    wlsdoc_bin="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
+fi
 
 

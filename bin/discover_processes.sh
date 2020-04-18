@@ -6,6 +6,12 @@
 
 delim='|'
 
+unset wls_attributes
+declare -A wls_attributes
+unset wls_attributes_groups
+declare -A wls_attributes_groups
+
+
 ###
 ### shared functions
 ###
@@ -127,7 +133,7 @@ function analyzeWLSjava() {
 
     unset IFS
     for attrGroup in $attr_groups; do
-        echo $attrGroup
+        #echo $attrGroup
         collectAttrGroup $attrGroup
     done
 
@@ -320,11 +326,9 @@ function discoverWLS() {
     unset wls_names
     wls_names=()
 
-    unset wls_attributes
-    declare -A wls_attributes
+    wls_attributes=()
 
-    unset wls_attributes_groups
-    declare -A wls_attributes_groups
+    wls_attributes_groups=()
 
     unset wls_managed
     wls_managed=()
@@ -334,7 +338,6 @@ function discoverWLS() {
 
     tmp=/tmp/$$
     mkdir -p $tmp
-
 
     discoverWLSnames
     discoverWLSjvmCfg
