@@ -56,7 +56,7 @@ function harvester::xml_generic_with_name::attachToDAG() {
     source $wlsdoc_bin/../lib/xml_tools.sh
     
     IFS=$'\n'
-    for data in $(xml_generic_with_name::getDSV $category); do
+    for data in $(harvester::xml_generic_with_name::getDSV $category); do
 
         key=$(echo $data | cut -f1 -d=)
         value=$(echo $data | cut -f2-9999 -d=)
