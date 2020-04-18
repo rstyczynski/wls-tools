@@ -30,7 +30,7 @@ function harvester::xml_generic_with_name::header() {
 }
 
 function harvester::xml_generic_with_name::getDSV() {
-    category=$1
+    local category=$1
 
     [ -z "$category" ] && return 1
 
@@ -47,8 +47,8 @@ function harvester::xml_generic_with_name::getDSV() {
 }
 
 function harvester::xml_generic_with_name::attachToDAG() {
-    category=$1
-    action=$2
+    local category=$1
+    local action=$2
 
     [ -z "$category" ] && return 1
     [ "$category" == print ] && return 1
@@ -80,7 +80,16 @@ function harvester::xml_generic_with_name::attachToDAG() {
 
             xml_root_tag=$(cat $tmp/clean_$category.xml | xmllint --xpath "/" - | sed 's/></>\n</g' | grep -v '^ ' | tr -d '<' | tr -d '>' | grep -v '^/' | grep -v '^?xml')
             cfg_name=$(cat $tmp/clean_$category.xml | xmllint --xpath "/$xml_root/name/text()" -)
-            (xml_tools::node2DSV $tmp/clean_$category.xml "$key_head" "/" $xml_root_tag)
+            for data in $(xml_tools::node2DSV $tmp/clean_$category.xml "$key_head" "/" $xml_root_tag); do
+                key=$(echo $data | cut -f1 -d=)
+                value=$(echo $data | cut -f2-9999 -d=)
+
+                domain_attr_groups[$key]=$value
+
+                if [ "$action" == print ]; then
+                    echo "$key=${domain_attr_groups[$key]}"
+                fi
+            done
         fi 
 
     done
