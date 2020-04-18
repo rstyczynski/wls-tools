@@ -193,12 +193,13 @@ function discoverDomain() {
         sed -E 's/nil="\w+"//g' |       # remove nil="true"
         cat >$tmp/clean_config.xml
 
-    harvesters=$($wlsdoc_bin/../harvesters | sort -n)
+    harvesters=$(ls $wlsdoc_bin/../harvesters | sort -n)
 
-    for harvester in $harvester; do
+    for harvester in $harvesters; do
 
-        source $harvester
-        harvester_name=$(echo $harvester | cut -f1 -d.)
+        source $wlsdoc_bin/../harvesters/$harvester
+        harvester_name=$(echo $harvester | cut -f2 -d.)
+        [ "$harvester_name" == "sh" ] && harvester_name=$(echo $harvester | cut -f1 -d.)
 
         $harvester_name::info
         $harvester_name::attachToDAG print
