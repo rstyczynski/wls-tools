@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function xml_tools::getCmplexNodes() {
+function xml_tools::getChildNodes() {
     xml_file=$1
     xml_anchor=$2
 
@@ -68,8 +68,8 @@ function xml_tools::node2DSV() {
         done
 
         if [ "$deep_analysis" == "yes" ]; then 
-            #echo xml_tools::getCmplexNodes $xml_file $xml_anchor
-            complex_nodes=$(xml_tools::getCmplexNodes $xml_file $xml_anchor)
+            #echo xml_tools::getChildNodes $xml_file $xml_anchor
+            complex_nodes=$(xml_tools::getChildNodes $xml_file $xml_anchor)
             #echo $complex_nodes
 
             if [ ! -z "$complex_nodes" ]; then
