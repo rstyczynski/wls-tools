@@ -68,6 +68,7 @@ function harvester::xml_generic_with_name::attachToDAG() {
         fi
 
         key_tail=$(echo $key | rev | cut -f1 -d$delim | rev)
+        key_head=$(echo $key | sed "s/$delim$key_tail$//g")
         if [ "$key_tail" == 'descriptor-file-name' ]; then
             
             cat $domain_home/config/$value |
@@ -79,7 +80,7 @@ function harvester::xml_generic_with_name::attachToDAG() {
 
             xml_root_tag=$(cat $tmp/clean_$category.xml | xmllint --xpath "/" - | sed 's/></>\n</g' | grep -v '^ ' | tr -d '<' | tr -d '>' | grep -v '^/' | grep -v '^?xml')
             cfg_name=$(cat $tmp/clean_$category.xml | xmllint --xpath "/$xml_root/name/text()" -)
-            (xml_tools::node2DSV $tmp/clean_$category.xml "$xml_root$delim$cfg_name" "/" $xml_root_tag)
+            (xml_tools::node2DSV $tmp/clean_$category.xml "$key_head$delim$xml_root$delim$cfg_name" "/" $xml_root_tag)
         fi 
 
     done
