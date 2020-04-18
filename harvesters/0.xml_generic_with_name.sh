@@ -67,7 +67,7 @@ function harvester::xml_generic_with_name::attachToDAG() {
             echo "$key=${domain_attr_groups[$key]}"
         fi
 
-        if [ "$key" == 'descriptor-file-name' ]; then
+        if [ "$value" == 'descriptor-file-name' ]; then
             
             cat $domain_home/config/$value |
                 sed -e 's/xmlns=".*"//g' | # remove namespace definitions
