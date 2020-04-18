@@ -20,40 +20,13 @@
 # interface required functions
 #
 function harvester::header() {
-    echo ">> Servers ..."
+    harvester::xml_generic_with_name::header Servers
 }
 
 function harvester::getDSV() {
-
-    source $wlsdoc_bin/../lib/xml_tools.sh
-
-    servers=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/server/name" - | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
-
-    for wls_name in $servers; do
-        xml_anchor="/domain/server/name[text()='$wls_name']/.."
-        complex_nodes="."
-        # run in subshell
-        (xml_tools::node2DSV $tmp/clean_config.xml "server$delim$wls_name" $xml_anchor "$complex_nodes")
-    done
+    harvester::xml_generic_with_name::getDSV server
 }
 
 function harvester::attachToDAG() {
-    action=$1
-
-    source $wlsdoc_bin/../lib/xml_tools.sh
-    
-    IFS=$'\n'
-    for data in $(harvester::getDSV); do
-
-        key=$(echo $data | cut -f1 -d=)
-        value=$(echo $data | cut -f2-9999 -d=)
-
-        domain_attr_groups[$key]=$value
-
-        if [ "$action" == print ]; then
-            echo "$key=${domain_attr_groups[$key]}"
-        fi
-    done
-    unset IFS
-
+     harvester::xml_generic_with_name::attachToDAG server $1
 }

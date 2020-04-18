@@ -20,13 +20,13 @@
 # interface required functions
 #
 function harvester::header() {
-    harvester::xml_generic_with_name::header JTA
+    harvester::xml_generic_with_name::header saf-agent
 }
 
 function harvester::getDSV() {
-    harvester::xml_generic_with_name::getDSV jta
+    harvester::xml_generic_with_name::getDSV saf-agent
 }
 
 function harvester::attachToDAG() {
-     harvester::xml_generic_with_name::attachToDAG jta $1
+     harvester::xml_generic_with_name::attachToDAG saf-agent $1
 }
