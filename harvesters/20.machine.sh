@@ -20,6 +20,7 @@ function machine::getDSV() {
 }
 
 function machine::attachToDAG() {
+    action=$1
 
     machines=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/machine/name" - | removeStr '<name>' | replaceStr '</name>' '\n' | sort -u)
 
@@ -31,6 +32,12 @@ function machine::attachToDAG() {
 
         domain_attr_groups[machine$delim$machine]=$machine_address
         domain_attr_groups[machine$delim$machine_address]=$machine
+
+        if [ "$action" == print ]; then
+            echo ${domain_attr_groups[machine$delim$machine]}
+            echo ${domain_attr_groups[machine$delim$machine_address]}
+        fi 
+
     done
 }
 

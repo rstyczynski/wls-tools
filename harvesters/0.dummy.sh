@@ -15,7 +15,13 @@ function dummy::getDSV() {
 }
 
 function dummy::attachToDAG() {
+    action=$1
+
     domain_attr_groups[dummy$delim\dummy]=value
+
+    if [ "$action" == print ]; then
+        echo ${domain_attr_groups[dummy$delim\dummy]}
+    fi 
 }
 
     

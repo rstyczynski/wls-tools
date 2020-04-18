@@ -193,6 +193,17 @@ function discoverDomain() {
         sed -E 's/nil="\w+"//g' |       # remove nil="true"
         cat >$tmp/clean_config.xml
 
+    harvesters=$($wlsdoc_bin/../harvesters | sort -n)
+
+    for harvester in $harvester; do
+
+        source $harvester
+        harvester_name=$(echo $harvester | cut -f1 -d.)
+
+        $harvester_name::info
+        $harvester_name::attachToDAG print
+
+    done
 
 
     echo Done.
