@@ -28,6 +28,16 @@ function xml_tools::node2DSV() {
     # echo "dumpComplexNodes: $key_pfx"
     # echo ">> $xml_anchor"
     # echo ">> $received_complex_nodes"
+
+    # check if tags are unique
+    all_tags=$(echo $received_complex_nodes | tr ' ' '\n' | wc -l)
+    unique_tags=$(echo $received_complex_nodes | tr ' ' '\n' | sort -u | wc -l)
+
+    if [ $all_tags -ne $unique_tags ]; then
+        echo "Error. Received not unique tags. Not able to apply generaci method."
+        exit 1
+    fi
+
     for section in $received_complex_nodes; do
 
         deep_analysis=yes
@@ -38,7 +48,6 @@ function xml_tools::node2DSV() {
             deep_analysis=no
             basic_nodes=$section
         else
-            # echo "section:>>$section<<"
             if [ "$section" != '.' ]; then
                 xml_anchor="$received_xml_anchor/$section"
             else
