@@ -34,7 +34,7 @@ function xml_tools::node2DSV() {
     unique_tags=$(echo $received_complex_nodes | tr ' ' '\n' | sort -u | wc -l)
 
     if [ $all_tags -ne $unique_tags ]; then
-        echo "Error. Received not unique tags. Not able to apply generaci method."
+        echo "Error. Received not unique tags. Not able to apply generaci method." >2
         exit 1
     fi
 
