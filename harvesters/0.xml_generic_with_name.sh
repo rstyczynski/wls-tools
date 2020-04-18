@@ -24,11 +24,15 @@ function harvester::xml_generic_with_name::header() {
     
     if [ ! -z "$header" ]; then
         echo ">> $header ..."
+    else
+        echo ">> Loaded xml_generic_with_name."
     fi
 }
 
 function harvester::xml_generic_with_name::getDSV() {
     category=$1
+
+    [ -z "$category" ] && return 1
 
     source $wlsdoc_bin/../lib/xml_tools.sh
 
@@ -42,9 +46,11 @@ function harvester::xml_generic_with_name::getDSV() {
     done
 }
 
-function harvester::attachToDAG() {
+function harvester::xml_generic_with_name::attachToDAG() {
     category=$1
     action=$2
+
+    [ -z "$category" ] && return 1
 
     source $wlsdoc_bin/../lib/xml_tools.sh
     
