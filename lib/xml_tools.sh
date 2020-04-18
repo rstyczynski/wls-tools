@@ -69,15 +69,15 @@ function xml_tools::node2DSV() {
 
         if [ "$deep_analysis" == "yes" ]; then 
             #echo xml_tools::getChildNodes $xml_file $xml_anchor
-            complex_nodes=$(xml_tools::getChildNodes $xml_file $xml_anchor)
+            child_nodes=$(xml_tools::getChildNodes $xml_file $xml_anchor)
             #echo $complex_nodes
 
-            if [ ! -z "$complex_nodes" ]; then
+            if [ ! -z "$child_nodes" ]; then
                 # run in subshell
                 if [ "$section" != "." ]; then
-                    (xml_tools::node2DSV $xml_file "$key_pfx$delim$section" $xml_anchor "$complex_nodes")
+                    (xml_tools::node2DSV $xml_file "$key_pfx$delim$section" $xml_anchor "$child_nodes")
                 else
-                    (xml_tools::node2DSV $xml_file "$key_pfx" $xml_anchor "$complex_nodes")
+                    (xml_tools::node2DSV $xml_file "$key_pfx" $xml_anchor "$child_nodes")
                 fi
 
             fi
