@@ -30,15 +30,21 @@ function xml_tools::node2DSV() {
     # echo ">> $received_complex_nodes"
     for section in $received_complex_nodes; do
 
-        # echo "section:>>$section<<"
-        if [ "$section" != '.' ]; then
-            xml_anchor="$received_xml_anchor/$section"
+        # check if section is not final tag <section/>
+        echo $section | grep "/$" >/dev/null
+        if [ $? -eq 0 ]; then
+            basic_nodes=$section
         else
-            xml_anchor="$received_xml_anchor"
+            # echo "section:>>$section<<"
+            if [ "$section" != '.' ]; then
+                xml_anchor="$received_xml_anchor/$section"
+            else
+                xml_anchor="$received_xml_anchor"
+            fi
+            #basic
+            #echo basic: "$xml_anchor/*[not(*)]"
+            basic_nodes=$(xmllint --xpath "$xml_anchor/*[not(*)]" $xml_file 2>/dev/null | sed 's/></>\n</g' | tr '>' '<' | cut -d'<' -f2)
         fi
-        #basic
-        #echo basic: "$xml_anchor/*[not(*)]"
-        basic_nodes=$(xmllint --xpath "$xml_anchor/*[not(*)]" $xml_file 2>/dev/null | sed 's/></>\n</g' | tr '>' '<' | cut -d'<' -f2)
         # print values
         for node in $basic_nodes; do
             echo $node | grep "/$" >/dev/null

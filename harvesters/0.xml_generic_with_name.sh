@@ -42,7 +42,7 @@ function harvester::xml_generic_with_name::getDSV() {
         xml_anchor="/domain/$category/name[text()='$name']/.."
         complex_nodes="."
         # run in subshell
-        (xml_tools::node2DSV $tmp/clean_config.xml "$category$delim$name" $xml_anchor "$complex_nodes")
+        (xml_tools::node2DSV $tmp/clean_config.xml "$category$delim$name" "$xml_anchor" "$complex_nodes")
     done
 }
 
