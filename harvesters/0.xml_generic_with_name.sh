@@ -19,13 +19,16 @@
 #
 # interface required functions
 #
-function harvester::header() {
-    echo ">> Clusters ..."
+function harvester::xml_generic_with_name::header() {
+    header=$1
+    
+    if [ ! -z "$header" ]; then
+        echo ">> $header ..."
+    fi
 }
 
-function harvester::getDSV() {
-
-    category=app-deployment
+function harvester::xml_generic_with_name::getDSV() {
+    category=$1
 
     source $wlsdoc_bin/../lib/xml_tools.sh
 
@@ -40,12 +43,13 @@ function harvester::getDSV() {
 }
 
 function harvester::attachToDAG() {
-    action=$1
+    category=$1
+    action=$2
 
     source $wlsdoc_bin/../lib/xml_tools.sh
     
     IFS=$'\n'
-    for data in $(harvester::getDSV); do
+    for data in $(harvester::getDSV $category); do
 
         key=$(echo $data | cut -f1 -d=)
         value=$(echo $data | cut -f2-9999 -d=)
