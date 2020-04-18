@@ -30,13 +30,13 @@ function xml_tools::node2DSV() {
     # echo ">> $received_complex_nodes"
 
     # check if tags are unique
-    all_tags=$(echo $received_complex_nodes | tr ' ' '\n' | wc -l)
-    unique_tags=$(echo $received_complex_nodes | tr ' ' '\n' | sort -u | wc -l)
+    # all_tags=$(echo $received_complex_nodes | tr ' ' '\n' | wc -l)
+    # unique_tags=$(echo $received_complex_nodes | tr ' ' '\n' | sort -u | wc -l)
 
-    if [ $all_tags -ne $unique_tags ]; then
-        echo "Error. Received not unique tags. Not able to apply generaci method." >2
-        exit 1
-    fi
+    # if [ $all_tags -ne $unique_tags ]; then
+    #     echo "Error. Received not unique tags. Not able to apply generaci method." >2
+    #     exit 1
+    # fi
 
     for section in $received_complex_nodes; do
 
@@ -48,14 +48,24 @@ function xml_tools::node2DSV() {
             deep_analysis=no
             basic_nodes=$section
         else
-            if [ "$section" != '.' ]; then
-                xml_anchor="$received_xml_anchor/$section"
+
+            if [ "$section" != 'properties' ]; then
+
+                echo $section
+                echo $xml_anchor
+
+                basic_nodes=''
             else
-                xml_anchor="$received_xml_anchor"
+
+                if [ "$section" != '.' ]; then
+                    xml_anchor="$received_xml_anchor/$section"
+                else
+                    xml_anchor="$received_xml_anchor"
+                fi
+                #basic
+                #echo basic: "$xml_anchor/*[not(*)]"
+                basic_nodes=$(xmllint --xpath "$xml_anchor/*[not(*)]" $xml_file 2>/dev/null | sed 's/></>\n</g' | tr '>' '<' | cut -d'<' -f2)
             fi
-            #basic
-            #echo basic: "$xml_anchor/*[not(*)]"
-            basic_nodes=$(xmllint --xpath "$xml_anchor/*[not(*)]" $xml_file 2>/dev/null | sed 's/></>\n</g' | tr '>' '<' | cut -d'<' -f2)
         fi
 
         # print values
