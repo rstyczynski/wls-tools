@@ -179,6 +179,11 @@ function discoverDomainXX() {
 function discoverDomain() {
     local domain_home=$1
 
+    if [ -z "$domain_home" ]; then
+        echo "Usage: discoverDomain domain_home"
+        return 1
+    fi
+
     domain_attr_groups=()
 
     tmp=/tmp/$$

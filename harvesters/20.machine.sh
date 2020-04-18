@@ -49,8 +49,8 @@ function harvester::attachToDAG() {
         domain_attr_groups[machine$delim$machine_address]=$machine
 
         if [ "$action" == print ]; then
-            echo machine$delim${domain_attr_groups[machine$delim$machine]}
-            echo machine$delim${domain_attr_groups[machine$delim$machine_address]}
+            echo machine$delim$machine$delim${domain_attr_groups[machine$delim$machine]}
+            echo machine$delim$machine_address$delim${domain_attr_groups[machine$delim$machine_address]}
         fi 
 
     done

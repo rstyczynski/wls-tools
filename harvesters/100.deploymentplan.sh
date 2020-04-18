@@ -59,14 +59,17 @@ function getDeploymentPlans() {
 
                 case $action in
                     attachToDAG)
+                        domain_attr_groups[deployment$delim\types]=$deployment_types
                         domain_attr_groups[deployment$delim\type$delim$type$delim$app$delim\plan]=$plan_file
                         if [ "$subaction" == print ]; then
-                            echo "$app$delim$plan_file"
+                            echo "types$delim$deployment_types"
+                            echo "type$delim$type$delim$app$delim$plan_file"
                         fi
                         ;;
 
                     getDSV)
-                        echo "$app$delim$plan_file"
+                        echo "types$delim$deployment_types"
+                        echo "type$delim$type$delim$app$delim$plan_file"
                         ;;
                 esac
 
