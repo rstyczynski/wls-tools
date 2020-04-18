@@ -47,6 +47,10 @@ function getDeploymentPlans() {
     deployment_types=$(cat $tmp/clean_config.xml | xmllint --xpath "/domain/app-deployment/module-type" - |
     removeStr '<module-type>' | replaceStr '</module-type>' '\n' | sort -u | tr '\n' ' ')
 
+    if [ "$subaction" == print ]; then
+        echo "types$delim$deployment_types"
+    fi
+
     for type in $deployment_types; do
         cat $tmp/clean_config.xml | xmllint --xpath "/domain/app-deployment/module-type[text()='$type']/../plan-path[text()]/../name" - >/dev/null 2>&1
         if [ $? -eq 0 ]; then
@@ -62,13 +66,11 @@ function getDeploymentPlans() {
                         domain_attr_groups[deployment$delim\types]=$deployment_types
                         domain_attr_groups[deployment$delim\type$delim$type$delim$app$delim\plan]=$plan_file
                         if [ "$subaction" == print ]; then
-                            echo "types$delim$deployment_types"
                             echo "type$delim$type$delim$app$delim$plan_file"
                         fi
                         ;;
 
                     getDSV)
-                        echo "types$delim$deployment_types"
                         echo "type$delim$type$delim$app$delim$plan_file"
                         ;;
                 esac
