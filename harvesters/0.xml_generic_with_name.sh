@@ -51,6 +51,7 @@ function harvester::xml_generic_with_name::attachToDAG() {
     action=$2
 
     [ -z "$category" ] && return 1
+    [ "$category" == print ] && return 1
 
     source $wlsdoc_bin/../lib/xml_tools.sh
     
@@ -65,6 +66,20 @@ function harvester::xml_generic_with_name::attachToDAG() {
         if [ "$action" == print ]; then
             echo "$key=${domain_attr_groups[$key]}"
         fi
+
+        
+        if [ "$key" == 'descriptor-file-name' ]; then
+            
+            #prepare config.xml
+            cat $domain_home/config/$value |
+                sed -e 's/xmlns=".*"//g' | # remove namespace definitions
+                sed -E 's/\w+://g' |       # remove namespace use TODO: must be fixed, as not removes all words suffixed by :
+                sed -E 's/nil="\w+"//g' |       # remove nil="true"
+                cat | xmllint --exc-c14n - | xmllint --format - >$tmp/clean_$category.xml
+
+            (xml_tools::node2DSV $tmp/clean_$category.xml "$category$delim" '/' '.')
+        fi 
+
     done
     unset IFS
 
