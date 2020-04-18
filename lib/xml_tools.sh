@@ -46,7 +46,7 @@ function xml_tools::node2DSV() {
         echo $section | grep "/$" >/dev/null
         if [ $? -eq 0 ]; then
             deep_analysis=no
-            basic_nodes=$section
+            basic_nodes=$(echo $section | tr -d '/')
         else
 
             if [ "$section" == 'properties' ]; then
