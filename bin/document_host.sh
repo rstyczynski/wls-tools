@@ -378,7 +378,7 @@ EOF
         [ ! -z "${wls_admin[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
         [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
         
-        [ ! -z "$mw_home" ]; then
+        if [ ! -z "$mw_home" ]; then
             documentMW $domain_name $mw_home
             echo "*** WebLogic middleware snapshot completed for: $domain_name"
             echo "************************************************************"
@@ -428,12 +428,14 @@ EOF
     fi
 
     # make archive
+    echo ">> preparing tar files..."
     cd $wlsdoc_root/history
     tar -zcvf $wlsdoc_root/$(hostname)-document_host-history.tar.gz . >/dev/null
     cd $wlsdoc_root/current
     tar -zcvf $wlsdoc_root/$(hostname)-document_host-current.tar.gz . >/dev/null
 
     # copy to dropbox
+    echo ">> copying to outbox..."
     dropbox=NO
     touch /var/wls-index-dropbox/test
     if [ $? -eq 0 ]; then
