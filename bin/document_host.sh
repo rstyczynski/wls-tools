@@ -28,14 +28,11 @@ function documentWLSruntime() {
     echo "*** WebLogic server discovery started"
     domain_name=$(getWLSjvmAttr $wls_name domain_name)
 
-    dst=$wlsdoc_now/$domain_name/servers/$wls_name
+    dst=$wlsdoc_now/$domain_name/runtime/servers/$wls_name
     mkdir -p $dst
 
     echo -n ">> top level information..."
     printAttrGroup $wls_name info >$dst/info
-
-    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables
-    #substituteStrings $dst/info $wlsdoc_now/$domain_name/servers/$wls_name/variables
     substituteStringsGlobal $dst/info
 
     echo "Completed."
@@ -46,18 +43,12 @@ function documentWLSruntime() {
 
     # jvm version
     $(getWLSjvmAttr $wls_name java_bin) -version >$dst/version 2>&1
-
-    #substituteStrings $dst/version $wlsdoc_now/$domain_name/variables
-    #substituteStrings $dst/version $wlsdoc_now/$domain_name/servers/$wls_name/variables
     substituteStringsGlobal $dst/version
 
     # jvm arguments
     rm -f $dst/args
     for group in $(getWLSjvmGroups $wls_name); do
         printAttrGroup $wls_name $group >>$dst/args
-
-        #substituteStrings $dst/args $wlsdoc_now/$domain_name/variables
-        #substituteStrings $dst/args $wlsdoc_now/$domain_name/servers/$wls_name/variables
         substituteStringsGlobal $dst/args
 
     done
