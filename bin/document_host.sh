@@ -68,22 +68,15 @@ function documentWLSruntime() {
 }
 
 function documentMW() {
-    local wls_name=$1
-
-    if [ -z "$wlsdoc_now" ]; then
-        echo "Required parameter not known: wlsdoc_now."
-        return 1
-    fi
-    if [ -z "$wls_name" ]; then
-        echo "Provide wls server name."
-        return 1
-    fi
+    local domain_name=$1
+    local mw_home=$2
+    
+    [ ! -z "$wlsdoc_now" ] && echo "Error. wlsdoc_now must be set in env. Exiting..." && exit 1
+    [ -z "$domain_name" ] && echo "Error. Wrong params. Usage: documentMW domain_name mw_home Exiting..." && exit 1 
+    [ -z "$mw_home" ] && echo "Error. Wrong params. Usage: documentMW domain_name mw_home Exiting..." && exit 1 
 
     oldDst=$dst
-
     echo "*** Middleware discovery started"
-    mw_home=$(getWLSjvmAttr $wls_name mw_home)
-    domain_name=$(getWLSjvmAttr $wls_name domain_name)
 
     if [ -d $wlsdoc_now/$domain_name/middleware ]; then
         echo " >> middleware already discovered."
@@ -367,46 +360,53 @@ EOF
     # prepare domain substitutes
     #
     prepareSystemSubstitutions
+    unset domain_name
     # get domain name | thre may be no admin or no managed server on thi s host...
-    [ ! -z "${wls_admin[0]}" ] && domain_name=$(getWLSjvmAttr $wls_name domain_name) && prepareDomainSubstitutions $domain_name ${wls_admin[0]}
-    [ ! -z "${wls_managed[0]}" ] && domain_name=$(getWLSjvmAttr $wls_name domain_name) && prepareDomainSubstitutions $domain_name ${wls_managed[0]}
+    [ ! -z "${wls_admin[0]}" ] && domain_name=$(getWLSjvmAttr ${wls_admin[0]} domain_name) && prepareDomainSubstitutions $domain_name ${wls_admin[0]}
+    [ ! -z "${wls_managed[0]}" ] && domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name) && prepareDomainSubstitutions $domain_name ${wls_managed[0]}
 
     #
     # document Middleware home
     #
 
-    # check existence of admin server
-    if [ -z "${wls_admin[0]}" ]; then
-        touch $wlsdoc_now/admin_not_found
-    else
-        documentMW ${wls_admin[0]}
-    fi
-    # check existence of managed servers
-    if [ -z "${wls_managed[0]}" ]; then
-        touch $wlsdoc_now/managed_not_found
-    else
-        documentMW ${wls_managed[0]}
-    fi
-
     if [ ! -z "$domain_name" ]; then
+
+        echo "************************************************************"
+        echo "*** WebLogic middleware snapshot started for: $domain_name"
+
+        unset mw_home
+        [ ! -z "${wls_admin[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
+        [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
+        
+        [ ! -z "$mw_home" ]; then
+            documentMW $domain_name $mw_home
+            echo "*** WebLogic middleware snapshot completed for: $domain_name"
+            echo "************************************************************"
+            echo 
+        else
+            echo "Error: Not able to detect MW_HOME."
+            echo "*** WebLogic middleware snapshot ERRORED for: $domain_name"
+            echo "************************************************************"
+            echo 
+        fi
+
         echo "************************************************************"
         echo "*** WebLogic domain snapshot started for: $domain_name"
-
         documentDomain $domain_name
-
         echo "*** WebLogic domain snapshot completed for: $domain_name"
         echo "************************************************************"
+        echo 
 
         # document servers
         for wls_name in $(getWLSnames); do
             echo "************************************************************"
             echo "*** WebLogic server snapshot started for: $wls_name"
             documentWLSruntime $wls_name
-
             echo "*** WebLogic server snapshot completed for: $wls_name"
             echo "************************************************************"
             echo
         done
+
     fi
 
     # copying snapshot to current
