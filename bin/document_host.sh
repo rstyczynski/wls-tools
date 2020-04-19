@@ -122,9 +122,6 @@ function documentDomain() {
     dst=$wlsdoc_now/$domain_name
     mkdir -p $dst
     getDomainGroupAttrs info >$dst/info
-
-    # substitute
-    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables
     substituteStringsGlobal $dst/info
 
     echo "OK"
@@ -138,7 +135,6 @@ function documentDomain() {
     # substitute
     cd $dst
     for script in $(ls *.sh); do
-        #substituteStrings $script  $wlsdoc_now/$domain_name/variables
         substituteStringsGlobal $script
     done
     cd -
@@ -155,7 +151,6 @@ function documentDomain() {
         # substitute
         cd $dst
         for script in $(ls *.sh); do
-            #substituteStrings $script $wlsdoc_now/$domain_name/variables
             substituteStringsGlobal $script
         done
         cd -
@@ -206,12 +201,13 @@ function documentDomain() {
         done
     done
 
+    rm -f $tmp/group_processed
     echo -n ">> getting server details..."
-    for wls_name in $(getWLSnames); do
+    for wls_name in $(domain::getSubCategory server); do
+        echo -n "...$wls_name "
 
         prepareServerSubstitutions $wls_name
 
-        echo -n "$wls_name "
         dst=$wlsdoc_now/$domain_name/servers/$wls_name
         mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
@@ -225,7 +221,40 @@ function documentDomain() {
             substituteStringsGlobal $dst/config
         done
     done
+    echo "^server$delim" >>$tmp/group_processed
     echo OK
+
+    # process other groups
+    for key in "${!domain_attr_groups[@]}"; do   
+        delims="${key//[^$delim]}"
+        if [ ${#delims} -gt 2 ]; then
+            echo $key
+        fi
+    done  | cut -d'|' -f1  | sort -t'|' -k 1 -k 2 -u | grep -v -f $tmp/group_processed >$tmp/process_groups
+    for property_group in $(cat $tmp/process_groups); do
+
+        echo -n ">> getting $property_group details..."
+        for category in $(domain::getSubCategory $property_group); do
+            echo -n "...$category "
+
+            dst=$wlsdoc_now/$domain_name/$property_group/$category
+            mkdir -p $dst
+            getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
+            substituteStringsGlobal $dst/config
+
+            cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
+            for cfg_group in $cfg_groups; do
+                dst=$wlsdoc_now/$domain_name/$property_group/$category/$cfg_group
+                mkdir -p $dst
+                getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999 >$dst/config
+                substituteStringsGlobal $dst/config
+            done
+        done
+        echo "^server$delim" >>$tmp/group_processed
+        echo OK
+
+    done
+
 
     echo "*** Domain snapshot done."
     dst=$oldDst
@@ -370,7 +399,7 @@ EOF
         [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
         
         if [ ! -z "$mw_home" ]; then
-            documentMW $domain_name $mw_home
+            # documentMW $domain_name $mw_home
             echo "*** WebLogic middleware snapshot completed for: $domain_name"
             echo "************************************************************"
             echo 

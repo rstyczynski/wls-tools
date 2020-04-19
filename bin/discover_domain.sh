@@ -54,9 +54,7 @@ function getDomainGroupAttrs() {
     keys=$(echo ${!domain_attr_groups[@]} | tr ' ' '\n' | grep "^$attrGroup")
 
     for key in $keys; do
-        echo -n $key
-        echo -n -e '\t'
-        echo ${domain_attr_groups[$key]}
+        echo "$key=${domain_attr_groups[$key]}"
     done
 }
 
@@ -66,6 +64,14 @@ function getDomainAttr() {
 
     key=$attrGroup$delim$attrName
     echo ${domain_attr_groups[$key]}
+}
+
+function domain::getSubCategory() {
+    local category=$1
+
+    for key in "${!domain_attr_groups[@]}"; do 
+        echo "$key"
+    done | grep "^$category$delim" | cut -d'|' -f2 | sort -u
 }
 
 
