@@ -429,9 +429,9 @@ EOF
 
     # make archive
     cd $wlsdoc_root/history
-    tar -zcvf $wlsdoc_root/$(hostname)-document_host-history.tar.gz .
+    tar -zcvf $wlsdoc_root/$(hostname)-document_host-history.tar.gz . >/dev/null
     cd $wlsdoc_root/current
-    tar -zcvf $wlsdoc_root/$(hostname)-document_host-current.tar.gz .
+    tar -zcvf $wlsdoc_root/$(hostname)-document_host-current.tar.gz . >/dev/null
 
     # copy to dropbox
     dropbox=NO
