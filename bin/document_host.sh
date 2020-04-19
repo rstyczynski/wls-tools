@@ -282,7 +282,8 @@ EOF
         local domain_name=$1
         local wls_name=$2
 
-        if [ xxx ]
+        if [ -z "$domain_name" ] && echo "Usage: prepareDomainSubstitutions wls_name"; return 1
+        if [ -z "$wls_name" ] &&  echo "Usage: prepareDomainSubstitutions wls_name"; return 1
 
         dst=$wlsdoc_now/$domain_name; mkdir -p $dst
         
