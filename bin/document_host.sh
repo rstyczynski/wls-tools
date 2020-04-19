@@ -96,13 +96,12 @@ function documentMW() {
         echo -n ">> opatch inventory in progress..."
         dst=$wlsdoc_now/$domain_name/middleware/opatch; mkdir -p $dst
         $mw_home/OPatch/opatch lsinventory >$dst/inventory
-
-        #substituteStrings $dst/inventory $wlsdoc_now/$domain_name/variables 
-        #substituteStrings $dst/inventory $wlsdoc_now/$domain_name/servers/$wls_name/variables 
-        substituteStringsGlobal $dst/inventory
-
         if [ $? -eq 0 ]; then
-            echo "Completed"
+            substituteStringsGlobal $dst/inventory
+
+            # format only to list ot patches
+            $dst/inventory  | tr -s ' ' | grep -e "^Patch [0-9]" | cut -d' ' -f1,2 | sort -t' ' -k2 -n $dst/patches
+            echo "Completed."
         else
             touch $dst/error_opatch_inventory
             echo "Error: opatch not found."
@@ -189,9 +188,6 @@ function documentDomain() {
             
             dst=$wlsdoc_now/$domain_name/deployments/$type; mkdir -p $dst
             echo "$app $delim $plan_file" >>$dst/plan_files
-
-            #substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/variables 
-            #substituteStrings $dst/plan_files $wlsdoc_now/$domain_name/servers/$wls_name/variables 
             substituteStringsGlobal $dst/plan_files
 
             dst=$wlsdoc_now/$domain_name/deployments/$type/$app; mkdir -p $dst
@@ -201,28 +197,22 @@ function documentDomain() {
                 echo -n ">> decoding rar $plan_file..."
                 getWLS_ra_properties $plan_file >$dst/properties
                 if [ $? -eq 0 ]; then
+                    substituteStringsGlobal $dst/properties
                     echo OK
                 else
                     echo Error
                 fi
-
-                #substituteStrings $dst/properties $wlsdoc_now/$domain_name/variables 
-                #substituteStrings $dst/properties $wlsdoc_now/$domain_name/servers/$wls_name/variables 
-                substituteStringsGlobal $dst/properties
                 ;;
             esac
 
             echo -n ">> decoding generic $plan_file..."
             decode_deployment_plan $plan_file >$dst/config
             if [ $? -eq 0 ]; then
+                substituteStringsGlobal $dst/config 
                 echo OK
             else
                 echo Error
             fi
-
-            #substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-            #substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
-            substituteStringsGlobal $dst/config 
         done
     done
 
@@ -234,18 +224,12 @@ function documentDomain() {
         echo -n "$wls_name "
         dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
-
-        #substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-        #substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
         substituteStringsGlobal $dst/config 
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
             dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
             getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
-
-            #substituteStrings $dst/config $wlsdoc_now/$domain_name/variables 
-            #substituteStrings $dst/config $wlsdoc_now/$domain_name/servers/$wls_name/variables 
             substituteStringsGlobal $dst/config 
         done
     done
@@ -295,8 +279,12 @@ EOF
     }
 
     function prepareDomainSubstitutions() {
+        local domain_name=$1
+        local wls_name=$2
+
+        if [ xxx ]
+
         dst=$wlsdoc_now/$domain_name; mkdir -p $dst
-        wls_name=${wls_names[0]}
         
         cat >$dst/variables <<EOF
 domain_home=$(getDomainHome)
@@ -369,29 +357,28 @@ EOF
     # prepare domain substitutes
     #
     prepareSystemSubstitutions
-    prepareDomainSubstitutions
+    # get domain name | thre may be no admin or no managed server on thi s host...
+    [ ! -z "${wls_admin[0]}" ] && domain_name=$(getWLSjvmAttr $wls_name domain_name) && prepareDomainSubstitutions $domain_name ${wls_admin[0]}
+    [ ! -z "${wls_managed[0]}" ] && domain_name=$(getWLSjvmAttr $wls_name domain_name) && prepareDomainSubstitutions $domain_name ${wls_managed[0]}
 
-    unset domain_name
+    #
+    # document Middleware home
+    # 
+
     # check existence of admin server
     if [ -z "${wls_admin[0]}" ]; then
         touch $wlsdoc_now/admin_not_found
     else
-        wls_name=${wls_admin[0]}
-        documentMW $wls_name
-        domain_name=$(getWLSjvmAttr $wls_name domain_name)
+        documentMW ${wls_admin[0]}
     fi
     # check existence of managed servers
     if [ -z "${wls_managed[0]}" ]; then
         touch $wlsdoc_now/managed_not_found
     else
-        wls_name=${wls_managed[0]}
-        documentMW $wls_name
-        domain_name=$(getWLSjvmAttr $wls_name domain_name)
+        documentMW ${wls_managed[0]}
     fi
 
-
     if [ ! -z "$domain_name" ]; then
-
         echo "************************************************************"
         echo "*** WebLogic domain snapshot started for: $domain_name"
 
