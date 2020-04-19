@@ -237,10 +237,10 @@ function documentDomain() {
         categories=$(domain::getSubCategory $property_group)
 
         cnt_max=$(echo $categories | wc -w)    
-        cnt_now=0  
+        cnt_now=0 
         for category in $categories; do
             cnt_now=$(( $cnt_now + 1 ))
-            echo -n "...$(bc <<< "scale=2; $cnt_now/$cnt_max*100" | cut -f1 -d.)"
+            echo -n "|$(bc <<< "scale=2; $cnt_now/$cnt_max*100" | cut -f1 -d.)%"
 
             dst=$wlsdoc_now/$domain_name/$property_group/$category
             mkdir -p $dst
@@ -256,7 +256,7 @@ function documentDomain() {
             done
         done
         echo "^$property_group$" >>$tmp/group_processed
-        echo OK
+        echo " OK"
 
     done
 
