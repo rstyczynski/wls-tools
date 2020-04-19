@@ -234,8 +234,13 @@ function documentDomain() {
     for property_group in $(cat $tmp/process_groups); do
 
         echo -n ">> getting $property_group details..."
-        for category in $(domain::getSubCategory $property_group); do
-            echo -n "...$category "
+        categories=$(domain::getSubCategory $property_group)
+
+        cnt_max=$(echo $categories | wc -w)    
+        cnt_now=0  
+        for category in $categories; do
+            cnt_now=$(( $cnt_now + 1 ))
+            echo -n "...$(bc <<< "scale=2; $cnt_now/$cnt_max*100" | cut -f1 -d.)"
 
             dst=$wlsdoc_now/$domain_name/$property_group/$category
             mkdir -p $dst
