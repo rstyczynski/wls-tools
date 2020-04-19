@@ -96,15 +96,10 @@ function discoverDomain() {
     harvesters=$(ls $wlsdoc_bin/../harvesters | sort -n)
 
     for harvester in $harvesters; do
-
-        # to reset functions to avoid reusing one from other adapter
-        source $wlsdoc_bin/../harvesters/dummy.sh
-
         source $wlsdoc_bin/../harvesters/$harvester
 
         harvester::header
         harvester::attachToDAG print
-
     done
 
     echo Done.
