@@ -239,18 +239,18 @@ function documentDomain() {
 
             dst=$wlsdoc_now/$domain_name/$property_group/$category
             mkdir -p $dst
-            getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
+            getDomainGroupAttrs "$property_group$delim$category" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
             substituteStringsGlobal $dst/config
 
-            cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
+            cfg_groups=$(getDomainGroupAttrs "$property_group$delim$category" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
             for cfg_group in $cfg_groups; do
                 dst=$wlsdoc_now/$domain_name/$property_group/$category/$cfg_group
                 mkdir -p $dst
-                getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999 >$dst/config
+                getDomainGroupAttrs "$property_group$delim$category$delim$cfg_group" | cut -d$delim -f4-999 >$dst/config
                 substituteStringsGlobal $dst/config
             done
         done
-        echo "^server$delim" >>$tmp/group_processed
+        echo "^$property_group$delim" >>$tmp/group_processed
         echo OK
 
     done
