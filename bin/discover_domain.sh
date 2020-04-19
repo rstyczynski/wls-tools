@@ -93,7 +93,8 @@ function discoverDomain() {
         cat | xmllint --exc-c14n - >$tmp/clean_config.xml
 
 
-    harvesters=$(ls $wlsdoc_bin/../harvesters | sort -n)
+    # files with numbers first, then alphanum order
+    harvesters="$(ls $wlsdoc_bin/../harvesters | sort -n | grep '^[0-9]') $(ls $wlsdoc_bin/../harvesters | sort | grep '^[^0-9]')"
 
     for harvester in $harvesters; do
         source $wlsdoc_bin/../harvesters/$harvester
