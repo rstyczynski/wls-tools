@@ -65,7 +65,7 @@ function getDomainAttr() {
     local attrName=$2
 
     key=$attrGroup$delim$attrName
-    echo ${domain_attr_groups[$key]} | cut -f2 -d"$delim"
+    echo ${domain_attr_groups[$key]}
 }
 
 
