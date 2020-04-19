@@ -326,10 +326,14 @@ function prepareServerSubstitutions() {
     mkdir -p $dst
 
     cat >$dst/variables <<EOF
-server_host=$(getDomainGroupAttrs "server|$wls_name|listen-address$" | cut -f2)
-server_port=$(getDomainGroupAttrs "server|$wls_name|listen-port$" | cut -f2)
-os_pid=${wls_attributes[$wls_name$delim\os_pid]}
+server_host=$(getDomainGroupAttrs "server|$wls_name|listen-address$" | cut -f2-99999 -d=)
+server_port=$(getDomainGroupAttrs "server|$wls_name|listen-port$" | cut -f2-99999 -d=)
 EOF
+
+if [ ! -z "${wls_attributes[$wls_name$delim\os_pid]}" ]; then 
+    os_pid=${wls_attributes[$wls_name$delim\os_pid]} >> $dst/variables
+fi
+
 }
 
 ##
