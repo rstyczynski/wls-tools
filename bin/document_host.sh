@@ -71,7 +71,7 @@ function documentMW() {
     local domain_name=$1
     local mw_home=$2
     
-    [ ! -z "$wlsdoc_now" ] && echo "Error. wlsdoc_now must be set in env. Exiting..." && exit 1
+    [ -z "$wlsdoc_now" ] && echo "Error. wlsdoc_now must be set in env. Exiting..." && exit 1
     [ -z "$domain_name" ] && echo "Error. Wrong params. Usage: documentMW domain_name mw_home Exiting..." && exit 1 
     [ -z "$mw_home" ] && echo "Error. Wrong params. Usage: documentMW domain_name mw_home Exiting..." && exit 1 
 
