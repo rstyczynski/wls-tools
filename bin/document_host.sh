@@ -230,7 +230,7 @@ function documentDomain() {
         if [ ${#delims} -gt 2 ]; then
             echo $key
         fi
-    done  | cut -d'|' -f1  | sort -t'|' -k 1 -k 2 -u | grep -v -f $tmp/group_processed >$tmp/process_groups
+    done  | cut -d'|' -f1  | sort -t'|' -k 1 -k 2 -u | grep -v "^server$delim" >$tmp/process_groups
     for property_group in $(cat $tmp/process_groups); do
 
         echo -n ">> getting $property_group details..."
