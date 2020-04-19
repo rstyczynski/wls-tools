@@ -28,25 +28,27 @@ function documentWLSruntime() {
     echo "*** WebLogic server discovery started"
     domain_name=$(getWLSjvmAttr $wls_name domain_name)
 
-    dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
+    dst=$wlsdoc_now/$domain_name/servers/$wls_name
+    mkdir -p $dst
 
     echo -n ">> top level information..."
     printAttrGroup $wls_name info >$dst/info
 
-    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
-    #substituteStrings $dst/info $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables
+    #substituteStrings $dst/info $wlsdoc_now/$domain_name/servers/$wls_name/variables
     substituteStringsGlobal $dst/info
 
     echo "Completed."
 
     echo -n ">> jvm details..."
-    dst=$wlsdoc_now/$domain_name/servers/$wls_name/jvm; mkdir -p $dst
+    dst=$wlsdoc_now/$domain_name/servers/$wls_name/jvm
+    mkdir -p $dst
 
     # jvm version
     $(getWLSjvmAttr $wls_name java_bin) -version >$dst/version 2>&1
 
-    #substituteStrings $dst/version $wlsdoc_now/$domain_name/variables 
-    #substituteStrings $dst/version $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+    #substituteStrings $dst/version $wlsdoc_now/$domain_name/variables
+    #substituteStrings $dst/version $wlsdoc_now/$domain_name/servers/$wls_name/variables
     substituteStringsGlobal $dst/version
 
     # jvm arguments
@@ -54,8 +56,8 @@ function documentWLSruntime() {
     for group in $(getWLSjvmGroups $wls_name); do
         printAttrGroup $wls_name $group >>$dst/args
 
-        #substituteStrings $dst/args $wlsdoc_now/$domain_name/variables 
-        #substituteStrings $dst/args $wlsdoc_now/$domain_name/servers/$wls_name/variables 
+        #substituteStrings $dst/args $wlsdoc_now/$domain_name/variables
+        #substituteStrings $dst/args $wlsdoc_now/$domain_name/servers/$wls_name/variables
         substituteStringsGlobal $dst/args
 
     done
@@ -89,18 +91,20 @@ function documentMW() {
         return 1
     fi
 
-    dst=$wlsdoc_now/$domain_name/middleware; mkdir -p $dst
+    dst=$wlsdoc_now/$domain_name/middleware
+    mkdir -p $dst
 
     # opatch
     if [ -f $mw_home/OPatch/opatch ]; then
         echo -n ">> opatch inventory in progress..."
-        dst=$wlsdoc_now/$domain_name/middleware/opatch; mkdir -p $dst
+        dst=$wlsdoc_now/$domain_name/middleware/opatch
+        mkdir -p $dst
         $mw_home/OPatch/opatch lsinventory >$dst/inventory
         if [ $? -eq 0 ]; then
             substituteStringsGlobal $dst/inventory
 
             # format only to list ot patches
-            $dst/inventory  | tr -s ' ' | grep -e "^Patch [0-9]" | cut -d' ' -f1,2 | sort -t' ' -k2 -n $dst/patches
+            $dst/inventory | tr -s ' ' | grep -e "^Patch [0-9]" | cut -d' ' -f1,2 | sort -t' ' -k2 -n $dst/patches
             echo "Completed."
         else
             touch $dst/error_opatch_inventory
@@ -136,7 +140,7 @@ function documentDomain() {
     getDomainGroupAttrs info >$dst/info
 
     # substitute
-    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables 
+    #substituteStrings $dst/info $wlsdoc_now/$domain_name/variables
     substituteStringsGlobal $dst/info
 
     echo "OK"
@@ -150,7 +154,7 @@ function documentDomain() {
     # substitute
     cd $dst
     for script in $(ls *.sh); do
-        #substituteStrings $script  $wlsdoc_now/$domain_name/variables 
+        #substituteStrings $script  $wlsdoc_now/$domain_name/variables
         substituteStringsGlobal $script
     done
     cd -
@@ -185,13 +189,15 @@ function documentDomain() {
         apps=$(getDomainGroupAttrs | grep "^deployment$delim\type$delim$type" | cut -f4 -d$delim)
         for app in $apps; do
             plan_file=${domain_attr_groups[deployment$delim\type$delim$type$delim$app$delim\plan]}
-            
-            dst=$wlsdoc_now/$domain_name/deployments/$type; mkdir -p $dst
+
+            dst=$wlsdoc_now/$domain_name/deployments/$type
+            mkdir -p $dst
             echo "$app $delim $plan_file" >>$dst/plan_files
             substituteStringsGlobal $dst/plan_files
 
-            dst=$wlsdoc_now/$domain_name/deployments/$type/$app; mkdir -p $dst
-        
+            dst=$wlsdoc_now/$domain_name/deployments/$type/$app
+            mkdir -p $dst
+
             case $type in
             rar)
                 echo -n ">> decoding rar $plan_file..."
@@ -208,7 +214,7 @@ function documentDomain() {
             echo -n ">> decoding generic $plan_file..."
             decode_deployment_plan $plan_file >$dst/config
             if [ $? -eq 0 ]; then
-                substituteStringsGlobal $dst/config 
+                substituteStringsGlobal $dst/config
                 echo OK
             else
                 echo Error
@@ -222,15 +228,17 @@ function documentDomain() {
         prepareServerSubstitutions $wls_name
 
         echo -n "$wls_name "
-        dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
+        dst=$wlsdoc_now/$domain_name/servers/$wls_name
+        mkdir -p $dst
         getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep -v "$delim" >$dst/config
-        substituteStringsGlobal $dst/config 
+        substituteStringsGlobal $dst/config
 
         cfg_groups=$(getDomainGroupAttrs "server$delim$wls_name" | sort | cut -d$delim -f3-999 | grep "$delim" | cut -d$delim -f1 | sort -u)
         for cfg_group in $cfg_groups; do
-            dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group; mkdir -p $dst
-            getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999  > $dst/config
-            substituteStringsGlobal $dst/config 
+            dst=$wlsdoc_now/$domain_name/servers/$wls_name/$cfg_group
+            mkdir -p $dst
+            getDomainGroupAttrs "server$delim$wls_name$delim$cfg_group" | cut -d$delim -f4-999 >$dst/config
+            substituteStringsGlobal $dst/config
         done
     done
     echo OK
@@ -242,25 +250,25 @@ function documentDomain() {
 function substituteStringsGlobal() {
     target_file=$1
 
-    substituteStrings $target_file $wlsdoc_now/variables     
-    substituteStrings $target_file $wlsdoc_now/$domain_name/variables 
+    substituteStrings $target_file $wlsdoc_now/variables
+    substituteStrings $target_file $wlsdoc_now/$domain_name/variables
 
     if [ -f $wlsdoc_now/$domain_name/servers/$wls_name/variables ]; then
-        substituteStrings $target_file $wlsdoc_now/$domain_name/servers/$wls_name/variables 
-    fi  
+        substituteStrings $target_file $wlsdoc_now/$domain_name/servers/$wls_name/variables
+    fi
 }
 
 function substituteStrings() {
-    src_file=$1 
+    src_file=$1
     variables=$2
 
     tmp=/tmp/$$
     mkdir -p $tmp
 
-    cat $src_file > $tmp/substituteStrings_src_file
+    cat $src_file >$tmp/substituteStrings_src_file
     for var in $(cat $variables); do
-        key=$(cat $variables | grep -F "$var" | cut -f1 -d=  )
-        value=$(cat $variables | grep -F "$var" | cut -f2 -d=  )
+        key=$(cat $variables | grep -F "$var" | cut -f1 -d=)
+        value=$(cat $variables | grep -F "$var" | cut -f2 -d=)
         #echo "$key, $value"
         cat $tmp/substituteStrings_src_file | replaceStr $value "\$[$key]" >$tmp/substituteStrings_src_file.new
         mv $tmp/substituteStrings_src_file.new $tmp/substituteStrings_src_file
@@ -268,47 +276,48 @@ function substituteStrings() {
     cat $tmp/substituteStrings_src_file >$src_file
 }
 
-    function prepareSystemSubstitutions() {
-        dst=$wlsdoc_now; mkdir -p $dst
-        
-        cat >$dst/variables <<EOF
+function prepareSystemSubstitutions() {
+    dst=$wlsdoc_now
+    mkdir -p $dst
+
+    cat >$dst/variables <<EOF
 Password, *********=assword",.*
 [name="Password"]/value, *********=[name="Password"]/value,.*
 {AES}********={AES}.*
 EOF
-    }
+}
 
-    function prepareDomainSubstitutions() {
-        local domain_name=$1
-        local wls_name=$2
+function prepareDomainSubstitutions() {
+    local domain_name=$1
+    local wls_name=$2
 
-        [ -z "$domain_name" ] && echo "Usage: prepareDomainSubstitutions wls_name"; exit 1
-        [ -z "$wls_name" ] &&  echo "Usage: prepareDomainSubstitutions wls_name"; exit 1
+    [ -z "$domain_name" ] && echo "Usage: prepareDomainSubstitutions wls_name" && exit 1
+    [ -z "$wls_name" ] && echo "Usage: prepareDomainSubstitutions wls_name" && exit 1
 
-        dst=$wlsdoc_now/$domain_name; mkdir -p $dst
-        
-        cat >$dst/variables <<EOF
+    dst=$wlsdoc_now/$domain_name
+    mkdir -p $dst
+
+    cat >$dst/variables <<EOF
 domain_home=$(getDomainHome)
 domain_name=$(getDomainAttr info name)
 admin_host=${wls_attributes[$wls_name$delim\admin_host_name]}
 admin_port=${wls_attributes[$wls_name$delim\admin_host_port]}
 mw_home=${wls_attributes[$wls_name$delim\mw_home]}
 EOF
-    }
+}
 
-    function prepareServerSubstitutions() {
-        local wls_name=$1
+function prepareServerSubstitutions() {
+    local wls_name=$1
 
-        dst=$wlsdoc_now/$domain_name/servers/$wls_name; mkdir -p $dst
-        
-        cat >$dst/variables <<EOF
+    dst=$wlsdoc_now/$domain_name/servers/$wls_name
+    mkdir -p $dst
+
+    cat >$dst/variables <<EOF
 server_host=$(getDomainGroupAttrs "server|$wls_name|listen-address$" | cut -f2)
 server_port=$(getDomainGroupAttrs "server|$wls_name|listen-port$" | cut -f2)
 os_pid=${wls_attributes[$wls_name$delim\os_pid]}
 EOF
-    }    
-
-
+}
 
 ##
 ## Process discovery
@@ -321,7 +330,7 @@ function document_host() {
     echo "========================================================================================="
     echo
 
-    wlsdoc_bin="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+    wlsdoc_bin="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
     wlsdoc_root=~/oracle/weblogic
     mkdir -p $wlsdoc_root
@@ -364,7 +373,7 @@ EOF
 
     #
     # document Middleware home
-    # 
+    #
 
     # check existence of admin server
     if [ -z "${wls_admin[0]}" ]; then
@@ -445,13 +454,13 @@ EOF
     echo
 
     if [ $dropbox == NO ]; then
-    echo "As /var/wls-index-dropbox is not available, transfter below files manually to host doing compare operation."
-    echo "- current archive:    $wlsdoc_root/$(hostname)-document_host-current.tar.gz "
-    echo "- historical archive: $wlsdoc_root/$(hostname)-document_host-history.tar.gz"
+        echo "As /var/wls-index-dropbox is not available, transfter below files manually to host doing compare operation."
+        echo "- current archive:    $wlsdoc_root/$(hostname)-document_host-current.tar.gz "
+        echo "- historical archive: $wlsdoc_root/$(hostname)-document_host-history.tar.gz"
     else
-    echo "Snapshots for remote access via /var/wls-index-dropbox are ready."
-    echo "- current archive:    /var/wls-index-dropbox/$(hostname)-document_host-current.tar.gz"
-    echo "- historical archive: /var/wls-index-dropbox/$(hostname)-document_host-history.tar.gz"
+        echo "Snapshots for remote access via /var/wls-index-dropbox are ready."
+        echo "- current archive:    /var/wls-index-dropbox/$(hostname)-document_host-current.tar.gz"
+        echo "- historical archive: /var/wls-index-dropbox/$(hostname)-document_host-history.tar.gz"
     fi
     echo "========================================================================================="
     echo "========================================================================================="
