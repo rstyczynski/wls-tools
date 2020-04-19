@@ -60,13 +60,13 @@ function getDomainGroupAttrs() {
     done
 }
 
-# function getDomainAttr() {
-#     local attrGroup=$1
-#     local attrName=$2
+function getDomainAttr() {
+    local attrGroup=$1
+    local attrName=$2
 
-#     key=$attrGroup$delim$attrName
-#     echo ${domain_attr_groups[$key]} | cut -f2 -d"$delim"
-# }
+    key=$attrGroup$delim$attrName
+    echo ${domain_attr_groups[$key]} | cut -f2 -d"$delim"
+}
 
 
 function discoverDomain() {
@@ -76,8 +76,6 @@ function discoverDomain() {
         echo "Usage: discoverDomain domain_home"
         return 1
     fi
-
-    domain_attr_groups=()
 
     tmp=/tmp/$$
     mkdir -p $tmp
@@ -89,7 +87,7 @@ function discoverDomain() {
         xmllint --format - |
         sed -e 's/xmlns=".*"//g' | # remove namespace definitions
         sed -E 's/\w+://g' |       # remove namespace use TODO: must be fixed, as not removes all words suffixed by :
-        sed -E 's/nil="\w+"//g' |       # remove nil="true"
+        sed -E 's/nil="\w+"//g' |  # remove nil="true"
         cat | xmllint --exc-c14n - >$tmp/clean_config.xml
 
 
