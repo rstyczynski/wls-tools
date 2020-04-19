@@ -88,7 +88,7 @@ function documentMW() {
             substituteStringsGlobal $dst/inventory
 
             # format only to list ot patches
-            cat $dst/inventory | tr -s ' ' | grep -e "^Patch [0-9]" | cut -d' ' -f1,2 | sort -t' ' -k2 -n $dst/patches
+            cat $dst/inventory | tr -s ' ' | grep -e "^Patch [0-9]" | cut -d' ' -f1,2 | sort -t' ' -k2 -n > $dst/patches
             echo "Completed."
         else
             touch $dst/error_opatch_inventory
