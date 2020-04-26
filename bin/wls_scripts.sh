@@ -1,4 +1,34 @@
-# cat wls_scripts.h 
+
+
+function _threadGetOwner() {
+    root_class=$1
+
+    cat /tmp/tdump | grep -B1 "$root_class" | grep -v "$root_class" | sort -u | grep -v '\--' | tr -d '\t' | cut -f2 -d' '
+}
+
+function wls_top() {
+    java_pid=$1 #13657
+
+    java_bin=$(dirname $(ps -o command ax -q $java_pid | grep -v 'COMMAND' | cut -f1 -d' '))
+    $java_bin/jstack $java_pid | grep -A30 RUNNABLE >/tmp/tdump
+
+    rm -f /tmp/modules
+
+    _threadGetOwner 'java.lang.Thread.run' >> /tmp/modules
+    _threadGetOwner 'weblogic.kernel.ExecuteThread.execute' >> /tmp/modules
+    _threadGetOwner 'weblogic.server.channels.ServerListenThread.selectFrom' >> /tmp/modules
+    _threadGetOwner 'weblogic.nodemanager.NMService$[0-9]+.run' >> /tmp/modules
+    _threadGetOwner 'oracle.integration.platform.blocks.executor.WorkManagerExecutor$[0-9][0-9]*.run' >> /tmp/modules
+
+    IFS=$'\n'
+    for module in $(cat /tmp/modules | sort -u); do
+        echo -n "$(echo "$module" | cut -f1 -d'('): "
+        cat /tmp/tdump | grep "$module" | wc -l
+    done | sort -k2 -t':' -r -n
+    unset IFS
+
+}
+
 
 function wlsLogSummary {
 script_id=wlsLogSummary
@@ -16,6 +46,11 @@ if [ -z $server_name ] || [ -z $domain_dir ]; then
   echo "Dates are in format 2019-01-01. If not provided today is used."
   return 1
 fi
+
+if [ -z "$REPORT_WIDTH" ]; then
+   REPORT_WIDTH=140
+fi
+
 
 date_start=$3
 if [ -z $date_start ]; then
@@ -111,9 +146,9 @@ for module in $(cat $tmp/modules | head -10 ); do
    grep '<Error>' $(cat $tmp/files) | \
    grep "<$module>" | \
    cut -d'<' -f6 | \
-   cut -b1-140 | \
+   cut -b1-$REPORT_WIDTH | \
    # replace identifiers to masks
-   # sed 's/[0-9]\{2\}\+/99/g' |
+   # sed 's/[0-9]\{2\}\+/99/g' | \
    sort | uniq -c | sort -nr | head -20
 done
 
