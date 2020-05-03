@@ -94,6 +94,10 @@ function discoverDomain() {
         sed -e 's/xmlns=".*"//g' | # remove namespace definitions
         sed -E 's/\w+://g' |       # remove namespace use TODO: must be fixed, as not removes all words suffixed by :
         sed -E 's/nil="\w+"//g' |  # remove nil="true"
+        perl -pe 's/xsi:type="[\w:-]*"//g' |  # remove xsi:type="
+        perl -pe 's/xsi:nil="[\w:-]*"//g' |  # remove nxsi:nil=
+        perl -pe 's/<\w+://g' |  # remove nxsi:nil=
+        perl -pe 's/<\/\w+://g' |  # remove nxsi:nil=
         cat | xmllint --exc-c14n - >$tmp/clean_config.xml
 
 
