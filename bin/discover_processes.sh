@@ -59,7 +59,7 @@ function collectAttrGroup() {
                 wls_attributes[$wls_server$delim$attr_name]=$attr_value
                 wls_attributes_groups[$wls_server$delim$attrGroup$delim$attr_name]=$attr_value
 
-                #echo $attr >>$tmp/skiplines.$$
+                echo $attr >>$tmp/skiplines.$$
             done
         else
             attr_name='(none)'
@@ -133,7 +133,7 @@ function analyzeWLSjava() {
 
     unset IFS
     for attrGroup in $attr_groups; do
-        #echo $attrGroup
+        echo $attrGroup
         collectAttrGroup $attrGroup
     done
 
@@ -342,6 +342,13 @@ function discoverWLS() {
     discoverWLSnames
     discoverWLSjvmCfg
     discoverWLSroles
+}
+
+function wls() {
+    server_name=$1
+    action=$2
+
+    # wls get soa_server1 jvm args
 }
 
 
