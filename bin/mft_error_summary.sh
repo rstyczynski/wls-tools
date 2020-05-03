@@ -1,5 +1,15 @@
 #!/bin/bash
 
+#
+# helper functions
+#
+
+# split log into NUL-separated chunks
+alias t0="sed 's:^\\(\\[[-+:.0-9T]\\+\\]\\):\\x0\\1:'"
+
+# remove NUL characters
+alias f0='tr -d \\0'
+
 unset mft_error_document
 function mft_error_document() {
     server_name=$1
@@ -8,16 +18,6 @@ function mft_error_document() {
     if [ -z "$log_date" ]; then
         log_date=$(date +%Y-%m-%d)
     fi
-
-    #
-    # helper functions
-    #
-
-    # split log into NUL-separated chunks
-    alias t0="sed 's:^\\(\\[[-+:.0-9T]\\+\\]\\):\\x0\\1:'"
-
-    # remove NUL characters
-    alias f0='tr -d \\0'
 
     #
     # analytical functions
@@ -42,14 +42,14 @@ function mft_error_document() {
         cut -f1 -d',' |
         sort -u |
         cat >$error_dir/ecid.tmp
-cat $error_dir/ecid.tmp
+    cat $error_dir/ecid.tmp
 
     echo "--- get files with ecid"
     find $error_dir/log -type f -mtime -1 -printf "%T+\t%p\n" |
         sort | cut -f2 |
         xargs grep -f $error_dir/ecid.tmp $1 |
         cut -f1 -d: | sort -u >$error_dir/files.tmp
-cat $error_dir/files.tmp
+    cat $error_dir/files.tmp
 
     echo "--- get errors"
     for ecid in $(cat $error_dir/ecid.tmp); do
@@ -110,7 +110,8 @@ cat $error_dir/files.tmp
 }
 
 function mft_error_summary() {
-    log_date=$1
+    server_name=$1
+    log_date=$2
 
     if [ -z "$log_date" ]; then
         log_date=$(date +%Y-%m-%d)
@@ -156,12 +157,12 @@ function mft_error_summary() {
             echo "   stop:   $(tail -1 $error_dir/$ecid.files | cut -d' ' -f1)"
             echo "   errors: $(cat $error_dir/$ecid.errors | grep '\[ERROR\]' | wc -l)"
             echo
-            cat $error_dir/$ecid.errors | perl -ne 'm{^(\S+).*?errorDesc=(\S+.*?),} && print "$2\n"'  | 
-    sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' | 
-    sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' | 
-    sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' | 
-    sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' | 
-    sort -u
+            cat $error_dir/$ecid.errors | perl -ne 'm{^(\S+).*?errorDesc=(\S+.*?),} && print "$2\n"' |
+                sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' |
+                sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' |
+                sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' |
+                sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' |
+                sort -u
             echo
             # echo "   ops:    $(cat $error_dir/$ecid.operations | wc -l)"
             echo
@@ -182,12 +183,12 @@ function mft_error_summary() {
     echo "=================="
     echo "==== Error summary"
     echo "=================="
-    errors=$(cat $error_dir/*.errors | perl -ne 'm{^(\S+).*?errorDesc=(\S+.*?),} && print "$2\n"'  | 
-    sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' | 
-    sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' | 
-    sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' | 
-    sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' | 
-    sort -u)
+    errors=$(cat $error_dir/*.errors | perl -ne 'm{^(\S+).*?errorDesc=(\S+.*?),} && print "$2\n"' |
+        sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' |
+        sed 's/-[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]-//g' |
+        sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' |
+        sed 's/[a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9][a-fA-F0-9]//g' |
+        sort -u)
     IFS=$'\n'
     for error in $errors; do
         echo "$(cat $error_dir/*.errors | grep "$error" | wc -l): $error"
@@ -203,4 +204,3 @@ function mft_error_summary() {
 
 #mft_error_document server_name 2020-04-24
 #mft_error_summary  2020-04-24
-

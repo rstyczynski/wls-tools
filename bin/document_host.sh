@@ -309,8 +309,8 @@ function prepareDomainSubstitutions() {
     local domain_name=$1
     local wls_name=$2
 
-    [ -z "$domain_name" ] && echo "Usage: prepareDomainSubstitutions wls_name" && exit 1
-    [ -z "$wls_name" ] && echo "Usage: prepareDomainSubstitutions wls_name" && exit 1
+    [ -z "$domain_name" ] && echo "Usage: prepareDomainSubstitutions wls_name" && return 1
+    [ -z "$wls_name" ] && echo "Usage: prepareDomainSubstitutions wls_name" && return 1
 
     dst=$wlsdoc_now/$domain_name
     mkdir -p $dst
@@ -408,7 +408,7 @@ EOF
         [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
         
         if [ ! -z "$mw_home" ]; then
-            # documentMW $domain_name $mw_home
+            documentMW $domain_name $mw_home
             echo "*** WebLogic middleware snapshot completed for: $domain_name"
             echo "************************************************************"
             echo 
@@ -497,4 +497,6 @@ EOF
     echo "========================================================================================="
 }
 
-document_host
+if [ "$1" == document ];then
+    document_host
+fi
