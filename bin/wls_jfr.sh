@@ -64,11 +64,11 @@ function wls_jfr() {
     case $operation in
     start)
         $java_bin/jcmd $os_pid JFR.check >$tmp/jfr_check
-        recNo=$(grep Recording: $tmp/jfr_check | cut -d: -f2 | cut -d= -f2 | cut -d' ' -f1 | head -1)
+        recNo=$(grep Recording: $tmp/jfr_check | grep wls-tools_JFR | cut -d: -f2 | cut -d= -f2 | cut -d' ' -f1 | head -1)
         if [ -z "$recNo" ]; then
 
             file_name=$(hostname)_$wls_server\_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
-            $java_bin/jcmd $os_pid JFR.start duration=$duration filename=$HOME/outbox/public/$file_name compress=true
+            $java_bin/jcmd $os_pid JFR.start name=wls-tools_JFR duration=$duration filename=$HOME/outbox/public/$file_name compress=true
             if [ $? -eq 0 ]; then
                 echo "Started $duration long recording. Output file will be written to $HOME/outbox/public/$file_name"
 
