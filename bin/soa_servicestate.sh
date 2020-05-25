@@ -4,15 +4,29 @@
 wls_env=$1
 wls_name=$2
 
-[ -z "$wls_env" ] && (usage; exit 1)
-[ -z "$wls_name" ] && (usage; exit 1)
+
+function stop() {
+    error_code=$1
+    [ -z "$error_code" ] && error_code=0
+
+    rm -rf /tmp/$$\_$caller
+    exit error_code
+}
+
+function usage(){
+    echo "Usage: soa_service_state env server_name"
+    stop 1
+}
+
+[ -z "$wls_env" ] && (usage; stop 1)
+[ -z "$wls_name" ] && (usage; stop 1)
 
 if [ ! -d ~/etc ]; then 
     echo "Note: cfg directory does not exist. Creating ~/etc"
     mkdir ~/etc
 fi
 
-if [ $(chmod 700 ~/etc) != 700 ]; then
+if [ $(chmod 700 ~/etc) != "700" ]; then
     echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 700"
     chmod 700 ~/etc
 fi
@@ -24,18 +38,6 @@ fi
 caller=soa_servicestate
 tmp=/tmp/$$\_$caller; mkdir -p $tmp
 
-function usage(){
-    echo "Usage: soa_service_state env server_name"
-    stop 1
-}
-
-function stop() {
-    error_code=$1
-    [ -z "$error_code" ] && error_code=0
-
-    rm -rf /tmp/$$\_$caller
-    exit error_code
-}
 
 function getParameters() {
 
