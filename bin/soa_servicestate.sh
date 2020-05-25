@@ -67,7 +67,7 @@ function getParameters() {
     lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_ip)
     wls_ip=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$wls_ip" ]; then
-        read -t 5 -p 'wls_ip:' wls_ip
+        read -t 15 -p 'wls_ip:' wls_ip
         if [ $? -ne 0 ]; then
             echo 'Error: server address not known and not privided.'
             return 1
@@ -81,7 +81,7 @@ function getParameters() {
     lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_port)
     wls_port=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$wls_port" ]; then
-        read -t 5 -p 'wls_port:' wls_port
+        read -t 15 -p 'wls_port:' wls_port
         if [ $? -ne 0 ]; then
             echo 'Error: server port not known and not privided.'
             return 1
@@ -92,38 +92,38 @@ function getParameters() {
     fi
 
     # error handler ip
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_err_ip)
-    err_ip=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
-    if [ -z "$err_ip" ]; then
-        read -t 5 -p 'err_ip:' err_ip
+    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_csf_ip)
+    csf_ip=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
+    if [ -z "$csf_ip" ]; then
+        read -t 15 -p 'csf_ip:' csf_ip
         if [ $? -ne 0 ]; then
             echo 'Error: error handler address not known and not privided.'
             return 1
         else
-            echo "$lookup_code=$err_ip" >>~/etc/soa.cfg
+            echo "$lookup_code=$csf_ip" >>~/etc/soa.cfg
             chmod 600 ~/etc/soa.cfg
         fi
     fi
 
     #error handler port
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_err_port)
-    err_port=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
-    if [ -z "$err_port" ]; then
-        read -t 5 -p 'err_port:' err_port
+    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_csf_port)
+    csf_port=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
+    if [ -z "$csf_port" ]; then
+        read -t 15 -p 'csf_port:' csf_port
         if [ $? -ne 0 ]; then
             echo 'Error: Error handler port not known and not privided.'
             return 1
         else
-            echo "$lookup_code=$err_port" >>~/etc/soa.cfg
+            echo "$lookup_code=$csf_port" >>~/etc/soa.cfg
             chmod 600 ~/etc/soa.cfg
         fi
     fi
 
-    #error handler port
+    #oci notification topic id
     lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_oci_topic_id)
     oci_topic_id=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$oci_topic_id" ]; then
-        read -t 5 -p 'oci_topic_id:' oci_topic_id
+        read -t 15 -p 'oci_topic_id:' oci_topic_id
         if [ $? -ne 0 ]; then
             echo 'Error: oci_topic_id not known and not privided.'
             return 1
@@ -137,7 +137,7 @@ function getParameters() {
     lookup_code=$(echo $(hostname)_$wls_env\_$wls_ip\_$wls_port\_user\_$script_code | sha256sum | cut -f1 -d' ')
     wls_user=$(cat ~/etc/secrets.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
     if [ -z "$wls_user" ]; then
-        read -t 5 -p 'wls_user:' wls_user
+        read -t 15 -p 'wls_user:' wls_user
         if [ $? -ne 0 ]; then
             echo 'Error: user name not known and not privided.'
             return 1
@@ -151,7 +151,7 @@ function getParameters() {
     lookup_code=$(echo $(hostname)\_$wls_env\_$wls_ip\_$wls_port\_pass\_$script_code | sha256sum | cut -f1 -d' ')
     wls_pass=$(cat ~/etc/secrets.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
     if [ -z "$wls_pass" ]; then
-        read -t 5 -s -p 'wls_pass:' wls_pass
+        read -t 15 -s -p 'wls_pass:' wls_pass
         if [ $? -ne 0 ]; then
             echo 'Error: password not known and not privided.'
             return 1
@@ -160,6 +160,20 @@ function getParameters() {
             chmod 600 ~/etc/secrets.cfg
         fi
     fi
+
+    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_ip\_$wls_port\_csf_auth\_$script_code | sha256sum | cut -f1 -d' ')
+    csf_auth=$(cat ~/etc/secrets.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
+    if [ -z "$csf_auth" ]; then
+        read -t 15 -s -p 'csf_auth:' csf_auth
+        if [ $? -ne 0 ]; then
+            echo 'Error: csf_auth not known and not privided.'
+            return 1
+        else
+            echo "$lookup_code=$csf_auth" >>~/etc/secrets.cfg
+            chmod 600 ~/etc/secrets.cfg
+        fi
+    fi
+
 }
 
 # send service state to CSF
@@ -188,9 +202,9 @@ function reportCompositeDown() {
 </soapenv:Envelope>
 EOF
 
-    timeout 5 curl -X POST http://$err_ip:$err_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
+    timeout 5 curl -X POST http://$csf_ip:$csf_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
     -H "Content-Type: text/xml" \
-    -H "Authorization: Basic a2F0aGlyYXZhbms6d2VsY29tZTEyMw==" \
+    -H "Authorization: Basic $csf_auth" \
     -H "SOAPAction: processExceptionMsg" \
     -d @$payload
     return_code=$?
@@ -217,11 +231,8 @@ wls_port   = '$wls_port'
 wls_user   = '$wls_user'
 wls_pass   = '$wls_pass'
 
-print wls_ip,wls_port,wls_user,wls_pass
-
 old_stdout = sys.stdout
 sys.stdout = open('$comp_file', 'w')
-#sys.stdout = open('/tmp/composites.txt', 'w')
 sca_listDeployedComposites(wls_ip,wls_port,wls_user,wls_pass)
 sys.stdout = old_stdout
 exit()
