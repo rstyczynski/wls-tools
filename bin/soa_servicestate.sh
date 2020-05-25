@@ -58,7 +58,7 @@ script_code=soa_servicestate
 tmp=/tmp/$$\_$script_code; mkdir -p $tmp
 
 # clean up after ctrl-break
-TRAP stop INT
+trap stop INT
 
 # set / get parameters
 function getParameters() {
