@@ -158,12 +158,14 @@ function reportCompositeDown() {
 </soapenv:Envelope>
 EOF
 
-    curl -X POST http://$err_ip:$err_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
+    timeout 5 curl -X POST http://$err_ip:$err_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
     -H "Content-Type: text/xml" \
     -H "Authorization: Basic a2F0aGlyYXZhbms6d2VsY29tZTEyMw==" \
     -H "SOAPAction: processExceptionMsg" \
     -d @$payload
+    return_code=$?
 
+    return $return_code
 }
 
 getParameters
@@ -174,7 +176,7 @@ fi
 
 comp_file=$tmp/composites.txt
 rm -rf $comp_file
-$MW_HOME/oracle_common/common/bin/wlst.sh <<EOF
+timeout 30 $MW_HOME/oracle_common/common/bin/wlst.sh <<EOF
 wls_ip = '$wls_ip'
 wls_port   = '$wls_port'
 wls_user   = '$wls_user'
@@ -204,6 +206,9 @@ else
     echo "Services down. Sending notifications."
     for svc_name in $services_down; do
         reportCompositeDown $svc_name
+        if [ $? -ne 0 ]; then
+            echo "Error sending notification. "
+        fi
     done
 fi
 
