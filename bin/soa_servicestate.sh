@@ -211,7 +211,7 @@ fi
 comp_file=$tmp/composites.txt
 rm -rf $comp_file
 export CONFIG_JVM_ARGS=-Djava.security.egd=file:/dev/./urandom
-timeout 60 $MW_HOME/oracle_common/common/bin/wlst.sh -skipWLSModuleScanning <<EOF
+timeout 60 strace $MW_HOME/oracle_common/common/bin/wlst.sh -skipWLSModuleScanning <<EOF
 wls_ip     = '$wls_ip'
 wls_port   = '$wls_port'
 wls_user   = '$wls_user'
