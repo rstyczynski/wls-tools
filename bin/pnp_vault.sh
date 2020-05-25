@@ -4,21 +4,39 @@ pnp_vault_debug=0
 
 function read_secret() {
     local key=$1
+    local privacy=$2
 
     if [ -z "$key" ]; then
         echo "usage: get_secret key"
         return 1
     fi
 
+    : ${privacy:=script}
+
     umask 077
 
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
 
-    if [ -f $0 ]; then
-        local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
-    else
+    case $privacy in
+    script)
+        if [ -f $0 ]; then
+            local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
+        else
+            echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+            local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+        fi
+        ;;
+    user)
         local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-    fi
+        ;;
+    host)
+        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        ;;
+    *)
+        echo 'Error. Privacy level not known. Falling to user level privacy.'
+        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        ;;
+    esac
 
     [ $pnp_vault_debug -gt 2 ] && echo $seed
     [ $pnp_vault_debug -gt 2 ] && echo $lookup_code
@@ -67,6 +85,7 @@ function read_secret() {
 function save_secret() {
     local key=$1
     local value=$2
+    local privacy=$3
 
     umask 077
 
@@ -94,11 +113,30 @@ function save_secret() {
         mkdir -p ~/etc/secret
     fi        
 
-    if [ -f $0 ]; then
-        local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
-    else
+    : ${privacy:=script}
+
+    local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
+
+    case $privacy in
+    script)
+        if [ -f $0 ]; then
+            local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
+        else
+            echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+            local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+        fi
+        ;;
+    user)
         local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-    fi
+        ;;
+    host)
+        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        ;;
+    *)
+        echo 'Error. Privacy level not known. Falling to user level privacy.'
+        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        ;;
+    esac
 
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
 
