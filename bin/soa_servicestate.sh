@@ -18,8 +18,15 @@ function usage(){
     stop 1
 }
 
-[ -z "$wls_env" ] && usage & stop 1
-[ -z "$wls_name" ] && usage & stop 1
+if [ -z "$wls_env" ]; then
+    usage
+    stop 1
+fi
+
+if [ -z "$wls_name" ]; then
+    usage
+    stop 1
+fi
 
 if [ ! -d ~/etc ]; then 
     echo "Note: cfg directory does not exist. Creating ~/etc"
