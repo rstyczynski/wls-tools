@@ -210,21 +210,21 @@ fi
 # invoke service check
 comp_file=$tmp/composites.txt
 rm -rf $comp_file
-timeout 60 $MW_HOME/oracle_common/common/bin/wlst.sh <<EOF
+timeout 120 $MW_HOME/oracle_common/common/bin/wlst.sh >$comp_file <<EOF
 wls_ip = '$wls_ip'
 wls_port   = '$wls_port'
 wls_user   = '$wls_user'
 wls_pass   = '$wls_pass'
 
-old_stdout = sys.stdout
-sys.stdout = open('$comp_file', 'w')
+#old_stdout = sys.stdout
+#sys.stdout = open('$comp_file', 'w')
 sca_listDeployedComposites(wls_ip,wls_port,wls_user,wls_pass)
-sys.stdout = old_stdout
+#sys.stdout = old_stdout
 exit()
 EOF
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
-    err_msg="Error starting WLST: $MW_HOME/oracle_common/common/bin/wlst.sh. Code: $exit_code. Details: $(cat $tmp/composites.txt | head -10)"
+    err_msg="Error starting WLST: $MW_HOME/oracle_common/common/bin/wlst.sh. Code: $exit_code. Details: $(cat $comp_file | head -10)"
     echo $err_msg
     oci_notification "$err_msg"
     stop 3
