@@ -211,10 +211,12 @@ fi
 comp_file=$tmp/composites.txt
 rm -rf $comp_file
 timeout 120 $MW_HOME/oracle_common/common/bin/wlst.sh <<EOF
-wls_ip = '$wls_ip'
+wls_ip     = '$wls_ip'
 wls_port   = '$wls_port'
 wls_user   = '$wls_user'
 wls_pass   = '$wls_pass'
+
+print wls_ip,wls_port,wls_user,wls_pass
 
 old_stdout = sys.stdout
 sys.stdout = open('$comp_file', 'w')
@@ -226,7 +228,7 @@ EOF
     if [ $exit_code -ne 0 ]; then
     err_msg="Error starting WLST: $MW_HOME/oracle_common/common/bin/wlst.sh. Code: $exit_code. Details: $(cat $comp_file | head -10)"
     echo $err_msg
-    oci_notification "$err_msg"
+    #oci_notification "$err_msg"
     stop 3
 fi
 
