@@ -7,7 +7,7 @@ function read_secret() {
     local privacy=$2
 
     if [ -z "$key" ]; then
-        echo "usage: get_secret key"
+        >&2 echo "usage: get_secret key"
         return 1
     fi
 
@@ -22,7 +22,7 @@ function read_secret() {
         if [ -f $0 ]; then
             local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
         else
-            echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+            >&2 echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
             local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
         fi
         ;;
@@ -33,8 +33,8 @@ function read_secret() {
         local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
         ;;
     *)
-        echo 'Error. Privacy level not known. Falling to user level privacy.'
-        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
+        local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
         ;;
     esac
 
@@ -90,22 +90,22 @@ function save_secret() {
     umask 077
 
     if [ -z "$key" ]; then
-        echo "usage: save_secret key value"
+        >&2  echo "usage: save_secret key value"
         return 1
     fi
 
     if [ -z "$value" ]; then
-        echo "usage: save_secret key value"
+        >&2 echo "usage: save_secret key value"
         return 1
     fi
 
     if [ ! -d ~/etc ]; then 
-        echo "Note: cfg directory does not exist. Creating ~/etc"
+        >&2 echo "Note: cfg directory does not exist. Creating ~/etc"
         mkdir ~/etc
     fi
 
     if [ "$(stat -c %a ~/etc)" != "700" ]; then
-        echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 0700"
+        >&2 echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 0700"
         chmod 0700 ~/etc
     fi
 
@@ -122,7 +122,7 @@ function save_secret() {
         if [ -f $0 ]; then
             local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
         else
-            echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+            >&2 echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
             local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
         fi
         ;;
@@ -133,8 +133,8 @@ function save_secret() {
         local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
         ;;
     *)
-        echo 'Error. Privacy level not known. Falling to user level privacy.'
-        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
+        local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
         ;;
     esac
 
