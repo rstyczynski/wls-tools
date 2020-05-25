@@ -210,16 +210,16 @@ fi
 # invoke service check
 comp_file=$tmp/composites.txt
 rm -rf $comp_file
-timeout 120 $MW_HOME/oracle_common/common/bin/wlst.sh >$comp_file <<EOF
+timeout 120 $MW_HOME/oracle_common/common/bin/wlst.sh <<EOF
 wls_ip = '$wls_ip'
 wls_port   = '$wls_port'
 wls_user   = '$wls_user'
 wls_pass   = '$wls_pass'
 
-#old_stdout = sys.stdout
-#sys.stdout = open('$comp_file', 'w')
+old_stdout = sys.stdout
+sys.stdout = open('$comp_file', 'w')
 sca_listDeployedComposites(wls_ip,wls_port,wls_user,wls_pass)
-#sys.stdout = old_stdout
+sys.stdout = old_stdout
 exit()
 EOF
     exit_code=$?
