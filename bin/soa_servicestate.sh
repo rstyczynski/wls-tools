@@ -46,12 +46,12 @@ if [ ! -d ~/etc ]; then
 fi
 
 if [ "$(stat -c %a ~/etc)" != "700" ]; then
-    echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 700"
-    chmod 700 ~/etc
+    echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 0700"
+    chmod 0700 ~/etc
 fi
 
 #
-#
+#  parameters
 #
 
 script_code=soa_servicestate
@@ -59,6 +59,10 @@ tmp=/tmp/$$\_$script_code; mkdir -p $tmp
 
 # clean up after ctrl-break
 trap stop INT
+
+#
+#  functions
+#
 
 # set / get parameters
 function getParameters() {
@@ -212,6 +216,10 @@ EOF
     return $return_code
 }
 
+
+#
+#  main logic
+#
 
 # get all parameters
 getParameters
