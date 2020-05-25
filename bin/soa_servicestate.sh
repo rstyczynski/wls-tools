@@ -210,7 +210,7 @@ fi
 # invoke service check
 comp_file=$tmp/composites.txt
 rm -rf $comp_file
-timeout 30 $MW_HOME/oracle_common/common/bin/wlst.sh <<EOF
+timeout 60 $MW_HOME/oracle_common/common/bin/wlst.sh <<EOF
 wls_ip = '$wls_ip'
 wls_port   = '$wls_port'
 wls_user   = '$wls_user'
@@ -222,8 +222,9 @@ sca_listDeployedComposites(wls_ip,wls_port,wls_user,wls_pass)
 sys.stdout = old_stdout
 exit()
 EOF
-if [ $? -ne 0 ]; then
-    err_msg="Error starting WLST: $MW_HOME/oracle_common/common/bin/wlst.sh"
+    exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+    err_msg="Error starting WLST: $MW_HOME/oracle_common/common/bin/wlst.sh. Code: $exit_code"
     echo $err_msg
     oci_notification "$err_msg"
     stop 3
@@ -258,7 +259,9 @@ else
             delivery_error=$(( $delivery_error + 1 ))
         fi
     done
-    err_msg="Services down. Discovered:$services_down_cnt, reported:$delivery_ok, not reported: $delivery_error"
+    err_msg="Services down. Discovered:$services_down_cnt, reported:$delivery_ok, not reported: $delivery_error.
+Check CSF logs for details."
+
     oci_notification "$err_msg"
 fi
 
