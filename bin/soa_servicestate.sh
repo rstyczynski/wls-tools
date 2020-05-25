@@ -254,6 +254,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # report
+services_active=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | sort | wc -l)
 services_down=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | grep 'state=off' | cut -f2 -d' ' | cut -f1 -d, | sort)
 services_down_cnt=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | grep 'state=off' | cut -f2 -d' ' | cut -f1 -d, | sort | wc -l)
 if [ $services_down_cnt -eq 0 ]; then
@@ -274,7 +275,7 @@ else
             delivery_error=$(( $delivery_error + 1 ))
         fi
     done
-    err_msg="Services down. Discovered:$services_down_cnt, reported:$delivery_ok, not reported: $delivery_error.
+    err_msg="Services down. Services active: $services_active, down:$services_down_cnt, reported:$delivery_ok, not reported: $delivery_error.
 Check CSF logs for details."
 
     oci_notification "$err_msg"
