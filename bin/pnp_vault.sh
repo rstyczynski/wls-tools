@@ -30,7 +30,7 @@ function read_secret() {
         local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
         ;;
     host)
-        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        local seed=$(stat -c %i%g /etc  | sha256sum | cut -f1 -d' ')
         ;;
     *)
         >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
@@ -130,7 +130,7 @@ function save_secret() {
         local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
         ;;
     host)
-        local seed=$(hostname -f | sha256sum | cut -f1 -d' ')
+        local seed=$(stat -c %i%g /etc| sha256sum | cut -f1 -d' ')
         ;;
     *)
         >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
