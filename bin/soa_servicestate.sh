@@ -33,7 +33,7 @@ if [ ! -d ~/etc ]; then
     mkdir ~/etc
 fi
 
-if [ "$(chmod 700 ~/etc)" != "700" ]; then
+if [ "$(stat -c %a ~/etc)" != "700" ]; then
     echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 700"
     chmod 700 ~/etc
 fi
@@ -198,8 +198,14 @@ if [ $? -ne 0 ]; then
 fi
 
 services_down=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | grep 'state=off' | cut -f2 -d' ' | cut -f1 -d, | sort)
-for svc_name in $services_down; do
-    reportCompositeDown $svc_name
-done
+if [ "$(echo $services_down | wc -c)" -eq 0 ]; then
+    echo "All good. All services up."
+else
+    echo "Services down. Sending notifications."
+    for svc_name in $services_down; do
+        reportCompositeDown $svc_name
+    done
+fi
 
+echo "Done."
 stop
