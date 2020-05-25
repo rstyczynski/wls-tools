@@ -7,7 +7,7 @@ wls_name=$2
 [ -z "$wls_env" ] && (usage; exit 1)
 [ -z "$wls_name" ] && (usage; exit 1)
 
-[ ! -d ~/etc ]; then 
+if [ ! -d ~/etc ]; then 
     echo "Note: cfg directory does not exist. Creating ~/etc"
     mkdir ~/etc
 fi
