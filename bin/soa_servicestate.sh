@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# parameters
+# CLI parameters
 wls_env=$1
 wls_name=$2
-
 
 function oci_notification() {
     local oci_notification_msg=$1
@@ -215,7 +214,6 @@ EOF
 
     return $return_code
 }
-
 
 #
 #  main logic
