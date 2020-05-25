@@ -18,15 +18,15 @@ function usage(){
     stop 1
 }
 
-[ -z "$wls_env" ] && (usage; stop 1)
-[ -z "$wls_name" ] && (usage; stop 1)
+[ -z "$wls_env" ] && usage & stop 1
+[ -z "$wls_name" ] && usage & stop 1
 
 if [ ! -d ~/etc ]; then 
     echo "Note: cfg directory does not exist. Creating ~/etc"
     mkdir ~/etc
 fi
 
-if [ $(chmod 700 ~/etc) != "700" ]; then
+if [ "$(chmod 700 ~/etc)" != "700" ]; then
     echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 700"
     chmod 700 ~/etc
 fi
