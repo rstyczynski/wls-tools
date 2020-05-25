@@ -10,7 +10,7 @@ function stop() {
     [ -z "$error_code" ] && error_code=0
 
     rm -rf /tmp/$$\_$caller
-    exit error_code
+    exit $error_code
 }
 
 function usage(){
