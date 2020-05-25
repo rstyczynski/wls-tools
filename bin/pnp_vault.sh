@@ -7,7 +7,7 @@ function read_secret() {
     local privacy=$2
 
     if [ -z "$key" ]; then
-        >&2 echo "usage: get_secret key"
+        >&2 echo "usage: get_secret key host|user|script"
         return 1
     fi
 
@@ -18,24 +18,24 @@ function read_secret() {
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
 
     case $privacy in
-    script)
-        if [ -f $0 ]; then
-            local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
-        else
-            >&2 echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+        script)
+            if [ -f $0 ]; then
+                local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
+            else
+                >&2 echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+                local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+            fi
+            ;;
+        user)
             local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-        fi
-        ;;
-    user)
-        local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-        ;;
-    host)
-        local seed=$(stat -c %i%g /etc  | sha256sum | cut -f1 -d' ')
-        ;;
-    *)
-        >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
-        local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-        ;;
+            ;;
+        host)
+            local seed=$(stat -c %i%g /etc  | sha256sum | cut -f1 -d' ')
+            ;;
+        *)
+            >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
+            local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+            ;;
     esac
 
     [ $pnp_vault_debug -gt 2 ] && echo $seed
@@ -90,12 +90,12 @@ function save_secret() {
     umask 077
 
     if [ -z "$key" ]; then
-        >&2  echo "usage: save_secret key value"
+        >&2  echo "usage: save_secret key value host|user|script"
         return 1
     fi
 
     if [ -z "$value" ]; then
-        >&2 echo "usage: save_secret key value"
+        >&2 echo "usage: save_secret key value host|user|script"
         return 1
     fi
 
@@ -118,24 +118,24 @@ function save_secret() {
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
 
     case $privacy in
-    script)
-        if [ -f $0 ]; then
-            local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
-        else
-            >&2 echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+        script)
+            if [ -f $0 ]; then
+                local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
+            else
+                >&2 echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
+                local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+            fi
+            ;;
+        user)
             local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-        fi
-        ;;
-    user)
-        local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-        ;;
-    host)
-        local seed=$(stat -c %i%g /etc| sha256sum | cut -f1 -d' ')
-        ;;
-    *)
-        >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
-        local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
-        ;;
+            ;;
+        host)
+            local seed=$(stat -c %i%g /etc| sha256sum | cut -f1 -d' ')
+            ;;
+        *)
+            >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
+            local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+            ;;
     esac
 
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
