@@ -230,7 +230,7 @@ exit_code=$?
 if [ $exit_code -ne 0 ]; then
     err_msg="Error starting WLST: $MW_HOME/oracle_common/common/bin/wlst.sh. Code: $exit_code. Details: $(cat $comp_file | head -10)"
     echo $err_msg
-    #oci_notification "$err_msg"
+    oci_notification "$err_msg"
     stop 3
 fi
 
