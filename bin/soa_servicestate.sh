@@ -75,7 +75,7 @@ function getParameters() {
             echo 'Error: server address not known and not privided.'
             return 1
         else
-            echo "$lookup_code=$wls_ip" >>~/etc/soa.cfg
+            echo "$lookup_code=$wls_protocol" >>~/etc/soa.cfg
             chmod 600 ~/etc/soa.cfg
         fi
     fi
