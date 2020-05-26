@@ -67,7 +67,7 @@ trap stop INT
 function getParameters() {
 
     # address
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_protocol)
+    lookup_code=$(echo $wls_env\_$wls_name\_protocol)
     wls_protocol=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$wls_protocol" ]; then
         read -t 15 -p 'wls_protocol:' wls_protocol
@@ -81,7 +81,7 @@ function getParameters() {
     fi
 
     # address
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_ip)
+    lookup_code=$(echo $wls_env\_$wls_name\_ip)
     wls_ip=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$wls_ip" ]; then
         read -t 15 -p 'wls_ip:' wls_ip
@@ -95,7 +95,7 @@ function getParameters() {
     fi
 
     # port
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_port)
+    lookup_code=$(echo $wls_env\_$wls_name\_port)
     wls_port=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$wls_port" ]; then
         read -t 15 -p 'wls_port:' wls_port
@@ -109,7 +109,7 @@ function getParameters() {
     fi
 
     # error handler ip
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_csf_ip)
+    lookup_code=$(echo $wls_env\_$wls_name\_csf_ip)
     csf_ip=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$csf_ip" ]; then
         read -t 15 -p 'csf_ip:' csf_ip
@@ -123,7 +123,7 @@ function getParameters() {
     fi
 
     #error handler port
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_csf_port)
+    lookup_code=$(echo $wls_env\_$wls_name\_csf_port)
     csf_port=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$csf_port" ]; then
         read -t 15 -p 'csf_port:' csf_port
@@ -137,7 +137,7 @@ function getParameters() {
     fi
 
     #oci notification topic id
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_oci_topic_id)
+    lookup_code=$(echo $wls_env\_$wls_name\_oci_topic_id)
     oci_topic_id=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$oci_topic_id" ]; then
         read -t 15 -p 'oci_topic_id:' oci_topic_id
@@ -151,21 +151,21 @@ function getParameters() {
     fi
 
     # username
-    lookup_code=$(echo $(hostname)_$wls_env\_$wls_ip\_$wls_port\_user\_$script_code | sha256sum | cut -f1 -d' ')
-    wls_user=$(cat ~/etc/secrets.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
+    lookup_code=$(echo $wls_env\_$wls_ip\_$wls_port\_user)
+    wls_user=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
     if [ -z "$wls_user" ]; then
         read -t 15 -p 'wls_user:' wls_user
         if [ $? -ne 0 ]; then
             echo 'Error: user name not known and not privided.'
             return 1
         else
-            echo "$lookup_code=$wls_user" >>~/etc/secrets.cfg
-            chmod 600 ~/etc/secrets.cfg
+            echo "$lookup_code=$wls_user" >>~/etc/soa.cfg
+            chmod 600 ~/etc/soa.cfg
         fi
     fi
 
     # password
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_ip\_$wls_port\_pass\_$script_code | sha256sum | cut -f1 -d' ')
+    lookup_code=$(echo $wls_env\_$wls_ip\_$wls_port\_pass)
     wls_pass=$(cat ~/etc/secrets.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
     if [ -z "$wls_pass" ]; then
         read -t 15 -s -p 'wls_pass:' wls_pass
@@ -173,21 +173,8 @@ function getParameters() {
             echo 'Error: password not known and not privided.'
             return 1
         else
-            echo "$lookup_code=$wls_pass" >>~/etc/secrets.cfg
-            chmod 600 ~/etc/secrets.cfg
-        fi
-    fi
-
-    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_ip\_$wls_port\_csf_auth\_$script_code | sha256sum | cut -f1 -d' ')
-    csf_auth=$(cat ~/etc/secrets.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
-    if [ -z "$csf_auth" ]; then
-        read -t 15 -s -p 'csf_auth:' csf_auth
-        if [ $? -ne 0 ]; then
-            echo 'Error: csf_auth not known and not privided.'
-            return 1
-        else
-            echo "$lookup_code=$csf_auth" >>~/etc/secrets.cfg
-            chmod 600 ~/etc/secrets.cfg
+            echo "$lookup_code=$wls_pass" >>~/etc/soa.cfg
+            chmod 600 ~/etc/soa.cfg
         fi
     fi
 
