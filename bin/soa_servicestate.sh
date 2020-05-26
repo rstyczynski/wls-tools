@@ -67,20 +67,6 @@ trap stop INT
 function getParameters() {
 
     # address
-    lookup_code=$(echo $wls_env\_$wls_name\_protocol)
-    wls_protocol=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
-    if [ -z "$wls_protocol" ]; then
-        read -t 15 -p 'wls_protocol:' wls_protocol
-        if [ $? -ne 0 ]; then
-            echo 'Error: server address not known and not privided.'
-            return 1
-        else
-            echo "$lookup_code=$wls_protocol" >>~/etc/soa.cfg
-            chmod 600 ~/etc/soa.cfg
-        fi
-    fi
-
-    # address
     lookup_code=$(echo $wls_env\_$wls_name\_ip)
     wls_ip=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$wls_ip" ]; then
@@ -104,6 +90,20 @@ function getParameters() {
             return 1
         else
             echo "$lookup_code=$wls_port" >>~/etc/soa.cfg
+            chmod 600 ~/etc/soa.cfg
+        fi
+    fi
+
+    # error handler protocol
+    lookup_code=$(echo $wls_env\_$wls_name\_protocol)
+    csf_protocol=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
+    if [ -z "$csf_protocol" ]; then
+        read -t 15 -p 'csf_protocol:' csf_protocol
+        if [ $? -ne 0 ]; then
+            echo 'Error: server address not known and not privided.'
+            return 1
+        else
+            echo "$lookup_code=$csf_protocol" >>~/etc/soa.cfg
             chmod 600 ~/etc/soa.cfg
         fi
     fi
@@ -151,7 +151,7 @@ function getParameters() {
     fi
 
     # username
-    lookup_code=$(echo $wls_env\_$wls_ip\_$wls_port\_user)
+    lookup_code=$(echo $wls_env\_$wls_ip\_user)
     wls_user=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
     if [ -z "$wls_user" ]; then
         read -t 15 -p 'wls_user:' wls_user
@@ -165,7 +165,7 @@ function getParameters() {
     fi
 
     # password
-    lookup_code=$(echo $wls_env\_$wls_ip\_$wls_port\_pass)
+    lookup_code=$(echo $wls_env\_$wls_ip\_pass)
     wls_pass=$(cat ~/etc/secrets.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2)
     if [ -z "$wls_pass" ]; then
         read -t 15 -s -p 'wls_pass:' wls_pass
@@ -206,7 +206,7 @@ function reportCompositeDown() {
 </soapenv:Envelope>
 EOF
 
-    timeout 5 curl -X POST $wls_protocol://$csf_ip:$csf_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
+    timeout 5 curl -X POST $csf_protocol://$csf_ip:$csf_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
     --user $wls_user:$wls_pass \
     -H "Content-Type: text/xml" \
     -H "SOAPAction: processExceptionMsg" \
