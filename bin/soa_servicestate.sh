@@ -67,6 +67,20 @@ trap stop INT
 function getParameters() {
 
     # address
+    lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_protocol)
+    wls_protocol=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
+    if [ -z "$wls_protocol" ]; then
+        read -t 15 -p 'wls_protocol:' wls_protocol
+        if [ $? -ne 0 ]; then
+            echo 'Error: server address not known and not privided.'
+            return 1
+        else
+            echo "$lookup_code=$wls_ip" >>~/etc/soa.cfg
+            chmod 600 ~/etc/soa.cfg
+        fi
+    fi
+
+    # address
     lookup_code=$(echo $(hostname)\_$wls_env\_$wls_name\_ip)
     wls_ip=$(cat ~/etc/soa.cfg | grep "$lookup_code" | tail -1 | cut -d= -f2 )
     if [ -z "$wls_ip" ]; then
@@ -205,7 +219,7 @@ function reportCompositeDown() {
 </soapenv:Envelope>
 EOF
 
-    timeout 5 curl -X POST http://$csf_ip:$csf_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
+    timeout 5 curl -X POST $wls_protocol://$csf_ip:$csf_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
     --user $wls_user:$wls_pass \
     -H "Content-Type: text/xml" \
     -H "SOAPAction: processExceptionMsg" \
