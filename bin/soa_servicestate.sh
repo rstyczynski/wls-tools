@@ -212,8 +212,6 @@ EOF
     -d @$payload
     return_code=$?
 
-    # -H "Authorization: Basic $csf_auth" \
-
     return $return_code
 }
 
@@ -266,7 +264,7 @@ services_active=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | 
 services_down=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | grep 'state=off' | cut -f2 -d' ' | cut -f1 -d, | sort)
 services_down_cnt=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | grep 'state=off' | cut -f2 -d' ' | cut -f1 -d, | sort | wc -l)
 if [ $services_down_cnt -eq 0 ]; then
-    err_msg="All good. All services up."
+    err_msg="All good. All services up at $wls_env/$wls_name."
     echo $err_msg
     oci_notification "$err_msg"
 else
@@ -283,7 +281,9 @@ else
             delivery_error=$(( $delivery_error + 1 ))
         fi
     done
-    err_msg="Services down. Services active: $services_active, down:$services_down_cnt, reported:$delivery_cnt, not reported: $delivery_error.
+    err_msg="Services down at $wls_env/$wls_name.
+
+Services active: $services_active, down:$services_down_cnt, reported:$delivery_cnt, not reported: $delivery_error.
 Check CSF logs for details."
 
     oci_notification "$err_msg"
