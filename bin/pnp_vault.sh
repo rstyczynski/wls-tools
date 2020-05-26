@@ -7,11 +7,11 @@ function read_secret() {
     local privacy=$2
 
     if [ -z "$key" ]; then
-        >&2 echo "usage: get_secret key host|user|script"
+        >&2 echo "usage: read_secret key user|host|script"
         return 1
     fi
 
-    : ${privacy:=script}
+    : ${privacy:=user}
 
     umask 077
 
@@ -90,12 +90,12 @@ function save_secret() {
     umask 077
 
     if [ -z "$key" ]; then
-        >&2  echo "usage: save_secret key value host|user|script"
+        >&2  echo "usage: save_secret key value user|host|script"
         return 1
     fi
 
     if [ -z "$value" ]; then
-        >&2 echo "usage: save_secret key value host|user|script"
+        >&2 echo "usage: save_secret key value user|host|script"
         return 1
     fi
 
@@ -113,7 +113,7 @@ function save_secret() {
         mkdir -p ~/etc/secret
     fi        
 
-    : ${privacy:=script}
+    : ${privacy:=user}
 
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
 
@@ -180,4 +180,3 @@ function save_secret() {
     #     mv ~/etc/secret.new ~/etc/secret
     # ) 8>~/etc/secret/lock
 }
-
