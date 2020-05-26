@@ -208,11 +208,12 @@ EOF
     timeout 5 curl -X POST http://$csf_ip:$csf_port/soa-infra/services/common/CommonErrorHandler/CommonErrorHandlerService \
     --user $wls_user:$wls_pass
     -H "Content-Type: text/xml" \
-    # -H "Authorization: Basic $csf_auth" \
     -H "SOAPAction: processExceptionMsg" \
     -d @$payload
     return_code=$?
 
+    # -H "Authorization: Basic $csf_auth" \
+    
     return $return_code
 }
 
