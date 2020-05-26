@@ -265,7 +265,7 @@ services_active=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | 
 services_down=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | grep 'state=off' | cut -f2 -d' ' | cut -f1 -d, | sort)
 services_down_cnt=$(cat $comp_file | grep 'isDefault=true' | grep 'mode=active' | grep 'state=off' | cut -f2 -d' ' | cut -f1 -d, | sort | wc -l)
 if [ $services_down_cnt -eq 0 ]; then
-    err_msg="All good. All services up at $wls_env/$wls_name."
+    err_msg="All good at $wls_env/$wls_name. All $services_active services up"
     echo $err_msg
     oci_notification "$err_msg"
 else
