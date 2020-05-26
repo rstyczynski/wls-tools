@@ -213,7 +213,7 @@ EOF
     return_code=$?
 
     # -H "Authorization: Basic $csf_auth" \
-    
+
     return $return_code
 }
 
@@ -276,14 +276,14 @@ else
     for svc_name in $services_down; do
         reportCompositeDown $svc_name
         if [ $? -eq 0 ]; then
-            delivery_ok=$(( $delivery_ok + 1 ))
+            delivery_cnt=$(( $delivery_cnt + 1 ))
         else
             err_msg="Error sending notification."
             echo $err_msg
             delivery_error=$(( $delivery_error + 1 ))
         fi
     done
-    err_msg="Services down. Services active: $services_active, down:$services_down_cnt, reported:$delivery_ok, not reported: $delivery_error.
+    err_msg="Services down. Services active: $services_active, down:$services_down_cnt, reported:$delivery_cnt, not reported: $delivery_error.
 Check CSF logs for details."
 
     oci_notification "$err_msg"
