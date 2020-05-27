@@ -247,10 +247,6 @@ function delete_secret() {
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
     [ $pnp_vault_debug -gt 0 ] && echo $lookup_code
 
-    if [ $(ls ~/etc/secret/* | wc -l) -eq 1 ]; then
-        return 0
-    fi
-
     rm -rf ~/etc/secret.new
     mkdir ~/etc/secret.new
 
@@ -269,8 +265,10 @@ function delete_secret() {
             
             local lookup_code_seed=$(echo $seed_element$element_pos$lookup_code | sha256sum | cut -f1 -d' ')
 
-            cat ~/etc/secret.new/$seed_element | sed "/^$lookup_code_seed/d"  > ~/etc/secret.new/$seed_element.new
-            mv ~/etc/secret.new/$seed_element.new ~/etc/secret.new/$seed_element
+            if [ -f ~/etc/secret.new/$seed_element ]; then
+                cat ~/etc/secret.new/$seed_element | sed "/^$lookup_code_seed/d"  > ~/etc/secret.new/$seed_element.new
+                mv ~/etc/secret.new/$seed_element.new ~/etc/secret.new/$seed_element
+            fi
 
             element_pos=$(( $element_pos + 1 ))
         fi
