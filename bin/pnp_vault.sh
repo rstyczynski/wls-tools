@@ -303,7 +303,7 @@ function delete_secret() {
         secret_repo=$internal_read
     fi
 
-    cp ~/etc/secret/* ~/etc/secret.delete
+    cp $secret_repo/* ~/etc/secret.delete
 
     local element_pos=0
     local lookup_code_element=.
