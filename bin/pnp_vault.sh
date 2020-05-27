@@ -367,7 +367,7 @@ privacy user|host|script with default user
 EOF
 }
 
-operation=$1
+operation=$1; shift
 
 case $operation in
     save)
