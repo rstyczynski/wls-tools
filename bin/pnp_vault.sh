@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pnp_vault_debug=0
-pnp_always_replace=0
+pnp_always_replace=1
 lock_fd=8
 
 #
@@ -124,6 +124,7 @@ function read_secret() {
         echo "$value"
         return 0
     else
+        echo ''
         return 1
     fi
 }
@@ -215,6 +216,7 @@ function save_secret() {
     # verification
     #
     internal_read=~/etc/secret.tx 
+    unset read_value
     read_value=$(read_secret $key $privacy)
     unset internal_read
     if [ "$value" != "$read_value" ]; then
@@ -361,6 +363,10 @@ function pnp_vault_test() {
 
         if [ "$read_value" == "$value" ]; then
             echo -n +
+        else
+            echo -n "-"
+            echo 
+            echo "$key : $value vs. $read_value" 
         fi
     done
     echo 
