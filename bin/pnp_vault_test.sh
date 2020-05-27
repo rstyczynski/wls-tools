@@ -10,7 +10,7 @@ pnp_always_replace=1
 rm -rf /tmp/pnp_vault_test.tmp
 echo -n "Save test:"
 for cnt in $(eval echo {1..$rounds}); do
-    key1=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
+    key1=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32| sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
     value1=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
     $DIR/pnp_vault.sh save "$key1" "$value1"
 
@@ -31,7 +31,7 @@ echo
 echo -n "Replace test:"
 pnp_always_replace=1
 for cnt in $(eval echo {1..$rounds}); do
-    key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
+    key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
     
     value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
     $DIR/pnp_vault.sh save "$key" "$value"
@@ -58,37 +58,6 @@ for cnt in $(eval echo {1..$rounds}); do
     fi
 done
 echo 
-
-echo -n "Replace test with delete and reshuffle:"
-pnp_always_replace=1
-for cnt in $(eval echo {1..$rounds}); do
-    key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)       
-    
-    value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-    $DIR/pnp_vault.sh save "$key" $value
-
-    value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-    $DIR/pnp_vault.sh save "$key" $value
-    
-    value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-    $DIR/pnp_vault.sh save "$key" $value
-
-    value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-    $DIR/pnp_vault.sh save "$key" $value
-
-    read_value=$($DIR/pnp_vault.sh read "$key")
-    
-    echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
-
-    if [ "$read_value" == "$value" ]; then
-        echo -n "+"
-    else
-        echo -n "-"
-        echo 
-        echo "$key : $value vs. $read_value" 
-    fi
-done
-echo
 
 rm -rf /tmp/pnp_vault_reread.tmp
 for known_key in $(cat /tmp/pnp_vault_test.tmp | cut -f1 -d' '); do
