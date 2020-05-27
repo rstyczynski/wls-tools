@@ -50,7 +50,7 @@ function read_secret() {
     fi
 
 
-    if [ ! -z "$internal_read" ]; then
+    if [ -z "$internal_read" ]; then
         # lock dataset for changes
         exec 8>~/etc/secret.lock
         flock -x -w 5 $lock_fd
@@ -85,10 +85,10 @@ function read_secret() {
             local lookup_code_seed=$(echo $seed_element$element_pos$lookup_code | sha256sum | cut -f1 -d' ')
             [ $pnp_vault_debug -gt 0 ] && echo $lookup_code_seed
 
-            if [ ! -z "$internal_read" ]; then
-                secret_repo=$internal_read
-            else
+            if [ -z "$internal_read" ]; then
                 secret_repo=~/etc/secret
+            else
+                secret_repo=$internal_read
             fi
 
             if [ $pnp_always_replace -eq 1 ]; then 
@@ -114,7 +114,7 @@ function read_secret() {
         fi
     done
     
-    if [ ! -z "$internal_read" ]; then
+    if [ -z "$internal_read" ]; then
         # remove lock
         flock -u $lock_fd
         rm ~/etc/secret.lock
@@ -278,7 +278,7 @@ function delete_secret() {
         mkdir -p ~/etc/secret
     fi        
 
-    if [ ! -z "$internal_read" ]; then
+    if [ -z "$internal_read" ]; then
         # lock dataset for changes
         exec 8>~/etc/secret.lock
         flock -x -w 5 $lock_fd
@@ -297,7 +297,7 @@ function delete_secret() {
 
     rm -rf ~/etc/secret.delete
     mkdir ~/etc/secret.delete
-    if [ ! -z "$internal_read" ]; then
+    if [ -z "$internal_read" ]; then
         secret_repo=~/etc/secret
     else   
         secret_repo=$internal_read
@@ -331,7 +331,7 @@ function delete_secret() {
     rm -rf $secret_repo
     mv ~/etc/secret.delete $secret_repo
 
-    if [ ! -z "$internal_read" ]; then
+    if [ -z "$internal_read" ]; then
         # remove lock
         flock -u $lock_fd
         rm ~/etc/secret.lock
