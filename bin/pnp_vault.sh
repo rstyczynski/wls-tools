@@ -193,40 +193,38 @@ function save_secret() {
         fi
     done
 
+    mv ~/etc/secret ~/etc/secret.prev
+    mv ~/etc/secret.tx  ~/etc/secret
     read_value=$(read_secret $key)
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retery with different key. This key is lost."
     
         rm -rf ~/etc/secret.tx
+        mv ~/etc/secret.prev ~/etc/secret
 
         # remove lock
         flock -u $lock_fd
         return 10
-    
     else
-
         rm -rf ~/etc/secret
         mv  ~/etc/secret.tx  ~/etc/secret
-    fi
-
-
-    if [ $pnp_always_replace -eq 1 ]; then
 
         # shuffle entries to eliminate entry order
-        rm -rf ~/etc/secret.new
-        mkdir ~/etc/secret.new
-        for secret in $(ls ~/etc/secret/* | grep -v lock); do
-            shuf $secret >~/etc/secret.new/$(basename $secret)
-        done
-        rm -rf ~/etc/secret
-        mv ~/etc/secret.new ~/etc/secret
-    
+        if [ $pnp_always_replace -eq 1 ]; then
+
+            rm -rf ~/etc/secret.new
+            mkdir ~/etc/secret.new
+            for secret in $(ls ~/etc/secret/* | grep -v lock); do
+                shuf $secret >~/etc/secret.new/$(basename $secret)
+            done
+            rm -rf ~/etc/secret
+            mv ~/etc/secret.new ~/etc/secret
+        
+        fi
+
+        # remove lock
+        flock -u $lock_fd
     fi
-
-
-    # remove lock
-    flock -u $lock_fd
-
 
 }
 
