@@ -174,7 +174,10 @@ function save_secret() {
 
     : ${privacy:=user}
 
-    [ $pnp_always_replace -eq 1 ] &&  delete_secret $key $privacy
+    if [ $pnp_always_replace -eq 1 ]; then
+        internal_read=~/etc/secret.tx
+        delete_secret $key $privacy
+    fi
 
     local seed=$(get_seed $privacy)
 
@@ -268,12 +271,14 @@ function delete_secret() {
         mkdir -p ~/etc/secret
     fi        
 
-    # lock dataset for changes
-    exec 8>~/etc/secret.lock
-    flock -x -w 5 $lock_fd
-    if [ $? -ne 0 ]; then
-        echo "Error. Other process keeps dataset."
-        return 127
+    if [ ! -z "$internal_read" ]; then
+        # lock dataset for changes
+        exec 8>~/etc/secret.lock
+        flock -x -w 5 $lock_fd
+        if [ $? -ne 0 ]; then
+            echo "Error. Other process keeps dataset."
+            return 127
+        fi
     fi
 
     : ${privacy:=user}
@@ -283,10 +288,15 @@ function delete_secret() {
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
     [ $pnp_vault_debug -gt 0 ] && echo $lookup_code
 
-    rm -rf ~/etc/secret.new
-    mkdir ~/etc/secret.new
+    if [ ! -z "$internal_read" ]; then
+        rm -rf ~/etc/secret.new
+        mkdir ~/etc/secret.new
 
-    cp ~/etc/secret/* ~/etc/secret.new
+        cp ~/etc/secret/* ~/etc/secret.new
+        secret_repo=~/etc/secret.new
+    else
+        secret_repo=$internal_read
+    fi
 
     local element_pos=0
     local lookup_code_element=.
@@ -303,19 +313,21 @@ function delete_secret() {
 
             if [ -f ~/etc/secret.new/$seed_element ]; then
                 cat ~/etc/secret.new/$seed_element | sed "/^$lookup_code_seed/d"  > ~/etc/secret.new/$seed_element.new
-                mv ~/etc/secret.new/$seed_element.new ~/etc/secret.new/$seed_element
+                mv ~/etc/secret.new/$seed_element.new $secrt_repo/$seed_element
             fi
 
             element_pos=$(( $element_pos + 1 ))
         fi
     done
 
-    rm -rf ~/etc/secret
-    mv ~/etc/secret.new ~/etc/secret
+    if [ ! -z "$internal_read" ]; then
+        rm -rf ~/etc/secret
+        mv ~/etc/secret.new ~/etc/secret
 
-    # remove lock
-    flock -u $lock_fd
-    rm ~/etc/secret.lock
+        # remove lock
+        flock -u $lock_fd
+        rm ~/etc/secret.lock
+    if
 }
 
 function pnp_vault_test() {
