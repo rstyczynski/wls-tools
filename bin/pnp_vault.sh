@@ -177,6 +177,7 @@ function save_secret() {
     if [ $pnp_always_replace -eq 1 ]; then
         internal_read=~/etc/secret.tx
         delete_secret $key $privacy
+        unset internal_read
     fi
 
     local seed=$(get_seed $privacy)
@@ -210,6 +211,8 @@ function save_secret() {
 
     internal_read=~/etc/secret.tx 
     read_value=$(read_secret $key $privacy)
+    unset internal_read
+
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retry with different key. This key is lost."
     
@@ -328,7 +331,7 @@ function delete_secret() {
         # remove lock
         flock -u $lock_fd
         rm ~/etc/secret.lock
-    if
+    fi
 }
 
 function pnp_vault_test() {
