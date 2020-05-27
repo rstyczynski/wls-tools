@@ -216,8 +216,7 @@ function save_secret() {
     # verification
     #
     internal_read=~/etc/secret.tx 
-    unset read_value
-    read_value=$(read_secret $key $privacy)
+    local read_value=$(read_secret $key $privacy)
     unset internal_read
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retry with different key. This key is lost."
@@ -349,15 +348,16 @@ function pnp_vault_test() {
 
     : ${rounds:=10}
 
-    rm -rf /tmp/pnp_vault_test.tmp
     pnp_always_replace=0
+    
+    rm -rf /tmp/pnp_vault_test.tmp
     echo -n "Save test:"
     for cnt in $(eval echo {1..$rounds}); do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret "$key" "$value"
 
-        read_value=$(read_secret $key)
+        local read_value=$(read_secret $key)
 
         echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
 
@@ -388,7 +388,7 @@ function pnp_vault_test() {
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret "$key" "$value"
 
-        read_value=$(read_secret $key)
+        local read_value=$(read_secret $key)
 
         echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
 
@@ -419,7 +419,7 @@ function pnp_vault_test() {
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret "$key" $value
 
-        read_value=$(read_secret "$key")
+        local read_value=$(read_secret "$key")
         
         echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
 
