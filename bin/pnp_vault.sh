@@ -44,8 +44,8 @@ function rollback_work() {
         rm -rf ~/etc/secret
         rm -rf ~/etc/secret.tx
         rm -rf ~/etc/secret.delete
+        mv ~/etc/secret.prev ~/etc/secret
     fi
-    mv ~/etc/secret.prev ~/etc/secret
 
     # remove lock
     flock -u $lock_fd
