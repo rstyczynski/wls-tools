@@ -206,9 +206,6 @@ function save_secret() {
         flock -u $lock_fd
         return 10
     else
-        rm -rf ~/etc/secret
-        mv  ~/etc/secret.tx  ~/etc/secret
-
         # shuffle entries to eliminate entry order
         if [ $pnp_always_replace -eq 1 ]; then
 
