@@ -191,16 +191,15 @@ function save_secret() {
 
     if [ $pnp_always_replace -eq 1 ]; then
 
-        if [ $(ls ~/etc/secret/* | wc -l) -gt 0 ]; then
-            # shuffle entries to eliminate entry order
-            rm -rf ~/etc/secret.new
-            mkdir ~/etc/secret.new
-            for secret in $(ls ~/etc/secret/* | grep -v lock); do
-                shuf $secret >~/etc/secret.new/$(basename $secret)
-            done
-            rm -rf ~/etc/secret
-            mv ~/etc/secret.new ~/etc/secret
-        fi
+        # shuffle entries to eliminate entry order
+        rm -rf ~/etc/secret.new
+        mkdir ~/etc/secret.new
+        for secret in $(ls ~/etc/secret/* | grep -v lock); do
+            shuf $secret >~/etc/secret.new/$(basename $secret)
+        done
+        rm -rf ~/etc/secret
+        mv ~/etc/secret.new ~/etc/secret
+    
     fi
 
     # remove lock
@@ -247,6 +246,10 @@ function delete_secret() {
 
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
     [ $pnp_vault_debug -gt 0 ] && echo $lookup_code
+
+    if [ $(ls ~/etc/secret/* | wc -l) -eq 0 ]; then
+        return 0
+    fi
 
     rm -rf ~/etc/secret.new
     mkdir ~/etc/secret.new
