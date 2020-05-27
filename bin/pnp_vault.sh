@@ -288,15 +288,15 @@ function delete_secret() {
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
     [ $pnp_vault_debug -gt 0 ] && echo $lookup_code
 
+    rm -rf ~/etc/secret.delete
+    mkdir ~/etc/secret.delete
     if [ ! -z "$internal_read" ]; then
-        rm -rf ~/etc/secret.new
-        mkdir ~/etc/secret.new
-
-        cp ~/etc/secret/* ~/etc/secret.new
-        secret_repo=~/etc/secret.new
-    else
+        secret_repo=~/etc/secret
+    else   
         secret_repo=$internal_read
     fi
+
+    cp ~/etc/secret/* ~/etc/secret.delete
 
     local element_pos=0
     local lookup_code_element=.
@@ -311,19 +311,20 @@ function delete_secret() {
             
             local lookup_code_seed=$(echo $seed_element$element_pos$lookup_code | sha256sum | cut -f1 -d' ')
 
-            if [ -f ~/etc/secret.new/$seed_element ]; then
-                cat ~/etc/secret.new/$seed_element | sed "/^$lookup_code_seed/d"  > ~/etc/secret.new/$seed_element.new
-                mv ~/etc/secret.new/$seed_element.new $secrt_repo/$seed_element
+            if [ -f ~/etc/secret.delete/$seed_element ]; then
+                cat ~/etc/secret.delete/$seed_element | sed "/^$lookup_code_seed/d"  > ~/etc/secret.delete/$seed_element.new
+                mv ~/etc/secret.delete/$seed_element.new ~/etc/secret.delete/$seed_element
             fi
 
             element_pos=$(( $element_pos + 1 ))
         fi
     done
 
-    if [ ! -z "$internal_read" ]; then
-        rm -rf ~/etc/secret
-        mv ~/etc/secret.new ~/etc/secret
 
+    rm -rf $secret_repo
+    mv ~/etc/secret.delete $secret_repo
+
+    if [ ! -z "$internal_read" ]; then
         # remove lock
         flock -u $lock_fd
         rm ~/etc/secret.lock
