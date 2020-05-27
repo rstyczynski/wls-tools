@@ -159,6 +159,7 @@ function save_secret() {
     rm -rf ~/etc/secret.tx
     mkdir -p ~/etc/secret.tx
     cp ~/etc/secret/* ~/etc/secret.tx
+    mv ~/etc/secret ~/etc/secret.prev
 
     : ${privacy:=user}
 
@@ -193,13 +194,12 @@ function save_secret() {
         fi
     done
 
-    mv ~/etc/secret ~/etc/secret.prev
     mv ~/etc/secret.tx  ~/etc/secret
     read_value=$(read_secret $key)
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retery with different key. This key is lost."
     
-        rm -rf ~/etc/secret.tx
+        rm -rf ~/etc/secret
         mv ~/etc/secret.prev ~/etc/secret
 
         # remove lock
