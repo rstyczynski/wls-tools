@@ -218,7 +218,7 @@ function save_secret() {
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retry with different key. This key is lost."
     
-        echo "$value vs. $read_value" 
+        echo "$key : $value vs. $read_value" 
 
         rm -rf ~/etc/secret.tx
         mv ~/etc/secret.prev ~/etc/secret
