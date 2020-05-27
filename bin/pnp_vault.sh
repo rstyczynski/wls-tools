@@ -247,7 +247,7 @@ function delete_secret() {
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
     [ $pnp_vault_debug -gt 0 ] && echo $lookup_code
 
-    if [ $(ls ~/etc/secret/* | wc -l) -eq 0 ]; then
+    if [ $(ls ~/etc/secret/* | wc -l) -eq 1 ]; then
         return 0
     fi
 
