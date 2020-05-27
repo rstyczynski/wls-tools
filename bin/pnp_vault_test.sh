@@ -12,7 +12,7 @@ pnp_always_replace=1
 rm -rf /tmp/pnp_vault_test.tmp
 echo -n "Save test:"
 for cnt in $(eval echo {1..$rounds}); do
-    key1=$(cat /dev/urandom | tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | fold -w $keylth | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
+    key1=$(cat /dev/urandom | tr -dc 'A-Za-z0-9_-' | fold -w $keylth | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
     value1=$(cat /dev/urandom | tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
     $DIR/pnp_vault.sh save "$key1" "$value1"
 
@@ -33,7 +33,7 @@ echo
 echo -n "Replace test:"
 pnp_always_replace=1
 for cnt in $(eval echo {1..$rounds}); do
-    key=$(cat /dev/urandom | tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | fold -w $keylth | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
+    key=$(cat /dev/urandom | tr -dc 'A-Za-z0-9_-' | fold -w $keylth | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
     
     value=$(cat /dev/urandom | tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
     $DIR/pnp_vault.sh save "$key" "$value"
