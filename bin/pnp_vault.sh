@@ -44,7 +44,7 @@ function rollback_work() {
     if [ -d ~/etc/secret.prev ]; then
         rm -rf ~/etc/secret
         mv ~/etc/secret.prev ~/etc/secret
-        
+
         rm -rf ~/etc/secret.tx
         rm -rf ~/etc/secret.delete
     fi
@@ -69,6 +69,9 @@ function read_secret() {
 
 
     if [ -z "$internal_read" ]; then
+        # rollback broken work
+        rollback_work
+
         # lock dataset for changes
         exec 8>~/etc/secret.lock
         flock -x -w 5 $lock_fd
@@ -81,9 +84,6 @@ function read_secret() {
     : ${privacy:=user}
 
     umask 077
-
-    # rollback broken work
-    rollback_work
 
     #
     local seed=$(get_seed $privacy)
@@ -168,10 +168,6 @@ function save_secret() {
 
     umask 077
 
-    # rollback broken work
-    rollback_work
-
-
     if [ ! -d ~/etc ]; then 
         >&2 echo "Note: cfg directory does not exist. Creating ~/etc"
         mkdir ~/etc
@@ -185,6 +181,9 @@ function save_secret() {
     if [ ! -d ~/etc/secret ]; then
         mkdir -p ~/etc/secret
     fi        
+
+    # rollback broken work
+    rollback_work
 
     # lock dataset for changes
     exec 8>~/etc/secret.lock
@@ -296,9 +295,6 @@ function delete_secret() {
 
     umask 077
 
-    # rollback broken work
-    rollback_work
-
     if [ ! -d ~/etc ]; then 
         >&2 echo "Note: cfg directory does not exist. Creating ~/etc"
         mkdir ~/etc
@@ -314,6 +310,10 @@ function delete_secret() {
     fi        
 
     if [ -z "$internal_read" ]; then
+
+        # rollback broken work
+        rollback_work
+
         # lock dataset for changes
         exec 8>~/etc/secret.lock
         flock -x -w 5 $lock_fd
