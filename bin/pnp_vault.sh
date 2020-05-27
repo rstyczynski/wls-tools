@@ -39,12 +39,14 @@ function get_seed() {
 function rollback_work() {
 
     exec 8>~/etc/secret.lock
+    flock -x -w 5 $lock_fd
 
     if [ -d ~/etc/secret.prev ]; then
         rm -rf ~/etc/secret
+        mv ~/etc/secret.prev ~/etc/secret
+        
         rm -rf ~/etc/secret.tx
         rm -rf ~/etc/secret.delete
-        mv ~/etc/secret.prev ~/etc/secret
     fi
 
     # remove lock
