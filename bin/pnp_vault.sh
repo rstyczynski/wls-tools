@@ -211,10 +211,12 @@ function save_secret() {
         fi
     done
 
+    #
+    # verification
+    #
     internal_read=~/etc/secret.tx 
     read_value=$(read_secret $key $privacy)
     unset internal_read
-
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retry with different key. This key is lost."
     
@@ -350,7 +352,7 @@ function pnp_vault_test() {
     for cnt in $(eval echo {1..$rounds}); do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret $key $value
+        save_secret "$key" "$value"
 
         read_value=$(read_secret $key)
 
@@ -368,13 +370,13 @@ function pnp_vault_test() {
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
         
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret $key $value
+        
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret $key $value
+        
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret $key $value
+        
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret $key $value
+        
 
         read_value=$(read_secret $key)
 
@@ -385,8 +387,7 @@ function pnp_vault_test() {
         else
             echo -n "-"
             echo 
-            echo "Saved: $value"
-            echo "Read:  $read_value"
+            echo "$key : $value vs. $read_value" 
         fi
     done
     echo 
@@ -417,8 +418,7 @@ function pnp_vault_test() {
         else
             echo -n "-"
             echo 
-            echo "Saved: $value"
-            echo "Read:  $read_value"
+            echo "$key : $value vs. $read_value" 
         fi
     done
     echo
