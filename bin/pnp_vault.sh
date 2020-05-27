@@ -191,14 +191,16 @@ function save_secret() {
 
     if [ $pnp_always_replace -eq 1 ]; then
 
-        # sort entries to eliminate entry order
-        rm -rf ~/etc/secret.new
-        mkdir ~/etc/secret.new
-        for secret in $(ls ~/etc/secret/* | grep -v lock); do
-            shuf $secret >~/etc/secret.new/$(basename $secret)
-        done
-        rm -rf ~/etc/secret
-        mv ~/etc/secret.new ~/etc/secret
+        if [ -f ~/etc/secret/* ]; then
+            # shuffle entries to eliminate entry order
+            rm -rf ~/etc/secret.new
+            mkdir ~/etc/secret.new
+            for secret in $(ls ~/etc/secret/* | grep -v lock); do
+                shuf $secret >~/etc/secret.new/$(basename $secret)
+            done
+            rm -rf ~/etc/secret
+            mv ~/etc/secret.new ~/etc/secret
+        fi
     fi
 
     # remove lock
@@ -376,6 +378,9 @@ function __main__() {
             ;;
         delete)
             delete_secret $@
+            ;;
+        test)
+            pnp_vault_test $@
             ;;
         *)
             usage
