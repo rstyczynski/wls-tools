@@ -345,9 +345,7 @@ function pnp_vault_test() {
 
     : ${rounds:=10}
 
-    rm -rf /tmp/pnp_vault_reread.tmp
     rm -rf /tmp/pnp_vault_test.tmp
-
     echo -n "Save test:"
     for cnt in $(eval echo {1..$rounds}); do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
@@ -426,11 +424,12 @@ function pnp_vault_test() {
     done
     echo
 
+    rm -rf /tmp/pnp_vault_reread.tmp
     for key in $(cat /tmp/pnp_vault_test.tmp | cut -f1 -d' '); do
-        read_value=$(read_secret "$key")
+        read_value="$(read_secret "$key")"
+        echo "$key $read_value"
         echo "$key $read_value $read_value" >>/tmp/pnp_vault_reread.tmp
     done
-
     diff  /tmp/pnp_vault_test.tmp /tmp/pnp_vault_reread.tmp
 
     #rm /tmp/pnp_vault_reread.tmp
