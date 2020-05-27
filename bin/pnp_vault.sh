@@ -84,7 +84,7 @@ function read_secret() {
             [ $pnp_vault_debug -gt 0 ] && echo $lookup_code_seed
 
             if [ $pnp_always_replace -eq 1 ]; then 
-            local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null)    
+                local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null)    
             else
                 local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null | tail -1)
             fi
@@ -169,7 +169,6 @@ function save_secret() {
     local lookup_code_element=.
     while [ ! -z "$lookup_code_element" ]; do
         local lookup_code_element=${lookup_code:$element_pos:1}
-
         if [ ! -z "$lookup_code_element" ]; then
             local lookup_code_element_value=$((16#$lookup_code_element))
             local seed_element=${seed:$lookup_code_element_value:1}
@@ -182,13 +181,11 @@ function save_secret() {
             [ $pnp_vault_debug -gt 0 ] && echo $value_element
 
             if [ ! -z "$value_element" ]; then
-
                 echo "$lookup_code_seed $value_element" >> ~/etc/secret/$seed_element
-
-                element_pos=$(( $element_pos + 1 ))
             else
                 break
             fi
+            element_pos=$(( $element_pos + 1 ))
         fi
     done
 
@@ -281,7 +278,7 @@ function delete_secret() {
     flock -u $lock_fd
 }
 
-function test() {
+function pnp_vault_test() {
 
     echo -n "Save test:"
     for cnt in {1..10}; do
