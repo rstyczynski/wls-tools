@@ -282,9 +282,12 @@ function delete_secret() {
 }
 
 function pnp_vault_test() {
+    rounds=$1 
+
+    : ${rounds:=10}
 
     echo -n "Save test:"
-    for cnt in {1..10}; do
+    for cnt in $(eval echo {1..$rounds}); do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
         save_secret $key $value
@@ -297,7 +300,7 @@ function pnp_vault_test() {
 
     echo -n "Replace test:"
     pnp_always_replace=0
-    for cnt in {1..10}; do
+    for cnt in $(eval echo {1..$rounds}); do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)        
         
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
@@ -323,7 +326,7 @@ function pnp_vault_test() {
 
     echo -n "Replace test with delete and reshuffle:"
     pnp_always_replace=1
-    for cnt in {1..10}; do
+    for cnt in $(eval echo {1..$rounds}); do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)        
         
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
