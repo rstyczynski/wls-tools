@@ -244,7 +244,7 @@ function save_secret() {
             mkdir ~/etc/secret.shuffle
 
             for secret_file in ~/etc/secret/*; do
-                shuf $secret_file > ~/etc/secret.shuffle/$(basename $secret)
+                shuf $secret_file > ~/etc/secret.shuffle/$(basename $secret_file)
             done
             rm -rf ~/etc/secret
             mv ~/etc/secret.shuffle ~/etc/secret
