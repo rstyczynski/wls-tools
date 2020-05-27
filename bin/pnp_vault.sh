@@ -40,7 +40,7 @@ function rollback_work() {
 
     exec 8>~/etc/secret.lock
 
-    if [ -d ~/etc/secret.prev ]l then
+    if [ -d ~/etc/secret.prev ]; then
         rm -rf ~/etc/secret
         rm -rf ~/etc/secret.tx
         rm -rf ~/etc/secret.delete
@@ -293,7 +293,7 @@ function delete_secret() {
     fi
 
     umask 077
-    
+
     # rollback broken work
     rollback_work
 
