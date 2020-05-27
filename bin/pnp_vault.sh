@@ -286,12 +286,18 @@ function pnp_vault_test() {
 
     : ${rounds:=10}
 
+    rm /tmp/pnp_vault_reread.tmp
+    rm /tmp/pnp_vault_test.tmp
+
     echo -n "Save test:"
     for cnt in $(eval echo {1..$rounds}); do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
         save_secret $key $value
         read_value=$(read_secret $key)
+
+        echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
+
         if [ $read_value == $value ]; then
             echo -n +
         fi
@@ -313,6 +319,9 @@ function pnp_vault_test() {
         save_secret $key $value
 
         read_value=$(read_secret $key)
+
+        echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
+
         if [ "$read_value" == "$value" ]; then
             echo -n +
         else
@@ -330,18 +339,20 @@ function pnp_vault_test() {
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)        
         
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
-        save_secret $key $value
+        save_secret "$key" $value
 
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
-        save_secret $key $value
+        save_secret "$key" $value
         
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
-        save_secret $key $value
+        save_secret "$key" $value
 
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)
-        save_secret $key $value
+        save_secret "$key" $value
 
-        read_value=$(read_secret $key)
+        echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
+
+        read_value=$(read_secret "$key")
         if [ "$read_value" == "$value" ]; then
             echo -n "+"
         else
@@ -351,8 +362,17 @@ function pnp_vault_test() {
             echo "Read:  $read_value"
         fi
     done
-    echo 
+    echo
 
+    for key in $(cat /tmp/pnp_vault_test.tmp | cut -f1 -d' '); do
+        read_value=$(read_secret "$key")
+        echo "$key $read_value $read_value" >>/tmp/pnp_vault_reread.tmp
+    done
+
+    diff  /tmp/pnp_vault_test.tmp /tmp/pnp_vault_reread.tmp
+
+    #rm /tmp/pnp_vault_reread.tmp
+    #rm /tmp/pnp_vault_test.tmp
     echo Done.
 }
 
