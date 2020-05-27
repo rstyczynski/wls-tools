@@ -170,6 +170,8 @@ function save_secret() {
     rm -rf ~/etc/secret.tx
     mkdir -p ~/etc/secret.tx
     cp ~/etc/secret/* ~/etc/secret.tx
+
+    rm -rf ~/etc/secret.prev
     mv ~/etc/secret ~/etc/secret.prev
 
     : ${privacy:=user}
@@ -226,6 +228,7 @@ function save_secret() {
         return 10
     else
 
+        rm -rf ~/etc/secret.prev
         mv ~/etc/secret.tx ~/etc/secret
 
         # shuffle entries to eliminate entry order
