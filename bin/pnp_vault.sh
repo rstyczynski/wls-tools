@@ -191,7 +191,7 @@ function save_secret() {
 
     if [ $pnp_always_replace -eq 1 ]; then
 
-        if [ -f ~/etc/secret/* ]; then
+        if [ $(ls ~/etc/secret/* | wc -l) -gt 0 ]; then
             # shuffle entries to eliminate entry order
             rm -rf ~/etc/secret.new
             mkdir ~/etc/secret.new
