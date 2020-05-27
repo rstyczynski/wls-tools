@@ -36,6 +36,22 @@ function get_seed() {
     echo $seed
 }
 
+function rollback_work() {
+
+    exec 8>~/etc/secret.lock
+
+    if [ -d ~/etc/secret.prev ]l then
+        rm -rf ~/etc/secret
+        rm -rf ~/etc/secret.tx
+        rm -rf ~/etc/secret.delete
+    fi
+    mv ~/etc/secret.prev ~/etc/secret
+
+    # remove lock
+    flock -u $lock_fd
+    rm ~/etc/secret.lock
+}
+
 #
 # main
 #
@@ -64,6 +80,10 @@ function read_secret() {
 
     umask 077
 
+    # rollback broken work
+    rollback_work
+
+    #
     local seed=$(get_seed $privacy)
 
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
@@ -134,8 +154,6 @@ function save_secret() {
     local value="$2"
     local privacy="$3"
 
-    umask 077
-
     if [ -z "$key" ]; then
         >&2  echo "usage: save_secret key value user|host|script"
         return 1
@@ -145,6 +163,12 @@ function save_secret() {
         >&2 echo "usage: save_secret key value user|host|script"
         return 1
     fi
+
+    umask 077
+
+    # rollback broken work
+    rollback_work
+
 
     if [ ! -d ~/etc ]; then 
         >&2 echo "Note: cfg directory does not exist. Creating ~/etc"
@@ -263,12 +287,15 @@ function delete_secret() {
     local key="$1"
     local privacy="$2"
 
-    umask 077
-
     if [ -z "$key" ]; then
         >&2  echo "usage: delete_secret key  user|host|script"
         return 1
     fi
+
+    umask 077
+    
+    # rollback broken work
+    rollback_work
 
     if [ ! -d ~/etc ]; then 
         >&2 echo "Note: cfg directory does not exist. Creating ~/etc"
