@@ -1,7 +1,7 @@
 #!/bin/bash
 
-pnp_paranoic=0
 pnp_vault_debug=0
+pnp_always_replace=1
 lock_fd=8
 
 #
@@ -83,7 +83,7 @@ function read_secret() {
             local lookup_code_seed=$(echo $seed_element$element_pos$lookup_code | sha256sum | cut -f1 -d' ')
             [ $pnp_vault_debug -gt 0 ] && echo $lookup_code_seed
 
-            if [ $pnp_paranoic -eq 1 ]; then 
+            if [ $pnp_always_replace -eq 1 ]; then 
             local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null)    
             else
                 local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null | tail -1)
@@ -158,7 +158,7 @@ function save_secret() {
 
     : ${privacy:=user}
 
-    [ $pnp_paranoic -eq 1 ] &&  delete_secret $key $privacy
+    [ $pnp_always_replace -eq 1 ] &&  delete_secret $key $privacy
 
     local seed=$(get_seed $privacy)
 
@@ -192,7 +192,7 @@ function save_secret() {
         fi
     done
 
-    if [ $pnp_paranoic -eq 1 ]; then
+    if [ $pnp_always_replace -eq 1 ]; then
 
         # sort entries to eliminate entry order
         rm -rf ~/etc/secret.new
@@ -296,7 +296,7 @@ function test() {
     echo 
 
     echo -n "Replace test:"
-    pnp_paranoic=0
+    pnp_always_replace=0
     for cnt in {1..10}; do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)        
         
@@ -322,7 +322,7 @@ function test() {
     echo 
 
     echo -n "Replace test with delete and reshuffle:"
-    pnp_paranoic=1
+    pnp_always_replace=1
     for cnt in {1..10}; do
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | head  -1)        
         
@@ -355,7 +355,7 @@ function test() {
 
 
 #
-#
+# 
 #
 function usage() {
     cat <<EOF
@@ -367,20 +367,25 @@ privacy user|host|script with default user
 EOF
 }
 
-operation=$1; shift
+function __main__() {
+    operation=$1; shift
 
-case $operation in
-    save)
-        save_secret $@
-        ;;
-    read)
-        read_secret $@
-        ;;
-    delete)
-        delete_secret $@
-        ;;
-    *)
-        usage
-        exit 1
-        ;;
-esac
+    case $operation in
+        save)
+            save_secret $@
+            ;;
+        read)
+            read_secret $@
+            ;;
+        delete)
+            delete_secret $@
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+# prevent staring main in source mode
+[ -f $0 ] && __main__ $@
