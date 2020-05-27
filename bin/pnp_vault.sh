@@ -220,6 +220,7 @@ function save_secret() {
     
         echo "$value vs. $read_value" 
 
+        rm -rf ~/etc/secret.tx
         mv ~/etc/secret.prev ~/etc/secret
 
         # remove lock
@@ -234,13 +235,13 @@ function save_secret() {
         # shuffle entries to eliminate entry order
         if [ $pnp_always_replace -eq 1 ]; then
 
-            rm -rf ~/etc/secret.new
-            mkdir ~/etc/secret.new
+            rm -rf ~/etc/secret.shuffle
+            mkdir ~/etc/secret.shuffle
             for secret in $(ls ~/etc/secret/* | grep -v lock); do
-                shuf $secret >~/etc/secret.new/$(basename $secret)
+                shuf $secret >~/etc/secret.shuffle/$(basename $secret)
             done
             rm -rf ~/etc/secret
-            mv ~/etc/secret.new ~/etc/secret
+            mv ~/etc/secret.shuffle ~/etc/secret
         
         fi
 
