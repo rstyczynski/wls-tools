@@ -51,7 +51,7 @@ function read_secret() {
 
 
     # lock dataset for changes
-    exec 8>~/etc/secret/lock
+    exec 8>~/etc/secret.lock
     flock -x -w 5 $lock_fd
     if [ $? -ne 0 ]; then
         echo "Error. Other process keeps dataset."
@@ -149,7 +149,7 @@ function save_secret() {
     fi        
 
     # lock dataset for changes
-    exec 8>~/etc/secret/lock
+    exec 8>~/etc/secret.lock
     flock -x -w 5 $lock_fd
     if [ $? -ne 0 ]; then
         echo "Error. Other process keeps dataset."
@@ -197,7 +197,7 @@ function save_secret() {
     mv ~/etc/secret.tx  ~/etc/secret
     read_value=$(read_secret $key $privacy)
     if [ "$value" != "$read_value" ]; then
-        echo "Error writing key due to low entropy. Retery with different key. This key is lost."
+        echo "Error writing key due to low entropy. Retry with different key. This key is lost."
     
         echo "$value vs. $read_value" 
 
@@ -254,7 +254,7 @@ function delete_secret() {
     fi        
 
     # lock dataset for changes
-    exec 8>~/etc/secret/lock
+    exec 8>~/etc/secret.lock
     flock -x -w 5 $lock_fd
     if [ $? -ne 0 ]; then
         echo "Error. Other process keeps dataset."
