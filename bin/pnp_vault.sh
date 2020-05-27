@@ -348,15 +348,15 @@ function pnp_vault_test() {
 
     echo -n "Save test:"
     for cnt in $(eval echo {1..$rounds}); do
-        key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret $key $value
 
         read_value=$(read_secret $key)
 
         echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
 
-        if [ $read_value == $value ]; then
+        if [ "$read_value" == "$value" ]; then
             echo -n +
         fi
     done
@@ -365,15 +365,15 @@ function pnp_vault_test() {
     echo -n "Replace test:"
     pnp_always_replace=0
     for cnt in $(eval echo {1..$rounds}); do
-        key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
+        key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
         
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret $key $value
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret $key $value
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret $key $value
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret $key $value
 
         read_value=$(read_secret $key)
@@ -394,18 +394,18 @@ function pnp_vault_test() {
     echo -n "Replace test with delete and reshuffle:"
     pnp_always_replace=1
     for cnt in $(eval echo {1..$rounds}); do
-        key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)       
+        key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)       
         
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret "$key" $value
 
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret "$key" $value
         
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret "$key" $value
 
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
+        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret "$key" $value
 
         read_value=$(read_secret "$key")
