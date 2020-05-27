@@ -199,6 +199,8 @@ function save_secret() {
     
         rm -rf ~/etc/secret.tx
 
+        # remove lock
+        flock -u $lock_fd
         return 10
     
     else
@@ -316,6 +318,7 @@ function pnp_vault_test() {
         key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
         value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!-_' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
         save_secret $key $value
+
         read_value=$(read_secret $key)
 
         echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
