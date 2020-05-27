@@ -195,10 +195,12 @@ function save_secret() {
     done
 
     mv ~/etc/secret.tx  ~/etc/secret
-    read_value=$(read_secret $key)
+    read_value=$(read_secret $key $privacy)
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retery with different key. This key is lost."
     
+        echo ""$value vs. $read_value" 
+
         rm -rf ~/etc/secret
         mv ~/etc/secret.prev ~/etc/secret
 
