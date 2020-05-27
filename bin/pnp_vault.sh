@@ -198,7 +198,7 @@ function save_secret() {
         rm -rf ~/etc/secret.new
         mkdir ~/etc/secret.new
         for secret in $(ls ~/etc/secret/* | grep -v lock); do
-            shuff $secret >~/etc/secret.new/$(basename $secret)
+            shuf $secret >~/etc/secret.new/$(basename $secret)
         done
         rm -rf ~/etc/secret
         mv ~/etc/secret.new ~/etc/secret
