@@ -344,109 +344,6 @@ function delete_secret() {
     fi
 }
 
-function pnp_vault_test() {
-    rounds=$1 
-
-    : ${rounds:=10}
-
-    pnp_always_replace=0
-    
-    rm -rf /tmp/pnp_vault_test.tmp
-    echo -n "Save test:"
-    for cnt in $(eval echo {1..$rounds}); do
-        local key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1) 
-        local value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" "$value"
-
-        local read_value=$(read_secret $key)
-
-        echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
-
-        if [ "$read_value" == "$value" ]; then
-            echo -n +
-        else
-            echo -n "-"
-            echo 
-            echo "$key : $value vs. $read_value" 
-        fi
-    done
-    echo 
-
-    echo -n "Replace test:"
-    pnp_always_replace=0
-    for cnt in $(eval echo {1..$rounds}); do
-        local key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)        
-        
-        local value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" "$value"
-        
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" "$value"
-        
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" "$value"
-        
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" "$value"
-
-        local read_value=$(read_secret $key)
-
-        echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
-
-        if [ "$read_value" == "$value" ]; then
-            echo -n +
-        else
-            echo -n "-"
-            echo 
-            echo "$key : $value vs. $read_value" 
-        fi
-    done
-    echo 
-
-    echo -n "Replace test with delete and reshuffle:"
-    pnp_always_replace=1
-    for cnt in $(eval echo {1..$rounds}); do
-        local key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)       
-        
-        local value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" $value
-
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" $value
-        
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" $value
-
-        value=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | sed 's/[\x01-\x1F\x7F]/x/g' | head  -1)
-        save_secret "$key" $value
-
-        local read_value=$(read_secret "$key")
-        
-        echo "$key $value $read_value" >>/tmp/pnp_vault_test.tmp
-
-        if [ "$read_value" == "$value" ]; then
-            echo -n "+"
-        else
-            echo -n "-"
-            echo 
-            echo "$key : $value vs. $read_value" 
-        fi
-    done
-    echo
-
-    rm -rf /tmp/pnp_vault_reread.tmp
-    for known_key in $(cat /tmp/pnp_vault_test.tmp | cut -f1 -d' '); do
-        local read_value="$(read_secret "$known_key")"
-        echo "$known_key $read_value"
-        echo "$known_key $read_value $read_value" >>/tmp/pnp_vault_reread.tmp
-    done
-    diff  /tmp/pnp_vault_test.tmp /tmp/pnp_vault_reread.tmp
-
-    #rm /tmp/pnp_vault_reread.tmp
-    #rm /tmp/pnp_vault_test.tmp
-    echo Done.
-}
-
 
 #
 # 
@@ -473,9 +370,6 @@ function __main__() {
             ;;
         delete)
             delete_secret $@
-            ;;
-        test)
-            pnp_vault_test $@
             ;;
         *)
             usage
