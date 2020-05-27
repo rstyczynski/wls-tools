@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pnp_vault_debug=0
-pnp_always_replace=1
+pnp_always_replace=0
 lock_fd=8
 
 #
@@ -237,8 +237,8 @@ function save_secret() {
 
             rm -rf ~/etc/secret.shuffle
             mkdir ~/etc/secret.shuffle
-            for secret in $(ls ~/etc/secret/* | grep -v lock); do
-                shuf $secret >~/etc/secret.shuffle/$(basename $secret)
+            for secret in ~/etc/secret/*; do
+                shuf $secret > ~/etc/secret.shuffle/$(basename $secret)
             done
             rm -rf ~/etc/secret
             mv ~/etc/secret.shuffle ~/etc/secret
