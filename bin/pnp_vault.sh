@@ -50,12 +50,14 @@ function read_secret() {
     fi
 
 
-    # lock dataset for changes
-    exec 8>~/etc/secret.lock
-    flock -x -w 5 $lock_fd
-    if [ $? -ne 0 ]; then
-        echo "Error. Other process keeps dataset."
-        return 127
+    if [ ! -z "$internal_read" ]; then
+        # lock dataset for changes
+        exec 8>~/etc/secret.lock
+        flock -x -w 5 $lock_fd
+        if [ $? -ne 0 ]; then
+            echo "Error. Other process keeps dataset."
+            return 127
+        fi
     fi
 
     : ${privacy:=user}
@@ -83,10 +85,16 @@ function read_secret() {
             local lookup_code_seed=$(echo $seed_element$element_pos$lookup_code | sha256sum | cut -f1 -d' ')
             [ $pnp_vault_debug -gt 0 ] && echo $lookup_code_seed
 
-            if [ $pnp_always_replace -eq 1 ]; then 
-                local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null | head -1)    
+            if [ ! -z "$internal_read" ]; then
+                secret_repo=$internal_read
             else
-                local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null | tail -1)
+                secret_repo=~/etc/secret
+            fi
+
+            if [ $pnp_always_replace -eq 1 ]; then 
+                local kv=$(grep $lookup_code_seed $secret_repo/$seed_element 2>/dev/null | head -1)    
+            else
+                local kv=$(grep $lookup_code_seed $secret_repo/$seed_element 2>/dev/null | tail -1)
             fi
 
             if [ -z "$kv" ]; then
@@ -106,8 +114,11 @@ function read_secret() {
         fi
     done
     
-    # remove lock
-    flock -u $lock_fd
+    if [ ! -z "$internal_read" ]; then
+        # remove lock
+        flock -u $lock_fd
+        rm ~/etc/secret.lock
+    fi
 
     if [ "$lookup_result" = "true" ]; then
         echo "$value"
@@ -194,20 +205,23 @@ function save_secret() {
         fi
     done
 
-    mv ~/etc/secret.tx  ~/etc/secret
+    internal_read=~/etc/secret.tx 
     read_value=$(read_secret $key $privacy)
     if [ "$value" != "$read_value" ]; then
         echo "Error writing key due to low entropy. Retry with different key. This key is lost."
     
         echo "$value vs. $read_value" 
 
-        rm -rf ~/etc/secret
         mv ~/etc/secret.prev ~/etc/secret
 
         # remove lock
         flock -u $lock_fd
+        rm ~/etc/secret.lock
         return 10
     else
+
+        mv ~/etc/secret.tx ~/etc/secret
+
         # shuffle entries to eliminate entry order
         if [ $pnp_always_replace -eq 1 ]; then
 
@@ -223,6 +237,7 @@ function save_secret() {
 
         # remove lock
         flock -u $lock_fd
+        rm ~/etc/secret.lock
     fi
 
 }
@@ -300,6 +315,7 @@ function delete_secret() {
 
     # remove lock
     flock -u $lock_fd
+    rm ~/etc/secret.lock
 }
 
 function pnp_vault_test() {
