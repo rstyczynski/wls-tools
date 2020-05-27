@@ -1,4 +1,4 @@
-#!/bin/value
+#!/bin/bash
 
 rounds=$1 
 
