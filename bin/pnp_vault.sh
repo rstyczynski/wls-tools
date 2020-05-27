@@ -84,7 +84,7 @@ function read_secret() {
             [ $pnp_vault_debug -gt 0 ] && echo $lookup_code_seed
 
             if [ $pnp_always_replace -eq 1 ]; then 
-                local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null)    
+                local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null | head -1)    
             else
                 local kv=$(grep $lookup_code_seed ~/etc/secret/$seed_element 2>/dev/null | tail -1)
             fi
@@ -156,6 +156,10 @@ function save_secret() {
         return 127
     fi
 
+    rm -rf ~/etc/secret.tx
+    mkdir -p ~/etc/secret.tx
+    cp ~/etc/secret/* ~/etc/secret.tx
+
     : ${privacy:=user}
 
     [ $pnp_always_replace -eq 1 ] &&  delete_secret $key $privacy
@@ -181,13 +185,28 @@ function save_secret() {
             [ $pnp_vault_debug -gt 0 ] && echo $value_element
 
             if [ ! -z "$value_element" ]; then
-                echo "$lookup_code_seed $value_element" >> ~/etc/secret/$seed_element
+                echo "$lookup_code_seed $value_element" >> ~/etc/secret.tx/$seed_element
             else
                 break
             fi
             element_pos=$(( $element_pos + 1 ))
         fi
     done
+
+    read_value=$(read_secret $key)
+    if [ "$value" != "$read_value" ]; then
+        echo "Error writing key due to low entropy. Retery with different key. This key is lost."
+    
+        rm -rf ~/etc/secret.tx
+
+        return 10
+    
+    else
+
+        rm -rf ~/etc/secret
+        mv  ~/etc/secret.tx  ~/etc/secret
+    fi
+
 
     if [ $pnp_always_replace -eq 1 ]; then
 
@@ -202,8 +221,11 @@ function save_secret() {
     
     fi
 
+
     # remove lock
     flock -u $lock_fd
+
+
 }
 
 
@@ -286,8 +308,8 @@ function pnp_vault_test() {
 
     : ${rounds:=10}
 
-    rm /tmp/pnp_vault_reread.tmp
-    rm /tmp/pnp_vault_test.tmp
+    rm -rf /tmp/pnp_vault_reread.tmp
+    rm -rf /tmp/pnp_vault_test.tmp
 
     echo -n "Save test:"
     for cnt in $(eval echo {1..$rounds}); do
