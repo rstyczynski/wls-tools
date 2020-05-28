@@ -205,7 +205,7 @@ function save_secret() {
     mkdir -p $pnp_root/secret.tx
     
     if [ -d $pnp_root/secret ]; then
-        if [ $(ls $pnp_root/secret/* | wc -l) -gt 0 ]; then
+        if [ $(ls $pnp_root/secret | wc -l) -gt 0 ]; then
             cp $pnp_root/secret/* $pnp_root/secret.tx
         fi
 
@@ -354,7 +354,7 @@ function delete_secret() {
     fi
 
     if [ -d $secret_repo ]; then
-        if [ $(ls $secret_repo/* | wc -l) -gt 0 ]; then
+        if [ $(ls $secret_repo | wc -l) -gt 0 ]; then
             cp $secret_repo/* $pnp_root/secret.delete
         fi
     fi
