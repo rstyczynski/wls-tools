@@ -11,27 +11,31 @@ lock_fd=8
 function get_seed() {
     local privacy="$1"
 
+    local seed_script=$(echo $($0)$(stat -c %i%g $0) | sha256sum | cut -f1 -d' ')
+    local seed_user=$(echo $(whoami)$(stat -c %i%g ~) | sha256sum | cut -f1 -d' ')
+    local seed_host=$(echo $(hostname -f)$(stat -c %i%g /etc)  | sha256sum | cut -f1 -d' ')
+
     case $privacy in
         script)
             if [ -f $0 ]; then
-                local seed=$(stat -c %i%g $0 | sha256sum | cut -f1 -d' ')
+                local seed=$seed_host$seed_script
             else
                 >&2 echo 'Warning. Script level privacy chosen, but running from shell. Falling to user level privacy.'
-                local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+                local seed=$seed_host$seed_user
             fi
             ;;
         user)
-            local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+            local seed=$seed_host$seed_user
             ;;
         host)
-            local seed=$(stat -c %i%g /etc  | sha256sum | cut -f1 -d' ')
+            local seed=$seed_host
             ;;
         *)
             >&2 echo 'Error. Privacy level not known. Falling to user level privacy.'
-            local seed=$(stat -c %i%g ~ | sha256sum | cut -f1 -d' ')
+            local seed=$seed_host$seed_user
             ;;
     esac
-    [ $pnp_vault_debug -gt 0 ] && echo $seed
+    [ $pnp_vault_debug -gt 0 ] && echo "$privacy, $seed"
 
     echo $seed
 }
@@ -407,5 +411,5 @@ function __main__() {
     esac
 }
 
-# prevent staring main in source mode
+# prevent from staring main in source mode
 [ -f $0 ] && __main__ $@
