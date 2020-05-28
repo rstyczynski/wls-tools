@@ -203,10 +203,13 @@ function save_secret() {
 
     rm -rf $pnp_root/secret.tx
     mkdir -p $pnp_root/secret.tx
-    cp $pnp_root/secret/* $pnp_root/secret.tx
+    
+    if [ -d $pnp_root/secret ]; then
+        cp $pnp_root/secret/* $pnp_root/secret.tx
 
-    rm -rf $pnp_root/secret.prev
-    mv $pnp_root/secret $pnp_root/secret.prev
+        rm -rf $pnp_root/secret.prev
+        mv $pnp_root/secret $pnp_root/secret.prev
+    fi
 
     : ${privacy:=user}
 
@@ -348,7 +351,9 @@ function delete_secret() {
         secret_repo=$internal_read
     fi
 
-    cp $secret_repo/* $pnp_root/secret.delete
+    if [ -d $secret_repo ]; then
+        cp $secret_repo/* $pnp_root/secret.delete
+    fi
 
     local element_pos=0
     local lookup_code_element=.
