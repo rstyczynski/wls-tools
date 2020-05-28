@@ -366,7 +366,6 @@ function delete_secret() {
         fi
     done
 
-
     rm -rf $secret_repo
     mv ~/etc/secret.delete $secret_repo
 
@@ -376,7 +375,6 @@ function delete_secret() {
         rm ~/etc/secret.lock
     fi
 }
-
 
 #
 # 
