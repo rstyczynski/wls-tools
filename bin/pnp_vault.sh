@@ -1,5 +1,6 @@
 #!/bin/bash
 
+pnp_root=~/.pnp
 pnp_vault_debug=0
 pnp_always_replace=1
 lock_fd=8
@@ -11,8 +12,8 @@ lock_fd=8
 function get_seed() {
     local privacy="$1"
 
-    local seed_script=$(echo $($0)$(stat -c %i%g $0) | sha256sum | cut -f1 -d' ')
-    local seed_user=$(echo $(whoami)$(stat -c %i%g ~) | sha256sum | cut -f1 -d' ')
+    local seed_script=$(echo $(hostname -f)$0$(stat -c %i%g $0) | sha256sum | cut -f1 -d' ')
+    local seed_user=$(echo $(hostname -f)$(whoami)$(stat -c %i%g ~) | sha256sum | cut -f1 -d' ')
     local seed_host=$(echo $(hostname -f)$(stat -c %i%g /etc)  | sha256sum | cut -f1 -d' ')
 
     case $privacy in
@@ -42,20 +43,20 @@ function get_seed() {
 
 function rollback_work() {
 
-    exec 8>~/etc/secret.lock
+    exec 8>$pnp_root/secret.lock
     flock -x -w 5 $lock_fd
 
-    if [ -d ~/etc/secret.prev ]; then
-        rm -rf ~/etc/secret
-        mv ~/etc/secret.prev ~/etc/secret
+    if [ -d $pnp_root/secret.prev ]; then
+        rm -rf $pnp_root/secret
+        mv $pnp_root/secret.prev $pnp_root/secret
 
-        rm -rf ~/etc/secret.tx
-        rm -rf ~/etc/secret.delete
+        rm -rf $pnp_root/secret.tx
+        rm -rf $pnp_root/secret.delete
     fi
 
     # remove lock
     flock -u $lock_fd
-    rm ~/etc/secret.lock
+    rm $pnp_root/secret.lock
 }
 
 #
@@ -77,7 +78,7 @@ function read_secret() {
         rollback_work
 
         # lock dataset for changes
-        exec 8>~/etc/secret.lock
+        exec 8>$pnp_root/secret.lock
         flock -x -w 5 $lock_fd
         if [ $? -ne 0 ]; then
             echo "Error. Other process keeps dataset."
@@ -112,7 +113,7 @@ function read_secret() {
             [ $pnp_vault_debug -gt 0 ] && echo $lookup_code_seed
 
             if [ -z "$internal_read" ]; then
-                local secret_repo=~/etc/secret
+                local secret_repo=$pnp_root/secret
             else
                 local secret_repo=$internal_read
             fi
@@ -143,7 +144,7 @@ function read_secret() {
     if [ -z "$internal_read" ]; then
         # remove lock
         flock -u $lock_fd
-        rm ~/etc/secret.lock
+        rm $pnp_root/secret.lock
     fi
 
     if [ "$lookup_result" = "true" ]; then
@@ -172,42 +173,42 @@ function save_secret() {
 
     umask 077
 
-    if [ ! -d ~/etc ]; then 
-        >&2 echo "Note: cfg directory does not exist. Creating ~/etc"
-        mkdir ~/etc
+    if [ ! -d $pnp_root ]; then 
+        >&2 echo "Note: cfg directory does not exist. Creating $pnp_root"
+        mkdir $pnp_root
     fi
 
-    if [ "$(stat -c %a ~/etc)" != "700" ]; then
-        >&2 echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 0700"
-        chmod 0700 ~/etc
+    if [ "$(stat -c %a $pnp_root)" != "700" ]; then
+        >&2 echo "Note: Wrong cfg directory access rights. Fixing $pnp_root to 0700"
+        chmod 0700 $pnp_root
     fi
 
-    if [ ! -d ~/etc/secret ]; then
-        mkdir -p ~/etc/secret
+    if [ ! -d $pnp_root/secret ]; then
+        mkdir -p $pnp_root/secret
     fi        
 
     # rollback broken work
     rollback_work
 
     # lock dataset for changes
-    exec 8>~/etc/secret.lock
+    exec 8>$pnp_root/secret.lock
     flock -x -w 5 $lock_fd
     if [ $? -ne 0 ]; then
         echo "Error. Other process keeps dataset."
         return 127
     fi
 
-    rm -rf ~/etc/secret.tx
-    mkdir -p ~/etc/secret.tx
-    cp ~/etc/secret/* ~/etc/secret.tx
+    rm -rf $pnp_root/secret.tx
+    mkdir -p $pnp_root/secret.tx
+    cp $pnp_root/secret/* $pnp_root/secret.tx
 
-    rm -rf ~/etc/secret.prev
-    mv ~/etc/secret ~/etc/secret.prev
+    rm -rf $pnp_root/secret.prev
+    mv $pnp_root/secret $pnp_root/secret.prev
 
     : ${privacy:=user}
 
     if [ $pnp_always_replace -eq 1 ]; then
-        internal_read=~/etc/secret.tx
+        internal_read=$pnp_root/secret.tx
         delete_secret $key $privacy
         unset internal_read
     fi
@@ -233,7 +234,7 @@ function save_secret() {
             [ $pnp_vault_debug -gt 0 ] && echo $value_element
 
             if [ ! -z "$value_element" ]; then
-                echo "$lookup_code_seed $value_element" >> ~/etc/secret.tx/$seed_element
+                echo "$lookup_code_seed $value_element" >> $pnp_root/secret.tx/$seed_element
             else
                 break
             fi
@@ -244,7 +245,7 @@ function save_secret() {
     #
     # verification
     #
-    internal_read=~/etc/secret.tx
+    internal_read=$pnp_root/secret.tx
     local read_value=$(read_secret $key $privacy)
     unset internal_read
     if [ "$value" != "$read_value" ]; then
@@ -252,37 +253,37 @@ function save_secret() {
     
         echo "$key : $value vs. $read_value" 
 
-        rm -rf ~/etc/secret.tx
-        rm -rf ~/etc/secret
-        mv ~/etc/secret.prev ~/etc/secret
+        rm -rf $pnp_root/secret.tx
+        rm -rf $pnp_root/secret
+        mv $pnp_root/secret.prev $pnp_root/secret
 
         # remove lock
         flock -u $lock_fd
-        rm ~/etc/secret.lock
+        rm $pnp_root/secret.lock
         return 10
     else
 
-        rm -rf ~/etc/secret.prev
-        rm -rf ~/etc/secret
-        mv ~/etc/secret.tx ~/etc/secret
+        rm -rf $pnp_root/secret.prev
+        rm -rf $pnp_root/secret
+        mv $pnp_root/secret.tx $pnp_root/secret
 
         # shuffle entries to eliminate entry order
         if [ $pnp_always_replace -eq 1 ]; then
 
-            rm -rf ~/etc/secret.shuffle
-            mkdir ~/etc/secret.shuffle
+            rm -rf $pnp_root/secret.shuffle
+            mkdir $pnp_root/secret.shuffle
 
-            for secret_file in ~/etc/secret/*; do
-                shuf $secret_file > ~/etc/secret.shuffle/$(basename $secret_file)
+            for secret_file in $pnp_root/secret/*; do
+                shuf $secret_file > $pnp_root/secret.shuffle/$(basename $secret_file)
             done
-            rm -rf ~/etc/secret
-            mv ~/etc/secret.shuffle ~/etc/secret
+            rm -rf $pnp_root/secret
+            mv $pnp_root/secret.shuffle $pnp_root/secret
         
         fi
 
         # remove lock
         flock -u $lock_fd
-        rm ~/etc/secret.lock
+        rm $pnp_root/secret.lock
     fi
 
 }
@@ -299,18 +300,18 @@ function delete_secret() {
 
     umask 077
 
-    if [ ! -d ~/etc ]; then 
-        >&2 echo "Note: cfg directory does not exist. Creating ~/etc"
-        mkdir ~/etc
+    if [ ! -d $pnp_root ]; then 
+        >&2 echo "Note: cfg directory does not exist. Creating $pnp_root"
+        mkdir $pnp_root
     fi
 
-    if [ "$(stat -c %a ~/etc)" != "700" ]; then
-        >&2 echo "Note: Wrong cfg directory access rights. Fixing ~/etc to 0700"
-        chmod 0700 ~/etc
+    if [ "$(stat -c %a $pnp_root)" != "700" ]; then
+        >&2 echo "Note: Wrong cfg directory access rights. Fixing $pnp_root to 0700"
+        chmod 0700 $pnp_root
     fi
 
-    if [ ! -d ~/etc/secret ]; then
-        mkdir -p ~/etc/secret
+    if [ ! -d $pnp_root/secret ]; then
+        mkdir -p $pnp_root/secret
     fi        
 
     if [ -z "$internal_read" ]; then
@@ -319,7 +320,7 @@ function delete_secret() {
         rollback_work
 
         # lock dataset for changes
-        exec 8>~/etc/secret.lock
+        exec 8>$pnp_root/secret.lock
         flock -x -w 5 $lock_fd
         if [ $? -ne 0 ]; then
             echo "Error. Other process keeps dataset."
@@ -334,15 +335,15 @@ function delete_secret() {
     local lookup_code=$(echo $(hostname)\_$key | sha256sum | cut -f1 -d' ')
     [ $pnp_vault_debug -gt 0 ] && echo $lookup_code
 
-    rm -rf ~/etc/secret.delete
-    mkdir ~/etc/secret.delete
+    rm -rf $pnp_root/secret.delete
+    mkdir $pnp_root/secret.delete
     if [ -z "$internal_read" ]; then
-        secret_repo=~/etc/secret
+        secret_repo=$pnp_root/secret
     else   
         secret_repo=$internal_read
     fi
 
-    cp $secret_repo/* ~/etc/secret.delete
+    cp $secret_repo/* $pnp_root/secret.delete
 
     local element_pos=0
     local lookup_code_element=.
@@ -357,9 +358,9 @@ function delete_secret() {
             
             local lookup_code_seed=$(echo $seed_element$element_pos$lookup_code | sha256sum | cut -f1 -d' ')
 
-            if [ -f ~/etc/secret.delete/$seed_element ]; then
-                cat ~/etc/secret.delete/$seed_element | sed "/^$lookup_code_seed/d"  > ~/etc/secret.delete/$seed_element.new
-                mv ~/etc/secret.delete/$seed_element.new ~/etc/secret.delete/$seed_element
+            if [ -f $pnp_root/secret.delete/$seed_element ]; then
+                cat $pnp_root/secret.delete/$seed_element | sed "/^$lookup_code_seed/d"  > $pnp_root/secret.delete/$seed_element.new
+                mv $pnp_root/secret.delete/$seed_element.new $pnp_root/secret.delete/$seed_element
             fi
 
             element_pos=$(( $element_pos + 1 ))
@@ -367,12 +368,12 @@ function delete_secret() {
     done
 
     rm -rf $secret_repo
-    mv ~/etc/secret.delete $secret_repo
+    mv $pnp_root/secret.delete $secret_repo
 
     if [ -z "$internal_read" ]; then
         # remove lock
         flock -u $lock_fd
-        rm ~/etc/secret.lock
+        rm $pnp_root/secret.lock
     fi
 }
 

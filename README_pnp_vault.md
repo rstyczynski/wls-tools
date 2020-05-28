@@ -1,5 +1,5 @@
 # Pretty naive privacy vault
-Naive vault was created to keep sensitive information as passwords in local storage in unreadable way. It's not really encryption, but rather multiple shuffling of data in a way that naive attacker will be not able to read stored secrets. Keys are hashed, so are never known, and secrets are divided into letters to be stored on 15 files under additionally shuffled and hashed keys. Each time new entry is added, secret files are reshuffled, so attacker cannot read from sequence of lines.
+Naive vault was created to keep sensitive information as passwords in local storage in unreadable way. It's based on repeated shuffling of data in a way that naive attacker will be not able to read stored secrets. Keys are hashed, so are never known, and secrets are divided into single letters to be stored on 15 files next to hashed keys. Each time, when new entry is added to the store, secret files are reshuffled, so attacker cannot deduct from sequence of lines. As typisal system will keep little infrmation it's recommended ot generate noise data before use.
 
 # Usage
 
@@ -54,7 +54,52 @@ pnp_vault.sh read john_smith@server1
 welcome1
 ```
 
-pnp_vault_test.sh 1 300
+Delete stored secret:
+
+```
+pnp_vault.sh delete john_smith@server1
+pnp_vault.sh read john_smith@server1
+
+```
+
+# Privacy levels
+Data may be stored on one out of three available provacy levels. Lowest one: host makes it possible to read data by oneone of the host, as seed is generated out of hostname and i-node of /etc/. User level gets seed as combination of hostname and i-node of user's home. And the script one uses calling script i-node with combination of the hostanme. All of them uses the same set of data, having keys hashed in such way that privacy levels separates readings.
+
+
+```
+pnp_vault.sh save john_smith@server1 welcome1 user
+
+pnp_vault.sh read john_smith@server1 user
+welcome1
+
+pnp_vault.sh read john_smith@server1 host
+
+```
+
+# Error codes
+Zero is returned when all is good, and 1 or above in case of error. No data is signalled by 1.
+
+```
+pnp_vault.sh read john_smith@server1 host
+
+echo $?
+1
+```
+
+# Call from other script
+One may call script as shell script or source it from own script. Sourcing is mandatory to use script level privacy. Having pnp_vault sourced, use functions in place od scripts callouts.
+
+```
+source pnp_vault.sh
+read_secret john_smith@server1
+welcome1
+read_secret john_smith@server1 host
+
+delete_secret john_smith@server1
+
+read_secret john_smith@server1
+
+```
 
 # Algorithm
 Algorithm used in pnp-vault is known, and everyone knowing parameters will be able to read secrets. So, what is the trick? First of all, keys are never known, as each key is hashed before string in vault. Even owner of the data is not able to read set of keys.
@@ -93,7 +138,7 @@ Algorithm is not hidden, and its strength comes from complexity of performed com
 How strong is above? Strong enough for amateur, and probably not a big issue for professional mathematician doing ciphers for life. Good point is that storage keeps rather small amount of data. It's designed to keep passwords, maybe private keys. Anyway, it's better than keeping in files protected by OS permissions. Attacker reaching the host will not be able to use this data in quick way. Data copied out of the computer is useless, unless attacker will be smart enough to retrieve seeds, what is quite unexpected for i-node information. Lowest privacy level, based on hostname seed seems to be trivial to break, however even with this one attacker will not read all data from secret files w/o knowing key names. 
 
 # How safe is data storage?
-Data is modified during save and delete operations. All data modification sections are locked to exclusive access. Data modification is always done on a copy of data to be moved to actual data once completed. Broken work will be rolled back during next start of the save or delete script.
+Data is modified during save and delete operations. All data modification sections are locked to gain exclusive access. Data modification is always done on a copy of data to be moved to actual data once completed. Broken work will be rolled back during next start of the save or delete script.
 
 # Data storage
 All files are stored in ~/etc/secret in file 1, 2, ..., f
