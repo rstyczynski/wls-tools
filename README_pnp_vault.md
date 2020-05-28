@@ -141,17 +141,17 @@ How strong is above? Strong enough for amateur, and probably not a big issue for
 Data is modified during save and delete operations. All data modification sections are locked to gain exclusive access. Data modification is always done on a copy of data to be moved to actual data once completed. Broken work will be rolled back during next start of the save or delete script.
 
 # Data storage
-All files are stored in ~/etc/secret in file 1, 2, ..., f
+All files are stored in ~/.pnp/secret in file 1, 2, ..., f
 
 ```
-ls ~/etc/secret 
+ls ~/.pnp/secret 
 2  4  5  6  7  8  9  b  c  f
 ```
 
 Let's take a look inside of files:
 
 ```
-cat ~/etc/secret/* | sort | head -10
+cat ~/.pnp/secret/* | sort | head -10
 000d540123eba36f979ff0a9ca5b48061aeef76f76edc6e3cc210f30068497a1 W
 000fc91b5ec35c6148ba6bbfae5cc01c0ffa07c6a2043e20b4a82f0d45a71e54 W
 00119d32a33f8cd8f100cd90026b40c39ed6c0012e280468f87b26f7358b3709 W
