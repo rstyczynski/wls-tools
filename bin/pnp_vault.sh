@@ -72,6 +72,9 @@ function read_secret() {
         return 1
     fi
 
+    umask 077
+
+    [ ! -d $pnp_root ] && mkdir -p $pnp_root
 
     if [ -z "$internal_read" ]; then
         # rollback broken work
@@ -87,8 +90,6 @@ function read_secret() {
     fi
 
     : ${privacy:=user}
-
-    umask 077
 
     #
     local seed=$(get_seed $privacy)
@@ -172,6 +173,8 @@ function save_secret() {
     fi
 
     umask 077
+
+    [ ! -d $pnp_root ] && mkdir -p $pnp_root
 
     if [ ! -d $pnp_root ]; then 
         >&2 echo "Note: cfg directory does not exist. Creating $pnp_root"
@@ -299,6 +302,8 @@ function delete_secret() {
     fi
 
     umask 077
+
+    [ ! -d $pnp_root ] && mkdir -p $pnp_root
 
     if [ ! -d $pnp_root ]; then 
         >&2 echo "Note: cfg directory does not exist. Creating $pnp_root"
