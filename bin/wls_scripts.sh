@@ -46,7 +46,7 @@ function wlsLogSummary() {
     server_logs=$domain_dir/servers/$server_name/logs
   fi
 
-  if [-z "$server_name" ] || [ -z "$server_logs" ]; then
+  if [ -z "$server_name" ] || [ -z "$server_logs" ]; then
     echo "Usage: wlsLogSummary server_name domain_dir [start_date] [stop_date]"
     echo "       wlsLogSummary server_name log server_logs_dir [start_date] [stop_date]"
     echo ""
