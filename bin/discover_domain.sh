@@ -1,5 +1,11 @@
 #!/bin/bash
 
+xmllint_vrsion=$(xmllint --version 2>&1 | grep libxml | cut -d' ' -f5)
+if [ $xmllint_vrsion -lt 20901 ]; then
+    echo "Error. xmllint version too low. Cannot proceed."
+    exit 1
+fi
+
 ###
 ### shared constants
 ###

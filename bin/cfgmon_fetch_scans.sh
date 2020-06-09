@@ -10,7 +10,7 @@ function usage() {
 : ${cfgmon_root:=/home/pmaker/cfgmon}
 [ -z "$src_servers" ] && echo "Error. $(usage)" && exit 1
 
-if [ $src_servers == init ]; then
+if [ "$src_servers" == init ]; then
 
     echo "======================================="
     echo "============ Config Monitor ==========="
