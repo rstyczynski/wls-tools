@@ -97,7 +97,7 @@ for server in $src_servers; do
     # remove data if fetched during cfg dump
     while [ -f $cfgmon_root/$server/lock ]; do
         echo -n '.'
-        rm -rf $cfgmon_root/$server/$today
+        rm -rf $cfgmon_root/$server/lock
 
         cnt=$(($cnt + 1))
         if [ $cnt -gt 10 ]; then
@@ -107,6 +107,7 @@ for server in $src_servers; do
         rsync -r $server:$cfgmon_root/* $cfgmon_root/$server
         sleep 1
     done
+    
     if [ $cnt -gt 10 ]; then
         echo Timeout
     else
