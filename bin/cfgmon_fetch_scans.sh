@@ -58,6 +58,8 @@ EOF
     sudo systemctl restart httpd
     curl http://10.106.6.57/rtg/cfgmon/
     sudo tail /var/log/httpd/error_log
+
+    exit 0
 fi
 
 #
