@@ -123,6 +123,7 @@ done
 
 # add to version control
 cd $cfgmon_root
-git add --all
-git commit -am "system fetch"
+git add --all >/dev/null 2>&1
+git commit -am "system fetch" >/dev/null 2>&1
 cd - >/dev/null
+

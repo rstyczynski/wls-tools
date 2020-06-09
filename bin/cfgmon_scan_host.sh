@@ -71,7 +71,7 @@ mkdir -p $cfgmon_now/os/sysctl
 sudo sysctl -a >$cfgmon_now/os/sysctl/sysctl.log
 
 # weblogic
-mkdir -p $cfgmon_now/middleware/wls
+mkdir -p $cfgmon_now/wls
 
 source ~/wls-tools/bin/discover_processes.sh
 discoverWLS
@@ -90,15 +90,15 @@ sudo su $wls_user <<EOF
 chmod -R o+r /home/applsoad/oracle/weblogic/current
 EOF
 
-cp -r /home/applsoad/oracle/weblogic/current/* $cfgmon_now/middleware/wls
+cp -r /home/applsoad/oracle/weblogic/current/* $cfgmon_now/wls
 
 #
 # finalize
 #
 
-mv $cfgmon_root/current $wlsdoc_root/current.prv
+mv $cfgmon_root/current $cfgmon_root/current.prv
 cp -r $cfgmon_now $cfgmon_root/current
-rm -rf $wlsdoc_root/current.prv
+rm -rf $cfgmon_root/current.prv
 
 # remove lock
 rm -rf $cfgmon_root/lock
