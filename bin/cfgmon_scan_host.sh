@@ -82,6 +82,6 @@ rm -rf $cfgmon_root/lock
 
 # add to version control
 cd $cfgmon_now
-git add --all 
-git commit -am "config fetch"
+git add --all >/dev/null
+git commit -am "config fetch" >/dev/null
 cd - >/dev/null
