@@ -90,8 +90,7 @@ sudo su $wls_user <<EOF
 chmod -R o+r /home/applsoad/oracle/weblogic/current
 EOF
 
-
-cp -r /home/applsoad/oracle/weblogic/current $cfgmon_now/middleware/wls
+cp -r /home/applsoad/oracle/weblogic/current/* $cfgmon_now/middleware/wls
 
 #
 # finalize
