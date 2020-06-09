@@ -104,7 +104,7 @@ rm -rf $wlsdoc_root/current.prv
 rm -rf $cfgmon_root/lock
 
 # add to version control
-cd $cfgmon_now
+cd $cfgmon_root
 git add --all >/dev/null 2>&1
 git commit -am "config fetch" >/dev/null 2>&1
 cd - >/dev/null
