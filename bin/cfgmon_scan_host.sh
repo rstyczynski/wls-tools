@@ -73,15 +73,39 @@ sudo sysctl -a >$cfgmon_now/os/sysctl/sysctl.log
 # weblogic
 mkdir -p $cfgmon_now/middleware/wls
 
+source ~/wls-tools/bin/discover_processes.sh
+discoverWLS
+wls_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+
+chmod o+x ~/
+chmod -R o+x ~/wls-tools
+chmod -R o+x ~/wls-tools/*
+wlstools_bin=$(cd ~/wls-tools/bin; pwd)
+
+sudo su $wls_user <<EOF
+source $wlstools_bin/document_host.sh document
+EOF
+
+sudo su $wls_user <<EOF
+chmod -R o+r /home/applsoad/oracle/weblogic/current
+EOF
+
+
+cp -r /home/applsoad/oracle/weblogic/current $cfgmon_now/middleware/wls
+
 #
 # finalize
 #
+
+mv $cfgmon_root/current $wlsdoc_root/current.prv
+cp -r $cfgmon_now $cfgmon_root/current
+rm -rf $wlsdoc_root/current.prv
 
 # remove lock
 rm -rf $cfgmon_root/lock
 
 # add to version control
 cd $cfgmon_now
-git add --all >/dev/null
-git commit -am "config fetch" >/dev/null
+git add --all >/dev/null 2>&1
+git commit -am "config fetch" >/dev/null 2>&1
 cd - >/dev/null

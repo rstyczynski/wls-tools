@@ -347,6 +347,10 @@ fi
 
 function document_host() {
 
+    wlsdoc_root=$1
+
+    : ${wlsdoc_root:=~/oracle/weblogic}
+
     echo "========================================================================================="
     echo "============================= Document host started ====================================="
     echo "========================================================================================="
@@ -354,7 +358,6 @@ function document_host() {
 
     wlsdoc_bin="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-    wlsdoc_root=~/oracle/weblogic
     mkdir -p $wlsdoc_root
 
     tmp=/tmp/$$
@@ -449,7 +452,7 @@ EOF
             if [ -f $wlsdoc_root/README ]; then
                 if [ -d $wlsdoc_root/history ]; then
                     echo -n "Removing snapshots older than 30 days..."
-                    find $wlsdoc_root/history -mtime +30 -exec rm -f {} \;
+                    find $wlsdoc_root/history -mtime +30 -exec rm -rf {} \;
                     echo "Done"
                 fi
             fi
