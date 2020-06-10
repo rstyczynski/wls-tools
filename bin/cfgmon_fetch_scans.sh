@@ -39,7 +39,7 @@ if [ "$src_servers" == init ]; then
     # prepare http
 
     cat >~/cfgmon.tmp <<EOF
-Alias /rtg/cfgmon $cfgmon_root
+Alias /cfgmon $cfgmon_root
 <Directory $cfgmon_root>
     Options +Indexes  
     #RH7 only
@@ -56,7 +56,7 @@ EOF
     chmod -R o+x $cfgmon_root
 
     sudo systemctl restart httpd
-    curl http://10.106.6.57/rtg/cfgmon/
+    curl http://localhost/cfgmon/
     sudo tail /var/log/httpd/error_log
 
     exit 0
