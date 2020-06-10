@@ -2,9 +2,10 @@
 
 scan_type=$1
 cfgmon_root=$2
+nfs_root=$3
 
 function usage() {
-    echo "Usage: cfgmon_scan_host.sh [init|scan_type] [cfgmon_root]"
+    echo "Usage: cfgmon_scan_host.sh [init|scan_type] [cfgmon_root] [nfs_root]"
 }
 
 [ -z "$scan_type" ] && echo "Error. $(usage)" && exit 1
@@ -71,8 +72,6 @@ mkdir -p $cfgmon_now/os/sysctl
 sudo sysctl -a >$cfgmon_now/os/sysctl/sysctl.log
 
 # weblogic
-mkdir -p $cfgmon_now/wls
-
 source ~/wls-tools/bin/discover_processes.sh
 discoverWLS
 wls_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
@@ -83,20 +82,41 @@ chmod -R o+x ~/wls-tools/*
 wlstools_bin=$(cd ~/wls-tools/bin; pwd)
 
 sudo su $wls_user <<EOF
-source $wlstools_bin/document_host.sh document
+$wlstools_bin/document_host.sh document
+if [ \$? -eq 0 ]; then 
+    touch /tmp/document_host.ok
+    chmod -R o+r /tmp/document_host.ok
+    rm -rf /tmp/document_host.error
+    chmod -R o+r /home/$wls_user/oracle/weblogic/current
+else
+    touch /tmp/document_host.error
+    chmod -R o+r /tmp/document_host.error
+    rm -rf /tmp/document_host.ok
+fi
 EOF
 
-sudo su $wls_user <<EOF
-chmod -R o+r /home/applsoad/oracle/weblogic/current
-EOF
+if [ -f /tmp/document_host.ok ]; then
+    mkdir -p $cfgmon_now/wls
+    cp -r /home/applsoad/oracle/weblogic/current/* $cfgmon_now/wls
+fi
 
-cp -r /home/applsoad/oracle/weblogic/current/* $cfgmon_now/wls
+# copy to shared location
+if [ ! -z "$nfs_root" ]; then
+    mkdir -p $nfs_root/$(hostname)/$today
+    cp -r $cfgmon_now/*  $nfs_root/$(hostname)/$today
+
+    mv $nfs_root/$(hostname)/current $nfs_root/$(hostname)/current.prv
+    mkdir -p $nfs_root/$(hostname)/current
+    cp -r  $cfgmon_now/* $nfs_root/$(hostname)/current
+    rm -rf $nfs_root/$(hostname)/current.prv
+fi
 
 #
 # finalize
 #
 
 mv $cfgmon_root/current $cfgmon_root/current.prv
+mkdir -p $cfgmon_root/current
 cp -r $cfgmon_now $cfgmon_root/current
 rm -rf $cfgmon_root/current.prv
 
