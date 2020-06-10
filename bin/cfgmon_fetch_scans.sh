@@ -93,7 +93,7 @@ for server in $src_servers; do
     echo -n "Fetching $server"
     mkdir -p $cfgmon_root/$server
     echo -n '.'
-    rsync -r $server:$cfgmon_root/* /$cfgmon_root/$server
+    rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
     # remove data if fetched during cfg dump
     while [ -f $cfgmon_root/$server/lock ]; do
         echo -n '.'
@@ -104,7 +104,7 @@ for server in $src_servers; do
             break
         fi
 
-        rsync -r $server:$cfgmon_root/* $cfgmon_root/$server
+        rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
         sleep 1
     done
     
