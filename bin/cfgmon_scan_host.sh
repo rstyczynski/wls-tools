@@ -104,7 +104,7 @@ fi
 echo ">> preparing tar files..."
 cd $cfgmon_now
 mkdir -p $cfgmon_root/outbox
-tar -zcvf $cfgmon_root/outbox/$(hostname)-$(today)-scan_host.tar.gz . >/dev/null
+tar -zcvf $cfgmon_root/outbox/$(hostname)-$today-scan_host.tar.gz . >/dev/null
 
 
 # copy to shared location
