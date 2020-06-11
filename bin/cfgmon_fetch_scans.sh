@@ -2,9 +2,10 @@
 
 src_servers=$1
 cfgmon_root=$2
+nfs_root=$3
 
 function usage() {
-    echo "Usage: cfgmon_fetch_scans.sh [init|src_servers] [cfgmon_root ]"
+    echo "Usage: cfgmon_fetch_scans.sh [init|none|src_servers] [cfgmon_root ] [nfs_root]"
 }
 
 : ${cfgmon_root:=/home/pmaker/cfgmon}
@@ -75,8 +76,9 @@ echo "== user: $(whoami)"
 echo "== date: $(date)"
 echo "======================================="
 echo "== cfgmon_root: $cfgmon_root"
-echo "== mode: fetch"
+echo "== mode       : fetch"
 echo "== src_servers: $src_servers"
+echo "== nfs_root   : $nfs_root"
 echo "======================================="
 echo "======================================="
 
@@ -87,35 +89,43 @@ fi
 
 today=$(date -u +"%Y-%m-%d")
 
-# server
-for server in $src_servers; do
-    cnt=0
-    echo -n "Fetching $server"
-    mkdir -p $cfgmon_root/$server
-    echo -n '.'
-    rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
-    # remove data if fetched during cfg dump
-    while [ -f $cfgmon_root/$server/lock ]; do
+if [ "$src_servers" != none ]; then
+    # server
+    for server in $src_servers; do
+        cnt=0
+        echo -n "Fetching $server"
+        mkdir -p $cfgmon_root/$server
         echo -n '.'
-        rm -rf $cfgmon_root/$server/lock
-
-        cnt=$(($cnt + 1))
-        if [ $cnt -gt 10 ]; then
-            break
-        fi
-
         rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
-        sleep 1
+        # remove data if fetched during cfg dump
+        while [ -f $cfgmon_root/$server/lock ]; do
+            echo -n '.'
+            rm -rf $cfgmon_root/$server/lock
+
+            cnt=$(($cnt + 1))
+            if [ $cnt -gt 10 ]; then
+                break
+            fi
+
+            rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
+            sleep 1
+        done
+        
+        if [ $cnt -gt 10 ]; then
+            echo Timeout
+        else
+            chmod -R o+x $cfgmon_root/$server
+            chmod -R o+r $cfgmon_root/$server
+            echo Done
+        fi
     done
+fi
+
+if [ ! -z "$nfs_root" ]; then
+
+    rsync -ra $nfs_root/* $cfgmon_root
     
-    if [ $cnt -gt 10 ]; then
-        echo Timeout
-    else
-        chmod -R o+x $cfgmon_root/$server
-        chmod -R o+r $cfgmon_root/$server
-        echo Done
-    fi
-done
+fi
 
 #
 # finalize

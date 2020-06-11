@@ -100,8 +100,20 @@ if [ -f /tmp/document_host.ok ]; then
     cp -r /home/applsoad/oracle/weblogic/current/* $cfgmon_now/wls
 fi
 
+# make archive
+echo ">> preparing tar files..."
+cd $cfgmon_now
+mkdir -p $cfgmon_root/outbox
+tar -zcvf $cfgmon_root/outbox/$(hostname)-$(today)-scan_host.tar.gz . >/dev/null
+
+
 # copy to shared location
 if [ ! -z "$nfs_root" ]; then
+    echo ">> copying tar file to shared location..."
+    mkdir -p $nfsroot/inbox
+    cp $cfgmon_root/outbox/$(hostname)-$(today)-scan_host.tar.gz $nfsroot/inbox
+
+    echo ">> copying files to shared location..."
     mkdir -p $nfs_root/$(hostname)/$today
     cp -r $cfgmon_now/*  $nfs_root/$(hostname)/$today
 
