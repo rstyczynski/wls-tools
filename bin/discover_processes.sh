@@ -389,8 +389,8 @@ function discoverWLS() {
 
     discoverWLSnames
 
-    if [ -z ${wls_names[0]} ]; 
-        echo Weblogic not detected on this host.
+    if [ -z ${wls_names[0]} ]; then
+        echo "Weblogic not detected on this host."
         return 1
     fi
 

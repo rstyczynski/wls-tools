@@ -373,7 +373,7 @@ EOF
 
     # document root
     wlsdoc_now=$wlsdoc_root/history/$(utc::now)
-    mkdir -p $wlsdoc_now/context
+    mkdir -p $wlsdoc_now/context/status
 
     # wls discovery
     echo -n "*** WebLogic server discovery in progress..."
