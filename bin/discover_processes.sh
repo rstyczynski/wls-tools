@@ -310,6 +310,16 @@ function getDomainHome() {
     echo $domain_home
 }
 
+function getDomainName() {
+
+    # NOADMIN-OK
+    local domain_home=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
+    if [ -z "$domain_home" ]; then
+        domain_home=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
+    fi
+    echo $domain_name
+}
+
 function showSample() {
 
         getWLSjvmAttrs ${wls_names[0]}

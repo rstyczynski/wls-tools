@@ -380,83 +380,114 @@ EOF
     source $wlsdoc_bin/discover_processes.sh
     discoverWLS
     if [ $? -eq 0 ]; then
+        discoverWLS=OK
         echo "OK"
-        echo discoverWLS. Done >> $wlsdoc_now/context/status
+        echo discoverWLS. Done > $wlsdoc_now/context/status/discoverWLS.done
     else
+        discoverWLS=Error
         # just report error
-        echo discoverWLS. Error >> $wlsdoc_now/context/status
+        echo discoverWLS. Error > $wlsdoc_now/context/status/discoverWLS.error
         return 10 
     fi
 
     # domain discovery
     echo -n "*** WebLogic domain discovery in progress..."
     source $wlsdoc_bin/discover_domain.sh
-    domain_home=$(getDomainHome)
-    discoverDomain $domain_home
-    if [ $? -eq 0 ]; then
-        echo "OK"
-        echo discoverDomain. Done >> $wlsdoc_now/context/status
-    else
-        # TODO
-        echo discoverDomain. Error >> $wlsdoc_now/context/status
-        # collect ouput of discoverWLS
-        discover_processes::dump $wlsdoc_now/context
-        # collect input for discoverDomain
-        discover_domain::dump $wlsdoc_now/context
-    fi
+    
+    domain_home=$(getDomainHome)  # taken from processes, before "domain discovery"
 
-    #
-    # prepare domain substitutes
-    #
-    prepareSystemSubstitutions
-    unset domain_name
-    # get domain name | thre may be no admin or no managed server on thi s host...
-    [ ! -z "${wls_admin[0]}" ] && domain_name=$(getWLSjvmAttr ${wls_admin[0]} domain_name) && prepareDomainSubstitutions $domain_name ${wls_admin[0]}
-    [ ! -z "${wls_managed[0]}" ] && domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name) && prepareDomainSubstitutions $domain_name ${wls_managed[0]}
+    if [ ! -z "$domain_home" ]; then
+        echo $domain_home > $wlsdoc_now/context/status/domain_home.done
 
-    #
-    # document Middleware home
-    #
+        discoverDomain $domain_home
+        if [ $? -eq 0 ]; then
+            discoverDomain=OK
+            echo "OK"
+            echo discoverDomain. Done > $wlsdoc_now/context/status/discoverDomain.done
 
-    if [ ! -z "$domain_name" ]; then
+            #
+            # prepare domain substitutions
+            #
+            prepareSystemSubstitutions # generic - discoverDomain nor reguired
+            
+            #
+            # get domain name | thre may be no admin or no managed server on this host...
+            #
+            unset domain_name
+            if [ ! -z "${wls_admin[0]}" ]; then
+                domain_name=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
+                prepareDomainSubstitutions $domain_name ${wls_admin[0]}
+            fi
+            
+            if [ ! -z "${wls_managed[0]}" ]; then
+                domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
+                prepareDomainSubstitutions $domain_name ${wls_managed[0]}
+            fi
 
-        echo "************************************************************"
-        echo "*** WebLogic middleware snapshot started for: $domain_name"
+            #
+            # document Middleware home
+            #
+            if [ ! -z "$domain_name" ]; then
 
-        unset mw_home
-        [ ! -z "${wls_admin[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
-        [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
-        
-        if [ ! -z "$mw_home" ]; then
-            documentMW $domain_name $mw_home
-            echo "*** WebLogic middleware snapshot completed for: $domain_name"
-            echo "************************************************************"
-            echo 
+                echo $domain_name > $wlsdoc_now/context/status/domain_name.done
+
+                echo "************************************************************"
+                echo "*** WebLogic middleware snapshot started for: $domain_name"
+
+                unset mw_home
+                [ ! -z "${wls_admin[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
+                [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
+
+                if [ ! -z "$mw_home" ]; then
+                    echo $mw_home > $wlsdoc_now/context/status/mw_home.done
+
+                    documentMW $domain_name $mw_home
+                    echo "*** WebLogic middleware snapshot completed for: $domain_name"
+                    echo "************************************************************"
+                    echo 
+                else
+                    echo empty > $wlsdoc_now/context/status/mw_home.error
+                    echo "Error: Not able to detect MW_HOME."
+                    echo "*** WebLogic middleware snapshot ERRORED for: $domain_name"
+                    echo "************************************************************"
+                    echo 
+                fi
+
+                echo "************************************************************"
+                echo "*** WebLogic domain snapshot started for: $domain_name"
+                documentDomain $domain_name
+                echo "*** WebLogic domain snapshot completed for: $domain_name"
+                echo "************************************************************"
+                echo 
+
+                # document servers
+                for wls_name in $(getWLSnames); do
+                    echo "************************************************************"
+                    echo "*** WebLogic server snapshot started for: $wls_name"
+                    documentWLSruntime $wls_name
+                    echo "*** WebLogic server snapshot completed for: $wls_name"
+                    echo "************************************************************"
+                    echo
+                done
+
+            else
+                echo empty > $wlsdoc_now/context/status/domain_name.error
+            fi
+
         else
-            echo "Error: Not able to detect MW_HOME."
-            echo "*** WebLogic middleware snapshot ERRORED for: $domain_name"
-            echo "************************************************************"
-            echo 
+            # report  problem, but continue
+            echo discoverDomain. Error > $wlsdoc_now/context/status/discoverDomain.error
+            # collect ouput of discoverWLS
+            discover_processes::dump $wlsdoc_now/context
+            # collect input for discoverDomain
+            discover_domain::dump $wlsdoc_now/context
         fi
-
-        echo "************************************************************"
-        echo "*** WebLogic domain snapshot started for: $domain_name"
-        documentDomain $domain_name
-        echo "*** WebLogic domain snapshot completed for: $domain_name"
-        echo "************************************************************"
-        echo 
-
-        # document servers
-        for wls_name in $(getWLSnames); do
-            echo "************************************************************"
-            echo "*** WebLogic server snapshot started for: $wls_name"
-            documentWLSruntime $wls_name
-            echo "*** WebLogic server snapshot completed for: $wls_name"
-            echo "************************************************************"
-            echo
-        done
-
+    else
+        echo empty > $wlsdoc_now/context/status/domain_home.error
     fi
+
+
+# TODO
 
     # copying snapshot to current
     mv $wlsdoc_root/current $wlsdoc_root/current.prv
