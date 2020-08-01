@@ -11,7 +11,6 @@ declare -A wls_attributes
 unset wls_attributes_groups
 declare -A wls_attributes_groups
 
-
 ###
 ### shared functions
 ###
@@ -46,16 +45,16 @@ function discover_processes::dump() {
     echo "# == host: $(hostname)" >>$tmp/discover_processes.dump
     echo "# == user: $(whoami)" >>$tmp/discover_processes.dump
     echo "# == date: $(date)" >>$tmp/discover_processes.dump
-    echo "# ======================================="  >>$tmp/discover_processes.dump
-    declare -p wls_names  >>$tmp/discover_processes.dump
-    declare -p wls_managed  >>$tmp/discover_processes.dump
-    declare -p wls_admin  >>$tmp/discover_processes.dump
-    declare -p wls_attributes  >>$tmp/discover_processes.dump
-    declare -p wls_attributes_groups  >>$tmp/discover_processes.dump
+    echo "# =======================================" >>$tmp/discover_processes.dump
+    declare -p wls_names >>$tmp/discover_processes.dump
+    declare -p wls_managed >>$tmp/discover_processes.dump
+    declare -p wls_admin >>$tmp/discover_processes.dump
+    declare -p wls_attributes >>$tmp/discover_processes.dump
+    declare -p wls_attributes_groups >>$tmp/discover_processes.dump
 
     # add signature or cipher dump
-    md5sum $tmp/discover_processes.dump > $context_dir/discover_processes.md5
-    echo "#md5sum: $(md5sum $tmp/discover_processes.dump)" >> $tmp/discover_processes.dump
+    md5sum $tmp/discover_processes.dump >$context_dir/discover_processes.md5
+    echo "#md5sum: $(md5sum $tmp/discover_processes.dump)" >>$tmp/discover_processes.dump
     mv $tmp/discover_processes.dump $context_dir/discover_processes.dump
 }
 
@@ -64,7 +63,7 @@ function discover_processes::load() {
     dump_file=$1
 
     test ! -f $dump_file && echo Dump file not specified. && return 1
-    
+
     source $dump_file
 }
 
@@ -171,7 +170,7 @@ function analyzeWLSjava() {
 
     unset IFS
     for attrGroup in $attr_groups; do
-        echo $attrGroup
+        # echo $attrGroup
         collectAttrGroup $attrGroup
     done
 
@@ -179,8 +178,10 @@ function analyzeWLSjava() {
 }
 
 function discoverWLSjvmCfg() {
-    for wls_server in $(getWLSnames); do
 
+    echo ">> discovering server configuration..."
+
+    for wls_server in $(getWLSnames); do
         echo "================================"
         echo "================================"
         echo "====== $wls_server"
@@ -191,6 +192,8 @@ function discoverWLSjvmCfg() {
 }
 
 function discoverWLSroles() {
+
+    echo ">> discovering server roles..."
 
     for wls_server in $(getWLSnames); do
 
@@ -209,11 +212,8 @@ function discoverWLSroles() {
             host=$(echo $wls_mgmt_svr | cut -d'/' -f3 | cut -f1 -d:)
             port=$(echo $wls_mgmt_svr | cut -d'/' -f3 | cut -f2 -d:)
 
-            echo Server role: Managed server.
-            echo Admin server:
-            echo - protocol: $protocol
-            echo - host: $host
-            echo - port: $port
+            echo "Server role:  Managed server."
+            echo "Admin server: $protocol://$host:$port"
 
             attrGroup=info
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\admin_host_protocol]=$protocol
@@ -224,7 +224,7 @@ function discoverWLSroles() {
             wls_attributes[$wls_server$delim\admin_host_name]=$host
             wls_attributes[$wls_server$delim\admin_host_port]=$port
         else
-            echo Server role: Admin server.
+            echo "Server role: Admin server."
             wls_admin+=($wls_server)
         fi
 
@@ -271,7 +271,6 @@ function getWLSjvmGroups() {
     wls_server=$1
 
     echo ${!wls_attributes_groups[@]} | tr ' ' '\n' | grep "^$wls_server" | sed "s/^$wls_server_//g" | cut -d$delim -f2 | sort -u
-
 }
 
 function getWLSjvmAttr() {
@@ -279,7 +278,6 @@ function getWLSjvmAttr() {
     attr_name=$2
 
     echo ${wls_attributes[$wls_server$delim$attr_name]}
-
 }
 
 function printAttrGroup() {
@@ -322,51 +320,51 @@ function getDomainName() {
 
 function showSample() {
 
-        getWLSjvmAttrs ${wls_names[0]}
-        echo
-        echo "================================"
-        echo "====== ${wls_names[0]}  attributes get groups"
-        echo "================================"
-        getWLSjvmGroups ${wls_names[0]}
-        echo
-        echo "================================"
-        echo "====== ${wls_names[0]}  group attributes"
-        echo "================================"
-        getWLSjvmGroupAttr ${wls_names[0]}
+    getWLSjvmAttrs ${wls_names[0]}
+    echo
+    echo "================================"
+    echo "====== ${wls_names[0]}  attributes get groups"
+    echo "================================"
+    getWLSjvmGroups ${wls_names[0]}
+    echo
+    echo "================================"
+    echo "====== ${wls_names[0]}  group attributes"
+    echo "================================"
+    getWLSjvmGroupAttr ${wls_names[0]}
 
-        echo "================================"
-        echo "====== ${wls_names[0]} attributes from XX group"
-        echo "================================"
-        getWLSjvmGroupAttr ${wls_names[0]} XX
-        echo
-        echo "================================"
-        echo "====== ${wls_names[0]} get all attribute groups"
-        echo "================================"
-        for group in $(getWLSjvmGroups ${wls_names[0]}); do
-            printAttrGroup ${wls_names[0]} $group
-        done
-        echo
-        echo "================================"
-        echo "====== Admin attributes ========" 
-        echo "===== from given group ========="
-        echo "================================"
-        if [ -z "${wls_admin[0]}" ]; then
-            echo "Info: No admin server found on this host."
-        else
-            printAttrGroup ${wls_admin[0]} info
-            printAttrGroup ${wls_admin[0]} main
-        fi
-        echo
-        echo "================================"
-        echo "==== First managed server ======"
-        echo "==attributes from given group ="
-        echo "================================"
-        if [ -z "${wls_managed[0]}" ]; then
-            echo "Info: No managed server found on this host."
-        else
-            printAttrGroup ${wls_managed[0]} info
-            printAttrGroup ${wls_managed[0]} main
-        fi
+    echo "================================"
+    echo "====== ${wls_names[0]} attributes from XX group"
+    echo "================================"
+    getWLSjvmGroupAttr ${wls_names[0]} XX
+    echo
+    echo "================================"
+    echo "====== ${wls_names[0]} get all attribute groups"
+    echo "================================"
+    for group in $(getWLSjvmGroups ${wls_names[0]}); do
+        printAttrGroup ${wls_names[0]} $group
+    done
+    echo
+    echo "================================"
+    echo "====== Admin attributes ========"
+    echo "===== from given group ========="
+    echo "================================"
+    if [ -z "${wls_admin[0]}" ]; then
+        echo "Info: No admin server found on this host."
+    else
+        printAttrGroup ${wls_admin[0]} info
+        printAttrGroup ${wls_admin[0]} main
+    fi
+    echo
+    echo "================================"
+    echo "==== First managed server ======"
+    echo "==attributes from given group ="
+    echo "================================"
+    if [ -z "${wls_managed[0]}" ]; then
+        echo "Info: No managed server found on this host."
+    else
+        printAttrGroup ${wls_managed[0]} info
+        printAttrGroup ${wls_managed[0]} main
+    fi
 }
 
 function discoverWLS() {
