@@ -1,11 +1,5 @@
 #!/bin/bash
 
-xmllint_vrsion=$(xmllint --version 2>&1 | grep libxml | cut -d' ' -f5)
-if [ $xmllint_vrsion -lt 20901 ]; then
-    echo "Error. xmllint version too low. Cannot proceed."
-    exit 1
-fi
-
 ###
 ### shared constants
 ###
@@ -89,6 +83,13 @@ function discoverDomain() {
         return 1
     fi
 
+
+    xmllint_vrsion=$(xmllint --version 2>&1 | grep libxml | cut -d' ' -f5)
+    if [ $xmllint_vrsion -lt 20901 ]; then
+        echo "Error. xmllint version too low. Cannot proceed."
+        return 2
+    fi
+
     tmp=/tmp/$$
     mkdir -p $tmp
 
@@ -121,7 +122,3 @@ function discoverDomain() {
 
     # rm -f $tmp/clean_config.xml
 }
-
-
-
-

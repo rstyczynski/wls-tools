@@ -373,20 +373,37 @@ EOF
 
     # document root
     wlsdoc_now=$wlsdoc_root/history/$(utc::now)
-    mkdir -p $wlsdoc_now
+    mkdir -p $wlsdoc_now/context
 
     # wls discovery
     echo -n "*** WebLogic server discovery in progress..."
     source $wlsdoc_bin/discover_processes.sh
     discoverWLS
-    echo "OK"
+    if [ $? -eq 0 ]; then
+        echo "OK"
+        echo discoverWLS. Done >> $wlsdoc_now/context/status
+    else
+        # just report error
+        echo discoverWLS. Error >> $wlsdoc_now/context/status
+        return 10 
+    fi
 
     # domain discovery
     echo -n "*** WebLogic domain discovery in progress..."
     source $wlsdoc_bin/discover_domain.sh
     domain_home=$(getDomainHome)
     discoverDomain $domain_home
-    echo "OK"
+    if [ $? -eq 0 ]; then
+        echo "OK"
+        echo discoverDomain. Done >> $wlsdoc_now/context/status
+    else
+        # TODO
+        echo discoverDomain. Error >> $wlsdoc_now/context/status
+        # collect ouput of discoverWLS
+        discover_processes::dump $wlsdoc_now/context
+        # collect input for discoverDomain
+        discover_domain::dump $wlsdoc_now/context
+    fi
 
     #
     # prepare domain substitutes

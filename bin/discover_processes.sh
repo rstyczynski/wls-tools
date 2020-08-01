@@ -31,6 +31,44 @@ function replaceStr() {
 ### local functions
 ###
 
+# dump context to files
+function discover_processes::dump() {
+    context_dir=$1
+
+    [ -z $context_dir ] && echo "Context directory not specified." && return 1
+
+    tmp=/tmp/$$
+
+    echo "# =======================================" >$tmp/discover_processes.dump
+    echo "# ========= discover_processes ==========" >>$tmp/discover_processes.dump
+    echo "# ==============  dump ==================" >>$tmp/discover_processes.dump
+    echo "# =======================================" >>$tmp/discover_processes.dump
+    echo "# == host: $(hostname)" >>$tmp/discover_processes.dump
+    echo "# == user: $(whoami)" >>$tmp/discover_processes.dump
+    echo "# == date: $(date)" >>$tmp/discover_processes.dump
+    echo "# ======================================="  >>$tmp/discover_processes.dump
+    declare -p wls_names  >>$tmp/discover_processes.dump
+    declare -p wls_managed  >>$tmp/discover_processes.dump
+    declare -p wls_admin  >>$tmp/discover_processes.dump
+    declare -p wls_attributes  >>$tmp/discover_processes.dump
+    declare -p wls_attributes_groups  >>$tmp/discover_processes.dump
+
+    # TOOD add signature or cipher dump
+    md5sum $tmp/discover_processes.dump > $context_dir/discover_processes.md5
+    echo "#md5sum: $(md5sum $tmp/discover_processes.dump)" >> $tmp/discover_processes.dump
+    mv $tmp/discover_processes.dump $context_dir/discover_processes.dump
+}
+
+# read context from files
+function discover_processes::load() {
+    dump_file=$1
+
+    test ! -f $dump_file && echo Dump file not specified. && return 1
+    
+    source $dump_file
+}
+
+#
 function discoverWLSnames() {
     discoverWLSroles
     wls_names=()
@@ -340,6 +378,12 @@ function discoverWLS() {
     mkdir -p $tmp
 
     discoverWLSnames
+
+    if [ -z ${wls_names[0]} ]; 
+        echo Weblogic not detected on this host.
+        return 1
+    fi
+
     discoverWLSjvmCfg
     discoverWLSroles
 }
@@ -350,7 +394,3 @@ function wls() {
 
     # wls get soa_server1 jvm args
 }
-
-
-
-
