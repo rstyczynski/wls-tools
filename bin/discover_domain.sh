@@ -64,12 +64,12 @@ function discover_domain::dump() {
     cp -R $domain_home/config $context_dir/discover_domain/
     echo "# == config: $context_dir/discover_domain/config" >>$tmp/discover_domain.dump
     
-    tar -zcvf $context_dir/discover_domain.tar.gz $domain_home/config 
+    tar -zcvf $context_dir/discover_domain.tar.gz $domain_home/config >/dev/null
     echo "# == config tar: $context_dir/discover_domain.tar.gz" >>$tmp/discover_domain.dump
     echo "# ======================================="  >>$tmp/discover_domain.dump
     
     # compute md5
-    md5sum $context_dir/discover_domain.tar.gz > $context_dir/discover_domain.md5 2>/dev/null
+    md5sum $context_dir/discover_domain.tar.gz > $context_dir/discover_domain.md5
     echo "#md5sum: $(md5sum $context_dir/discover_domain.tar.gz)" >> $tmp/discover_domain.dump
     mv $tmp/discover_domain.dump $context_dir/discover_domain.dump
 }
