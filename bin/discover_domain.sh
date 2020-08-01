@@ -58,17 +58,19 @@ function discover_domain::dump() {
     echo "# == host: $(hostname)" >>$tmp/discover_domain.dump
     echo "# == user: $(whoami)" >>$tmp/discover_domain.dump
     echo "# == date: $(date)" >>$tmp/discover_domain.dump
-    echo "# ======================================="  >>$tmp/discover_domain.dump
 
     # copy domain config directory
     mkdir $context_dir/discover_domain
     cp -R $domain_home/config $context_dir/discover_domain/
-
+    echo "# == config: $context_dir/discover_domain/config" >>$tmp/discover_domain.dump
+    
     tar -zcvf $context_dir/discover_domain.tar.gz $domain_home/config 
-
+    echo "# == config tar: $context_dir/discover_domain.tar.gz" >>$tmp/discover_domain.dump
+    echo "# ======================================="  >>$tmp/discover_domain.dump
+    
     # compute md5
-    md5sum $context_dir/discover_domain.tar.gz > $context_dir/discover_domain.md5
-    echo "#md5sum: $(md5sum $tmp/discover_domain.dump)" >> $tmp/discover_domain.dump
+    md5sum $context_dir/discover_domain.tar.gz > $context_dir/discover_domain.md5 2>/dev/null
+    echo "#md5sum: $(md5sum $context_dir/discover_domain.tar.gz)" >> $tmp/discover_domain.dump
     mv $tmp/discover_domain.dump $context_dir/discover_domain.dump
 }
 
