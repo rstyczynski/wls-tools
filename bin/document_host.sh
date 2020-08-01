@@ -371,7 +371,7 @@ ryszard.styczynsi@oracle.com, version 0.1 dev
 EOF
 
     # document root
-    wlsdoc_now=$wlsdoc_root/history/$(utc::now)
+    export wlsdoc_now=$wlsdoc_root/history/$(utc::now)
     mkdir -p $wlsdoc_now/context/status
 
     # wls discovery
@@ -495,7 +495,7 @@ EOF
 
     # copying snapshot to current
     mv $wlsdoc_root/current $wlsdoc_root/current.prv
-    ln -a $wlsdoc_now $wlsdoc_root/current 
+    ln -s $wlsdoc_now $wlsdoc_root/current 
     rm -rf $wlsdoc_root/current.prv
 
     # delete old files; checking few dirs to protects against error leading to removel of wrong files
