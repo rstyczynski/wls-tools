@@ -42,6 +42,43 @@ declare -A domain_attr_groups
 ### local functions
 ###
 
+
+# dump context to files
+function discover_dmain::dump() {
+    context_dir=$1
+
+    [ -z $context_dir ] && echo "Context directory not specified." && return 1
+
+    tmp=/tmp/$$
+
+    echo "# =======================================" >$tmp/discover_dmain.dump
+    echo "# =========== discover_dmain ============" >>$tmp/discover_dmain.dump
+    echo "# ==============  dump ==================" >>$tmp/discover_dmain.dump
+    echo "# =======================================" >>$tmp/discover_dmain.dump
+    echo "# == host: $(hostname)" >>$tmp/discover_dmain.dump
+    echo "# == user: $(whoami)" >>$tmp/discover_dmain.dump
+    echo "# == date: $(date)" >>$tmp/discover_dmain.dump
+    echo "# ======================================="  >>$tmp/discover_dmain.dump
+
+    # copy domain config directory
+    mkdir $context_dir/discover_dmain
+    cp -R $domain_home/config $context_dir/discover_dmain/
+
+    tar -zcvf $context_dir/discover_dmain.tar.gz $domain_home/config 
+
+    # compute md5
+    md5sum $context_dir/discover_dmain.tar.gz > $context_dir/discover_dmain.md5
+    echo "#md5sum: $(md5sum $tmp/discover_dmain.dump)" >> $tmp/discover_dmain.dump
+    mv $tmp/discover_dmain.dump $context_dir/discover_dmain.dump
+}
+
+# read context from files
+function discover_dmain::load() {
+    echo Not implemented by intension. Use config directly from context directory.
+}
+
+# 
+
 function getDomainGroups() {
 
     echo ${!domain_attr_groups[@]} | tr ' ' '\n' | cut -f1 -d"$delim" | sort -u

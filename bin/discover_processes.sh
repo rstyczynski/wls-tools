@@ -53,7 +53,7 @@ function discover_processes::dump() {
     declare -p wls_attributes  >>$tmp/discover_processes.dump
     declare -p wls_attributes_groups  >>$tmp/discover_processes.dump
 
-    # TOOD add signature or cipher dump
+    # add signature or cipher dump
     md5sum $tmp/discover_processes.dump > $context_dir/discover_processes.md5
     echo "#md5sum: $(md5sum $tmp/discover_processes.dump)" >> $tmp/discover_processes.dump
     mv $tmp/discover_processes.dump $context_dir/discover_processes.dump
