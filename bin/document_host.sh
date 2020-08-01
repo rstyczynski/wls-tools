@@ -294,6 +294,9 @@ function substituteStrings() {
 }
 
 function prepareSystemSubstitutions() {
+
+    set -x
+
     dst=$wlsdoc_now
     mkdir -p $dst
 
@@ -302,6 +305,9 @@ Password, *********=assword",.*
 [name="Password"]/value, *********=[name="Password"]/value,.*
 {AES}********={AES}.*
 EOF
+
+set +x
+
 }
 
 function prepareDomainSubstitutions() {
@@ -371,7 +377,7 @@ ryszard.styczynsi@oracle.com, version 0.1 dev
 EOF
 
     # document root
-    export wlsdoc_now=$wlsdoc_root/history/$(utc::now)
+    wlsdoc_now=$wlsdoc_root/history/$(utc::now)
     mkdir -p $wlsdoc_now/context/status
 
     # wls discovery
