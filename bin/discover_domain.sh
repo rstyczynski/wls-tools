@@ -44,36 +44,36 @@ declare -A domain_attr_groups
 
 
 # dump context to files
-function discover_dmain::dump() {
+function discover_domain::dump() {
     context_dir=$1
 
     [ -z $context_dir ] && echo "Context directory not specified." && return 1
 
     tmp=/tmp/$$
 
-    echo "# =======================================" >$tmp/discover_dmain.dump
-    echo "# =========== discover_dmain ============" >>$tmp/discover_dmain.dump
-    echo "# ==============  dump ==================" >>$tmp/discover_dmain.dump
-    echo "# =======================================" >>$tmp/discover_dmain.dump
-    echo "# == host: $(hostname)" >>$tmp/discover_dmain.dump
-    echo "# == user: $(whoami)" >>$tmp/discover_dmain.dump
-    echo "# == date: $(date)" >>$tmp/discover_dmain.dump
-    echo "# ======================================="  >>$tmp/discover_dmain.dump
+    echo "# =======================================" >$tmp/discover_domain.dump
+    echo "# =========== discover_domain ============" >>$tmp/discover_domain.dump
+    echo "# ==============  dump ==================" >>$tmp/discover_domain.dump
+    echo "# =======================================" >>$tmp/discover_domain.dump
+    echo "# == host: $(hostname)" >>$tmp/discover_domain.dump
+    echo "# == user: $(whoami)" >>$tmp/discover_domain.dump
+    echo "# == date: $(date)" >>$tmp/discover_domain.dump
+    echo "# ======================================="  >>$tmp/discover_domain.dump
 
     # copy domain config directory
-    mkdir $context_dir/discover_dmain
-    cp -R $domain_home/config $context_dir/discover_dmain/
+    mkdir $context_dir/discover_domain
+    cp -R $domain_home/config $context_dir/discover_domain/
 
-    tar -zcvf $context_dir/discover_dmain.tar.gz $domain_home/config 
+    tar -zcvf $context_dir/discover_domain.tar.gz $domain_home/config 
 
     # compute md5
-    md5sum $context_dir/discover_dmain.tar.gz > $context_dir/discover_dmain.md5
-    echo "#md5sum: $(md5sum $tmp/discover_dmain.dump)" >> $tmp/discover_dmain.dump
-    mv $tmp/discover_dmain.dump $context_dir/discover_dmain.dump
+    md5sum $context_dir/discover_domain.tar.gz > $context_dir/discover_domain.md5
+    echo "#md5sum: $(md5sum $tmp/discover_domain.dump)" >> $tmp/discover_domain.dump
+    mv $tmp/discover_domain.dump $context_dir/discover_domain.dump
 }
 
 # read context from files
-function discover_dmain::load() {
+function discover_domain::load() {
     echo Not implemented by intension. Use config directly from context directory.
 }
 
