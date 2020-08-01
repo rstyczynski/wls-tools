@@ -495,7 +495,7 @@ EOF
 
     # copying snapshot to current
     mv $wlsdoc_root/current $wlsdoc_root/current.prv
-    ln $wlsdoc_root/current $wlsdoc_now 
+    ln -a $wlsdoc_now $wlsdoc_root/current 
     rm -rf $wlsdoc_root/current.prv
 
     # delete old files; checking few dirs to protects against error leading to removel of wrong files
