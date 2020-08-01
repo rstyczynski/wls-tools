@@ -375,7 +375,7 @@ EOF
     mkdir -p $wlsdoc_now/context/status
 
     # wls discovery
-    echo -n "*** WebLogic server discovery in progress..."
+    echo "*** WebLogic server discovery in progress..."
     source $wlsdoc_bin/discover_processes.sh
     discoverWLS
     if [ $? -eq 0 ]; then
