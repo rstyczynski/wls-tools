@@ -186,8 +186,8 @@ function discoverWLSjvmCfg() {
         echo "================================"
         echo "====== $wls_server"
         echo "================================"
-        echo "================================"
         analyzeWLSjava $wls_server 'Xm server cp Dlaunch da java Xloggc verbose Djava XX:+ XX:- XX Doracle DHTTPClient Dorg.apache.commons.logging DJAAS DUSE_JAAS Djps Dweblogic Ddomain.home Dwls Dtangosol Dmft Dums Dem Dcommon Djrf Dopss Dadf'
+        echo "================================"
     done
 }
 
@@ -200,7 +200,6 @@ function discoverWLSroles() {
         echo "================================"
         echo "================================"
         echo "====== $wls_server"
-        echo "================================"
         echo "================================"
         wls_mgmt_svr=${wls_attributes_groups[$wls_server$delim\Dweblogic$delim\-Dweblogic.management.server]}
 
@@ -235,6 +234,7 @@ function discoverWLSroles() {
         wls_attributes[$wls_server$delim\mw_home]=$(getWLSjvmAttr $wls_server -Dweblogic.home | sed 's|/wlserver/server$||')
         wls_attributes[$wls_server$delim\domain_home]=$(getWLSjvmAttr $wls_server -Ddomain.home)
         wls_attributes[$wls_server$delim\domain_name]=$(basename $(getWLSjvmAttr $wls_server -Ddomain.home))
+        echo "================================"
 
     done
 }
