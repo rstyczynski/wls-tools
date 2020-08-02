@@ -96,7 +96,7 @@ if [ "$src_servers" != none ]; then
         echo -n "Fetching $server"
         mkdir -p $cfgmon_root/$server
         echo -n '.'
-        rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
+        rsync -rav $server:$cfgmon_root/* $cfgmon_root/$server
         # remove data if fetched during cfg dump
         while [ -f $cfgmon_root/$server/lock ]; do
             echo -n '.'
@@ -107,7 +107,7 @@ if [ "$src_servers" != none ]; then
                 break
             fi
 
-            rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
+            rsync -rav $server:$cfgmon_root/* $cfgmon_root/$server
             sleep 1
         done
         
@@ -123,7 +123,7 @@ fi
 
 if [ ! -z "$nfs_root" ]; then
 
-    rsync -ra $nfs_root/* $cfgmon_root
+    rsync -rav $nfs_root/* $cfgmon_root
     
 fi
 
