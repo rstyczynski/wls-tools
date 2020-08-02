@@ -1,8 +1,8 @@
 #!/bin/bash
 
 
-unset compareDomains
-function compareDomains() {
+unset compareHosts
+function compareHosts() {
     left_host=$1
     left_domain=$2
     left_snapshot=$3
@@ -10,8 +10,8 @@ function compareDomains() {
     right_domain=$5
     right_snapshot=$6
 
-    left_domain_home=$base_dir/servers/$left_host/$left_snapshot/$left_domain
-    right_domain_home=$base_dir/servers/$right_host/$right_snapshot/$right_domain
+    left_domain_home=$base_dir/$left_host/$left_snapshot/wls/$left_domain
+    right_domain_home=$base_dir/$right_host/$right_snapshot/wls/$right_domain
 
     echo $left_domain_home vs. $right_domain_home
 
@@ -169,11 +169,11 @@ report_root=$wls_diff_root/report
 left=10.196.3.40
 right=10.196.4.41
 
-left=preprod_mft1
-right=preprod_mft2
+left_domain_name=domain
+right_domain_name=domain
 
-snapshot=current
-
+left_snapshot=current
+right_snapshot=current
 
 rm -f $report_root/report.html
 rm -f $report_root/index.html
@@ -184,9 +184,9 @@ for left_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
     cd $base_dir/servers/$right/$snapshot
     for right_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
         echo $left_domain_name vs. $right_domain_name
-        compareDomains \
-        $left  $left_domain_name  $snapshot \
-        $right $right_domain_name $snapshot
+        compareHosts \
+        $left  $left_domain_name  $left_snapshot \
+        $right $right_domain_name $right_snapshot
     done
 done
 
