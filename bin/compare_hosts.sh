@@ -231,8 +231,8 @@ function compareHosts() {
 left=10.196.3.40
 right=10.196.7.51
 
-left_domain_name=domain
-right_domain_name=domain
+left_domain_name=preprdmf_domain
+right_domain_name=prodmftc_domain
 
 left_instance=preprdmf_server_1
 right_instance=prodmftc_server_2
@@ -322,5 +322,3 @@ mv $report_root/diff_report.html $report_root/index.html
 chmod -R o+x $base_dir
 chmod -R o+r $base_dir
 cd
-
-
