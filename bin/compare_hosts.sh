@@ -17,12 +17,12 @@ function compareHosts() {
     right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
 
     # make links to instances to compare
-    ln -s $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance
-    ln -s $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/$left_instance
+    ln -s $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
+    ln -s $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/$left_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance 
 
-    ln -s $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance
-    ln -s $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/$right_instance
-    red -p "press enter" aqq
+    ln -s $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance 
+    ln -s $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/$right_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance 
+    read -p "press enter" aqq
 
     echo $left_domain_home vs. $right_domain_home
 
@@ -186,7 +186,7 @@ function compareHosts() {
                         echo "</li>" >> $report_root/index.html
 
                         echo $directory/$file 
-                        read -p "press enter" aqq
+                        # XXX read -p "press enter" aqq
                     done
 
                 else
