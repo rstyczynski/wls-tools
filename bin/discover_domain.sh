@@ -94,7 +94,7 @@ function getDomainGroups() {
 function getDomainGroupAttrs() {
     local attrGroup=$1
 
-    keys=$(echo ${!domain_attr_groups[@]} | tr ' ' '\n' | grep "^$attrGroup")
+    keys=$(echo ${!domain_attr_groups[@]} | tr ' ' '\n' | sort | grep "^$attrGroup")
 
     for key in $keys; do
         echo "$key=${domain_attr_groups[$key]}"
