@@ -62,6 +62,8 @@ function discover_domain::dump() {
     # copy domain config directory
     mkdir $context_dir/discover_domain
     cp -R $domain_home/config $context_dir/discover_domain/
+    cp -R $domain_home/bin $context_dir/discover_domain/
+
     echo "# == config: $context_dir/discover_domain/config" >>$tmp/discover_domain.dump
     echo "# == bin: $context_dir/discover_domain/bin" >>$tmp/discover_domain.dump
 
