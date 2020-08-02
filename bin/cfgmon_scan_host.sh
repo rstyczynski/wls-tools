@@ -75,20 +75,41 @@ sudo sysctl -a >$cfgmon_now/os/sysctl/sysctl.log
 source ~/wls-tools/bin/discover_processes.sh
 discoverWLS
 wls_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+# take wls owner home dir
+wls_user_home=$(cat /etc/passwd | grep "^$wls_user:" | cut -d: -f6)
 
 chmod o+x ~/
 chmod -R o+x ~/wls-tools
 chmod -R o+x ~/wls-tools/*
 wlstools_bin=$(cd ~/wls-tools/bin; pwd)
 
+# prepare inbox to get data from wls user
+pmaker_home=$HOME
+mkdir -p $pmaker_home/cfgmon/inbox
+chmod o+x $pmaker_home/cfgmon
+chmod o+x $pmaker_home/cfgmon/inbox
+chmod o+w $pmaker_home/cfgmon/inbox
+
 # perform document_host
 sudo su - $wls_user <<EOF
 $wlstools_bin/document_host.sh document
 if [ \$? -eq 0 ]; then 
+
     touch /tmp/document_host.ok
     chmod -R o+r /tmp/document_host.ok
     rm -rf /tmp/document_host.error
-    chmod -R o+r $HOME/oracle/weblogic/current
+
+    #chmod o+x \$HOME
+    #chmod -R o+x \$HOME/oracle
+    #chmod -R o+r \$HOME/oracle/weblogic/current
+
+    cp -R ~/oracle/weblogic/current/* $pmaker_home/cfgmon/inbox
+
+    for file_name in \$(ls $pmaker_home/cfgmon/inbox); do
+        chmod -R o+r $pmaker_home/cfgmon/inbox/\$file_name
+        chmod -R o+w $pmaker_home/cfgmon/inbox/\$file_name
+        [ -d $file_name ] && chmod -R o+x $pmaker_home/cfgmon/inbox/\$file_name
+    done
 else
     touch /tmp/document_host.error
     chmod -R o+r /tmp/document_host.error
@@ -96,12 +117,10 @@ else
 fi
 EOF
 
-# take wls owner home dir
-wls_user_home=$(cat /etc/passwd | grep $wls_user | cut -d: -f6)
-
 if [ -f /tmp/document_host.ok ]; then
     mkdir -p $cfgmon_now/wls
-    cp -R $wls_user_home/oracle/weblogic/current/* $cfgmon_now/wls
+    cp -R $pmaker_home/cfgmon/inbox/* $cfgmon_now/wls
+    rm -rf $pmaker_home/cfgmon/inbox
 fi
 
 # make archive
@@ -132,8 +151,7 @@ fi
 #
 
 mv $cfgmon_root/current $cfgmon_root/current.prv
-mkdir -p $cfgmon_root/current
-cp -R $cfgmon_now $cfgmon_root/current
+ln -s $wlsdoc_now $cfgmon_root/current 
 rm -rf $cfgmon_root/current.prv
 
 # remove lock
