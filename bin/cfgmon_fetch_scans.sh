@@ -1,14 +1,14 @@
 #!/bin/bash
 
 src_servers=$1
-cfgmon_root/servers=$2
+cfgmon_root=$2
 nfs_root=$3
 
 function usage() {
-    echo "Usage: cfgmon_fetch_scans.sh [init|none|src_servers] [cfgmon_root/servers ] [nfs_root]"
+    echo "Usage: cfgmon_fetch_scans.sh [init|none|src_servers] [cfgmon_root] [nfs_root]"
 }
 
-: ${cfgmon_root/servers:=/home/pmaker/cfgmon}
+: ${cfgmon_root:=/home/pmaker/cfgmon}
 [ -z "$src_servers" ] && echo "Error. $(usage)" && exit 1
 
 if [ "$src_servers" == init ]; then
@@ -21,7 +21,7 @@ if [ "$src_servers" == init ]; then
     echo "== user: $(whoami)"
     echo "== date: $(date)"
     echo "======================================="
-    echo "== cfgmon_root/servers: $cfgmon_root/servers"
+    echo "== cfgmon_root: $cfgmon_root"
     echo "== mode: init"
     echo "======================================="
     echo "======================================="
