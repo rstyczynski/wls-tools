@@ -100,7 +100,7 @@ if [ "$src_servers" != none ]; then
         echo -n ">> Removing current folder: $cfgmon_root/$server/current"
         rm -rf $cfgmon_root/$server/current/*
         rmdir $cfgmon_root/$server/current
-        
+
         echo -n ">> Fetching $server"
         mkdir -p $cfgmon_root/$server
         echo -n '.'
@@ -121,8 +121,6 @@ if [ "$src_servers" != none ]; then
         if [ $cnt -gt 10 ]; then
             echo Timeout.
         else
-            chmod -R o+x $cfgmon_root/$server
-            chmod -R o+r $cfgmon_root/$server
             echo Done.
         fi
 
@@ -130,6 +128,10 @@ if [ "$src_servers" != none ]; then
             echo ">> Recovering domain scan." 
             recover_discoverDomain_error $server
         fi
+
+        # fix permissions
+        chmod -R o+x $cfgmon_root/$server
+        chmod -R o+r $cfgmon_root/$server
     done
 fi
 
