@@ -392,59 +392,57 @@ EOF
         if [ ! -z "$domain_home" ]; then
             echo $domain_home >$wlsdoc_now/context/status/domain_home.done
 
-            discoverDomain $domain_home
-            if [ $? -eq 0 ]; then
-                discoverDomain=OK
-                echo "OK"
-                echo discoverDomain. Done >$wlsdoc_now/context/status/discoverDomain.done
+            #
+            # prepare domain substitutions
+            #
+            prepareSystemSubstitutions # generic - discoverDomain not reguired
 
-                #
-                # prepare domain substitutions
-                #
-                prepareSystemSubstitutions # generic - discoverDomain not reguired
+            #
+            # get domain name | thre may be no admin or no managed server on this host...
+            #
+            unset domain_name
+            if [ ! -z "${wls_admin[0]}" ]; then
+                domain_name=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
+                prepareDomainSubstitutions $domain_name ${wls_admin[0]}
+            fi
 
-                #
-                # get domain name | thre may be no admin or no managed server on this host...
-                #
-                unset domain_name
-                if [ ! -z "${wls_admin[0]}" ]; then
-                    domain_name=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
-                    prepareDomainSubstitutions $domain_name ${wls_admin[0]}
-                fi
+            if [ ! -z "${wls_managed[0]}" ]; then
+                domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
+                prepareDomainSubstitutions $domain_name ${wls_managed[0]}
+            fi
 
-                if [ ! -z "${wls_managed[0]}" ]; then
-                    domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
-                    prepareDomainSubstitutions $domain_name ${wls_managed[0]}
-                fi
 
-                #
-                # document Middleware home
-                #
-                if [ ! -z "$domain_name" ]; then
+            if [ ! -z "$domain_name" ]; then
 
-                    echo $domain_name >$wlsdoc_now/context/status/domain_name.done
+                echo $domain_name >$wlsdoc_now/context/status/domain_name.done
 
+                echo "************************************************************"
+                echo "*** WebLogic middleware snapshot started for: $domain_name"
+
+                unset mw_home
+                [ ! -z "${wls_admin[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
+                [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
+
+                if [ ! -z "$mw_home" ]; then
+                    echo $mw_home >$wlsdoc_now/context/status/mw_home.done
+
+                    documentMW $domain_name $mw_home
+                    echo "*** WebLogic middleware snapshot completed for: $domain_name"
                     echo "************************************************************"
-                    echo "*** WebLogic middleware snapshot started for: $domain_name"
+                    echo
+                else
+                    echo empty >$wlsdoc_now/context/status/mw_home.error
+                    echo "Error: Not able to detect MW_HOME."
+                    echo "*** WebLogic middleware snapshot ERRORED for: $domain_name"
+                    echo "************************************************************"
+                    echo
+                fi
 
-                    unset mw_home
-                    [ ! -z "${wls_admin[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
-                    [ ! -z "${wls_managed[0]}" ] && mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
-
-                    if [ ! -z "$mw_home" ]; then
-                        echo $mw_home >$wlsdoc_now/context/status/mw_home.done
-
-                        documentMW $domain_name $mw_home
-                        echo "*** WebLogic middleware snapshot completed for: $domain_name"
-                        echo "************************************************************"
-                        echo
-                    else
-                        echo empty >$wlsdoc_now/context/status/mw_home.error
-                        echo "Error: Not able to detect MW_HOME."
-                        echo "*** WebLogic middleware snapshot ERRORED for: $domain_name"
-                        echo "************************************************************"
-                        echo
-                    fi
+                discoverDomain $domain_home
+                if [ $? -eq 0 ]; then
+                    discoverDomain=OK
+                    echo "OK"
+                    echo discoverDomain. Done >$wlsdoc_now/context/status/discoverDomain.done
 
                     echo "************************************************************"
                     echo "*** WebLogic domain snapshot started for: $domain_name"
@@ -462,18 +460,16 @@ EOF
                         echo "************************************************************"
                         echo
                     done
-
                 else
-                    echo empty >$wlsdoc_now/context/status/domain_name.error
+                    # report  problem, but continue
+                    echo discoverDomain. Error >$wlsdoc_now/context/status/discoverDomain.error
+                    # collect ouput of discoverWLS
+                    discover_processes::dump $wlsdoc_now/context
+                    # collect input for discoverDomain
+                    discover_domain::dump $wlsdoc_now/context
                 fi
-
             else
-                # report  problem, but continue
-                echo discoverDomain. Error >$wlsdoc_now/context/status/discoverDomain.error
-                # collect ouput of discoverWLS
-                discover_processes::dump $wlsdoc_now/context
-                # collect input for discoverDomain
-                discover_domain::dump $wlsdoc_now/context
+                echo empty >$wlsdoc_now/context/status/domain_name.error
             fi
         else
             echo empty >$wlsdoc_now/context/status/domain_home.error
