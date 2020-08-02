@@ -151,7 +151,7 @@ fi
 
 echo ">> linking current to actual data: $cfgmon_root/current -> $cfgmon_now"
 mv $cfgmon_root/current $cfgmon_root/current.prv
-ln -s $cfgmon_now $cfgmon_root/current 
+ln -s $(basename $cfgmon_now) $cfgmon_root/current 
 rm -rf $cfgmon_root/current.prv
 
 # remove lock
