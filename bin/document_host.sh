@@ -495,6 +495,7 @@ EOF
 
     # copying snapshot to current
     mv $wlsdoc_root/current $wlsdoc_root/current.prv
+    echo ln -s $(basename $wlsdoc_now) $wlsdoc_root/current
     ln -s $(basename $wlsdoc_now) $wlsdoc_root/current 
     rm -rf $wlsdoc_root/current.prv
 
