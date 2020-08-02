@@ -50,7 +50,6 @@ function documentWLSruntime() {
     for group in $(getWLSjvmGroups $wls_name); do
         printAttrGroup $wls_name $group >>$dst/args
         substituteStringsGlobal $dst/args
-
     done
     echo "Completed."
 
@@ -444,22 +443,6 @@ EOF
                 fi
 
 
-                # document servers
-                for wls_name in $(getWLSnames); do
-                    echo "************************************************************"
-                    echo "*** WebLogic server snapshot started for: $wls_name"
-                    documentWLSruntime $wls_name
-                    if [ $? -eq 0 ]; then
-                        echo documentWLSruntime. Done >$wlsdoc_now/context/status/documentWLSruntime_$wls_name.done
-                        echo "*** WebLogic server snapshot completed for: $wls_name"
-                    else
-                        echo documentWLSruntime. Error >$wlsdoc_now/context/status/documentWLSruntime_$wls_name.error
-                        echo "*** WebLogic server snapshot errored for: $wls_name"
-                    fi
-                    echo "************************************************************"
-                    echo
-                done
-
                 discoverDomain $domain_home
                 if [ $? -eq 0 ]; then
                     discoverDomain=OK
@@ -472,6 +455,23 @@ EOF
                     echo "*** WebLogic domain snapshot completed for: $domain_name"
                     echo "************************************************************"
                     echo
+
+                    # document servers
+                    for wls_name in $(getWLSnames); do
+                        echo "************************************************************"
+                        echo "*** WebLogic server snapshot started for: $wls_name"
+                        documentWLSruntime $wls_name
+                        if [ $? -eq 0 ]; then
+                            echo documentWLSruntime. Done >$wlsdoc_now/context/status/documentWLSruntime_$wls_name.done
+                            echo "*** WebLogic server snapshot completed for: $wls_name"
+                        else
+                            echo documentWLSruntime. Error >$wlsdoc_now/context/status/documentWLSruntime_$wls_name.error
+                            echo "*** WebLogic server snapshot errored for: $wls_name"
+                        fi
+                        echo "************************************************************"
+                        echo
+                    done
+                
                 else
                     # report  problem, but continue
                     echo discoverDomain. Error >$wlsdoc_now/context/status/discoverDomain.error
