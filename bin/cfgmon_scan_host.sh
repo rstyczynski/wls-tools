@@ -119,7 +119,7 @@ EOF
 
 if [ -f /tmp/document_host.ok ]; then
     mkdir -p $cfgmon_now/wls
-    cp -R $pmaker_home/cfgmon/inbox/* $cfgmon_now/wls
+    cp -R $pmaker_home/cfgmon/inbox/* $cfgmon_now/wls/
     rm -rf $pmaker_home/cfgmon/inbox
 fi
 
