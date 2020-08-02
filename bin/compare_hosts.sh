@@ -52,13 +52,13 @@ function compareHosts() {
     for directory in $(cat $tmp/dirs_left); do
         echo Checking $directory
         cd $left_domain_home/$directory
-        find . -type f | cut -d'/' -f2 | sort >$tmp/files_left
+        find .  -maxdepth 1 -type f | cut -d'/' -f2 | sort >$tmp/files_left
         files_left=$(cat $tmp/files_left | grep -v variables | grep -v '.DS_Store')
 
         if [ ! -z "$files_left" ]; then
             if [ -d $right_domain_home/$directory ]; then
                 cd $right_domain_home/$directory
-                find . -type f | cut -d'/' -f2  | sort >$tmp/files_right
+                find .  -maxdepth 1 -type f | cut -d'/' -f2  | sort >$tmp/files_right
                 files_right=$(cat $tmp/files_right)
 
                 if [ ! -z "$files_right" ]; then
