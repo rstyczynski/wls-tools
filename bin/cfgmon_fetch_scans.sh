@@ -45,6 +45,13 @@ if [ "$src_servers" == init ]; then
 
     cat >~/cfgmon.tmp <<EOF
 Alias /cfgmon $cfgmon_root
+
+<Directory $cfgmon_root>
+    Options +Indexes  
+    #RH7 only
+    Require all granted
+</Directory>
+
 <Directory $cfgmon_root/servers>
     Options +Indexes  
     #RH7 only
