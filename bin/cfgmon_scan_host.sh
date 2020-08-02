@@ -101,7 +101,7 @@ wls_user_home=$(cat /etc/passwd | grep $wls_user | cut -d: -f6)
 
 if [ -f /tmp/document_host.ok ]; then
     mkdir -p $cfgmon_now/wls
-    cp -r $wls_user_home/oracle/weblogic/current/* $cfgmon_now/wls
+    cp -R $wls_user_home/oracle/weblogic/current/* $cfgmon_now/wls
 fi
 
 # make archive
@@ -119,11 +119,11 @@ if [ ! -z "$nfs_root" ]; then
 
     echo ">> copying files to shared location..."
     mkdir -p $nfs_root/$(hostname)/$today
-    cp -r $cfgmon_now/*  $nfs_root/$(hostname)/$today
+    cp -R $cfgmon_now/*  $nfs_root/$(hostname)/$today
 
     mv $nfs_root/$(hostname)/current $nfs_root/$(hostname)/current.prv
     mkdir -p $nfs_root/$(hostname)/current
-    cp -r  $cfgmon_now/* $nfs_root/$(hostname)/current
+    cp -R  $cfgmon_now/* $nfs_root/$(hostname)/current
     rm -rf $nfs_root/$(hostname)/current.prv
 fi
 
@@ -133,7 +133,7 @@ fi
 
 mv $cfgmon_root/current $cfgmon_root/current.prv
 mkdir -p $cfgmon_root/current
-cp -r $cfgmon_now $cfgmon_root/current
+cp -R $cfgmon_now $cfgmon_root/current
 rm -rf $cfgmon_root/current.prv
 
 # remove lock
