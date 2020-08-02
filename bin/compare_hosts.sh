@@ -125,7 +125,7 @@ function compareHosts() {
                             report_root=$base_dir/report/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
                             mkdir -p $report_root/$directory
                             git diff --color-words --no-index $left_domain_home/$directory/$file $right_domain_home/$directory/$file > $report_root/$directory/$file.txt
-                            ansifilter -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
+                            highlight -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
 
                             # report
                             cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
