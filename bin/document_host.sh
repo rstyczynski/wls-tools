@@ -590,35 +590,35 @@ function recover_discoverDomain_error() {
     wlsdoc_bin="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
     # proceed
-    if [ -f $cfgmon_root/$server/current/wls/context/status/discoverDomain.done ]; then
+    if [ -f $cfgmon_root/servers/$server/current/wls/context/status/discoverDomain.done ]; then
         echo Recovery not needed. Server data already processed with sucess.
         return 1
     fi
 
-    if [ -f $cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.done ]; then
+    if [ -f $cfgmon_root/servers/$server/current/wls/context/status/discoverDomain_recovery.done ]; then
         echo "Already done."
         return 0
 
     else
         # load process info
-        if [ ! -f $cfgmon_root/$server/current/wls/context/discover_processes.dump ]; then
+        if [ ! -f $cfgmon_root/servers/$server/current/wls/context/discover_processes.dump ]; then
             echo Failure. Missing  discover_processes dump file. Cannot continue.
-            echo Missing  discover_processes dump file. Cannot continue.. Failure >$cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.failure
+            echo Missing  discover_processes dump file. Cannot continue.. Failure >$cfgmon_root/servers/$server/current/wls/context/status/discoverDomain_recovery.failure
         fi
 
         # discover domain from copy
         source $wlsdoc_bin/discover_processes.sh
         source $wlsdoc_bin/discover_domain.sh
 
-        source $cfgmon_root/$server/current/wls/context/discover_processes.dump
+        source $cfgmon_root/servers/$server/current/wls/context/discover_processes.dump
 
-        wlsdoc_now=$cfgmon_root/$server/current/wls
+        wlsdoc_now=$cfgmon_root/servers/$server/current/wls
 
-        discoverDomain $cfgmon_root/$server/current/wls/context/discover_domain
+        discoverDomain $cfgmon_root/servers/$server/current/wls/context/discover_domain
         if [ $? -eq 0 ]; then
             discoverDomain=OK
             echo "OK"
-            echo discoverDomain. Done >$cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.done
+            echo discoverDomain. Done >$cfgmon_root/servers/$server/current/wls/context/status/discoverDomain_recovery.done
             
             # document domain
             source $wlsdoc_bin/document_host.sh
@@ -638,7 +638,7 @@ function recover_discoverDomain_error() {
 
         else
             echo Failure.
-            echo discoverDomain. Failure >$cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.failure
+            echo discoverDomain. Failure >$cfgmon_root/servers/$server/current/wls/context/status/discoverDomain_recovery.failure
         fi
     fi
 
