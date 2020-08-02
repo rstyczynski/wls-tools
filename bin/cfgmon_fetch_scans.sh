@@ -89,6 +89,9 @@ fi
 
 today=$(date -u +"%Y-%m-%d")
 
+wlsdoc_bin="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+source /home/pmaker/wls-tools/bin/document_host.sh
+
 if [ "$src_servers" != none ]; then
     # server
     for server in $src_servers; do
@@ -98,7 +101,7 @@ if [ "$src_servers" != none ]; then
         echo -n '.'
 
         rm -rf $cfgmon_root/$server/current
-        rsync -rav $server:$cfgmon_root/* $cfgmon_root/$server
+        rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
         # remove data if fetched during cfg dump
         while [ -f $cfgmon_root/$server/lock ]; do
             echo -n '.'
@@ -108,23 +111,28 @@ if [ "$src_servers" != none ]; then
             if [ $cnt -gt 10 ]; then
                 break
             fi
-            rsync -rav $server:$cfgmon_root/* $cfgmon_root/$server
+            rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
             sleep 1
         done
         
         if [ $cnt -gt 10 ]; then
-            echo Timeout
+            echo Timeout.
         else
             chmod -R o+x $cfgmon_root/$server
             chmod -R o+r $cfgmon_root/$server
-            echo Done
+            echo Done.
+        fi
+
+        if [ -f $cfgmon_root/$server/current/wls/context/status/discoverDomain.error ]; then
+            echo ">> Recovering domain scan." 
+            recover_discoverDomain_error $server
         fi
     done
 fi
 
 if [ ! -z "$nfs_root" ]; then
 
-    rsync -rav $nfs_root/* $cfgmon_root
+    rsync -ra $nfs_root/* $cfgmon_root
     
 fi
 
