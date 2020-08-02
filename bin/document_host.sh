@@ -598,11 +598,13 @@ function recover_discoverDomain_error() {
             echo Failure. Missing  discover_processes dump file. Cannot continue.
             echo Missing  discover_processes dump file. Cannot continue.. Failure >$cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.failure
         fi
-        source $cfgmon_root/$server/current/wls/context/discover_processes.dump
 
         # discover domain from copy
         source $wlsdoc_bin/discover_processes.sh
         source $wlsdoc_bin/discover_domain.sh
+
+        source $cfgmon_root/$server/current/wls/context/discover_processes.dump
+
         discoverDomain $cfgmon_root/$server/current/wls/context/discover_domain
         if [ $? -eq 0 ]; then
             discoverDomain=OK
