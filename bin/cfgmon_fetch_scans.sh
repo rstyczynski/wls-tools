@@ -70,7 +70,10 @@ EOF
     sudo chcon unconfined_u:object_r:httpd_config_t:s0 /etc/httpd/conf.d/cfgmon.conf
 
     permission=$(ls -la --context /var/www/html | head -1 | cut -d' ' -f4)
+    chcon -R $permission $cfgmon_root/servers
+    chcon -R $permission $cfgmon_root/reports
     chcon -R $permission $cfgmon_root
+
     chmod -R o+x $cfgmon_root/servers
     chmod -R o+x $cfgmon_root/reports
     chmod -R o+x $cfgmon_root
