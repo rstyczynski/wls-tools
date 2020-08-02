@@ -392,11 +392,6 @@ EOF
         if [ ! -z "$domain_home" ]; then
             echo $domain_home >$wlsdoc_now/context/status/domain_home.done
 
-            # prepare directory to keep domain data with link to make generic place
-            mkdir -p $wlsdoc_now/$domain_name
-            echo ln -s $domain_name $wlsdoc_now/domain
-            ln -s $domain_name $wlsdoc_now/domain
-
             #
             # prepare domain substitutions
             #
@@ -418,8 +413,13 @@ EOF
 
 
             if [ ! -z "$domain_name" ]; then
-
                 echo $domain_name >$wlsdoc_now/context/status/domain_name.done
+
+                # prepare directory to keep domain data with link to make generic place
+                mkdir -p $wlsdoc_now/$domain_name
+                echo ln -s $domain_name $wlsdoc_now/domain
+                ln -s $domain_name $wlsdoc_now/domain
+
 
                 echo "************************************************************"
                 echo "*** WebLogic middleware snapshot started for: $domain_name"
