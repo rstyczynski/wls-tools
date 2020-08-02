@@ -30,12 +30,12 @@ function compareHosts() {
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     cp -R $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance/* $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
-    find $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance -type f -exec sed -i "s/$right_instance/\$[WLS_INSTANCE]/g" {} \;
+    find $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance -type f -exec sed -i "s/$left_instance/\$[WLS_INSTANCE]/g" {} \;
 
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance 
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance
     cp -R $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/$left_instance/* $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance 
-    find $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance -type f -exec sed -i "s/$right_instance/\$[WLS_INSTANCE]/g" {} \;
+    find $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance -type f -exec sed -i "s/$left_instance/\$[WLS_INSTANCE]/g" {} \;
 
     rm -rf $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance 
     mkdir $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance
