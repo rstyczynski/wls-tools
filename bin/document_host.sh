@@ -605,6 +605,8 @@ function recover_discoverDomain_error() {
 
         source $cfgmon_root/$server/current/wls/context/discover_processes.dump
 
+        wlsdoc_now=$cfgmon_root/$server/current/wls
+
         discoverDomain $cfgmon_root/$server/current/wls/context/discover_domain
         if [ $? -eq 0 ]; then
             discoverDomain=OK
@@ -625,7 +627,6 @@ function recover_discoverDomain_error() {
                 prepareDomainSubstitutions $domain_name ${wls_managed[0]}
             fi
 
-            wlsdoc_now=$cfgmon_root/$server/current/wls
             documentDomain $domain_name
 
             # document servers
