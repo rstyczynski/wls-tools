@@ -149,8 +149,8 @@ fi
 # finalize
 #
 
+echo ">> linking current to actual data: $cfgmon_root/current -> $cfgmon_now"
 mv $cfgmon_root/current $cfgmon_root/current.prv
-echo ln -s $cfgmon_now $cfgmon_root/current 
 ln -s $cfgmon_now $cfgmon_root/current 
 rm -rf $cfgmon_root/current.prv
 
@@ -158,7 +158,10 @@ rm -rf $cfgmon_root/current.prv
 rm -rf $cfgmon_root/lock
 
 # add to version control
+echo ">> keeping history in git"
 cd $cfgmon_root
 git add --all >/dev/null 2>&1
 git commit -am "config fetch" >/dev/null 2>&1
 cd - >/dev/null
+
+echo "Done."
