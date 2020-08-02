@@ -636,6 +636,22 @@ function recover_discoverDomain_error() {
 
             documentDomain $domain_name
 
+            # document servers
+            for wls_name in $(getWLSnames); do
+                echo "************************************************************"
+                echo "*** WebLogic server snapshot started for: $wls_name"
+                documentWLSruntime $wls_name
+                if [ $? -eq 0 ]; then
+                    echo documentWLSruntime. Done >$wlsdoc_now/context/status/documentWLSruntime_$wls_name.done
+                    echo "*** WebLogic server snapshot completed for: $wls_name"
+                else
+                    echo documentWLSruntime. Error >$wlsdoc_now/context/status/documentWLSruntime_$wls_name.error
+                    echo "*** WebLogic server snapshot errored for: $wls_name"
+                fi
+                echo "************************************************************"
+                echo
+            done
+
         else
             echo Failure.
             echo discoverDomain. Failure >$cfgmon_root/servers/$server/current/wls/context/status/discoverDomain_recovery.failure
