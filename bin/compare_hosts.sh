@@ -220,8 +220,8 @@ right=10.196.7.51
 left_domain_name=domain
 right_domain_name=domain
 
-left_instance=prodmftc_server_1
-right_instance=preprdmf_server_1
+left_instance=preprdmf_server_1
+right_instance=prodmftc_server_1
 
 left_snapshot=current
 right_snapshot=current
