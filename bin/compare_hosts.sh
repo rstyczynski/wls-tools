@@ -10,7 +10,7 @@ function compareHosts() {
 
     right_host=$5
     right_domain=$6
-    left_instance=$7
+    right_instance=$7
     right_snapshot=$8
 
     left_domain_home=$base_dir/servers/$left_host/$left_snapshot/wls/$left_domain
