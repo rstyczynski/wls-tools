@@ -66,9 +66,11 @@ fi
 today=$(date -u +"%Y-%m-%d")
 cfgmon_now=$cfgmon_root/$today
 
-# remove today to avoind file mixing between multiple runs on the sme day
+# remove today (if exists) to avoind file mixing between multiple runs on the sme day
 rm -rf $cfgmon_now
+mkdir -p $cfgmon_now
 
+# lock cfg mon directory
 touch $cfgmon_root/lock
 
 # sysctl
