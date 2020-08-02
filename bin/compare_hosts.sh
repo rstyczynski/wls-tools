@@ -15,6 +15,14 @@ function compareHosts() {
 
     echo $left_domain_home vs. $right_domain_home
 
+    # initialize 
+    
+    report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+    mkdir -p $report_root
+    rm -rf $report_root/*
+
+    #
+
     cd $left_domain_home
     find . -type d | sort >$tmp/dirs_left
     cd $right_domain_home
@@ -26,9 +34,6 @@ function compareHosts() {
         extra_left=$(cat $tmp/diff_dirs | grep '<')
         if [ ! -z "$extra_left" ]; then
             echo "MISMATCH: Missing directories at $right. Extra dirs: $extra_left"
-
-            report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
-            mkdir -p $report_root
             cat $tmp/diff_dirs | grep '<' >$report_root/missing_dirs_at_right
         fi 
 
