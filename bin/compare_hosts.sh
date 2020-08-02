@@ -96,46 +96,54 @@ function compareHosts() {
                         echo $directory/$file >> $report_root/report.html
                         echo "</h1>" >> $report_root/report.html
 
-                        echo "======================================================="
-                        echo Left: $left_domain_home/$directory/$file
-                        echo Right: $right_domain_home/$directory/$file
-                        echo "======================================================="
-                        diff $left_domain_home/$directory/$file $right_domain_home/$directory/$file >$tmp/diff_file
-                        if [ $? -eq 0 ]; then
-                            diff_result=NO
-                            echo OK
+                        if [ ! -f $right_domain_home/$directory/$file ]; then
+                            echo "======================================================="
+                            echo Left: $left_domain_home/$directory/$file
+                            echo Right: DOES NOT EXIST: $right_domain_home/$directory/$file
+                            echo "======================================================="
 
-                            report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
-                            mkdir -p $report_root/$directory
-
-                            cat $left_domain_home/$directory/$file > $report_root/$directory/$file.txt
-
-                            cat $left_domain_home/$directory/$file | sed 's|$|</br>|g' > $report_root/$directory/$file.html
-
-                            # report
-                            text_style='style="color:green;"'
-                            echo "<p $text_style>" >> $report_root/report.html
-                            cat $report_root/$directory/$file.html >> $report_root/report.html
-                            echo "</p>" >> $report_root/report.html
                         else
-                            diff_result=YES
-                            echo "MISMATCH detected."
-                            cat $tmp/diff_file
+                            echo "======================================================="
+                            echo Left: $left_domain_home/$directory/$file
+                            echo Right: $right_domain_home/$directory/$file
+                            echo "======================================================="
+                            diff $left_domain_home/$directory/$file $right_domain_home/$directory/$file >$tmp/diff_file
+                            if [ $? -eq 0 ]; then
+                                diff_result=NO
+                                echo OK
 
-                            report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
-                            mkdir -p $report_root/$directory
-                            git diff --color-words --no-index $left_domain_home/$directory/$file $right_domain_home/$directory/$file > $report_root/$directory/$file.txt
-                            ansifilter -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
+                                report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+                                mkdir -p $report_root/$directory
 
-                            # report
-                            cat $report_root/$directory/$file.html
+                                cat $left_domain_home/$directory/$file > $report_root/$directory/$file.txt
 
-                            # xmllint does not work complaing with xml errors
-                            #cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
+                                cat $left_domain_home/$directory/$file | sed 's|$|</br>|g' > $report_root/$directory/$file.html
 
-                            cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | 
-                            sed -n '/<body>/,/<\/body>/p' | grep -v '<[\/]*body>' >> $report_root/report.html
+                                # report
+                                text_style='style="color:green;"'
+                                echo "<p $text_style>" >> $report_root/report.html
+                                cat $report_root/$directory/$file.html >> $report_root/report.html
+                                echo "</p>" >> $report_root/report.html
+                            else
+                                diff_result=YES
+                                echo "MISMATCH detected."
+                                cat $tmp/diff_file
 
+                                report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+                                mkdir -p $report_root/$directory
+                                git diff --color-words --no-index $left_domain_home/$directory/$file $right_domain_home/$directory/$file > $report_root/$directory/$file.txt
+                                ansifilter -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
+
+                                # report
+                                cat $report_root/$directory/$file.html
+
+                                # xmllint does not work complaing with xml errors
+                                #cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
+
+                                cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | 
+                                sed -n '/<body>/,/<\/body>/p' | grep -v '<[\/]*body>' >> $report_root/report.html
+
+                            fi
                         fi
 
 
