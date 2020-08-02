@@ -10,8 +10,8 @@ function compareHosts() {
     right_domain=$5
     right_snapshot=$6
 
-    left_domain_home=$base_dir/$left_host/$left_snapshot/wls/$left_domain
-    right_domain_home=$base_dir/$right_host/$right_snapshot/wls/$right_domain
+    left_domain_home=$base_dir/servers/$left_host/$left_snapshot/wls/$left_domain
+    right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
 
     echo $left_domain_home vs. $right_domain_home
 
@@ -211,22 +211,22 @@ echo "</p>"              >>$report_root/diff_report.html
 
 echo "<h1>Substituted variables</h1>"  >>$report_root/diff_report.html
 echo "<h2>Global</h2>"  >>$report_root/diff_report.html
-cat $base_dir/$right/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+cat $base_dir/servers/$right/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
 
 echo "<h2>$left</h2>"  >>$report_root/diff_report.html
 echo "<h3>domain</h3>"  >>$report_root/diff_report.html
-cat $base_dir/$right/$left_snapshot/wls/$left_domain_name/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-for wls_name in $(ls $base_dir/$right/$left_snapshot/wls/$left_domain_name/servers); do
+cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain_name/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+for wls_name in $(ls $base_dir/servers/$right/$left_snapshot/wls/$left_domain_name/servers); do
    echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
-   cat $base_dir/$right/$left_snapshot/wls/$left_domain_name/servers/$wls_name/variables >>$report_root/diff_report.html
+   cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain_name/servers/$wls_name/variables >>$report_root/diff_report.html
 done
 
 echo "<h2>$right</h2>"  >>$report_root/diff_report.html
 echo "<h3>domain</h3>"  >>$report_root/diff_report.html
-cat $base_dir/$right/$right_snapshot/wls/$right_domain_name/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-for wls_name in $(ls $base_dir/$right/$right_snapshot/wls/$right_domain_name/servers); do
+cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain_name/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+for wls_name in $(ls $base_dir/servers/$right/$right_snapshot/wls/$right_domain_name/servers); do
    echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
-   cat $base_dir/$right/$right_snapshot/wls/$right_domain_name/servers/$wls_name/variables >>$report_root/diff_report.html
+   cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain_name/servers/$wls_name/variables >>$report_root/diff_report.html
 done
 
 echo "<h1>Compared files</h1>"  >>$report_root/diff_report.html
