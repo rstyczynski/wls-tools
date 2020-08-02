@@ -63,9 +63,11 @@ function discover_domain::dump() {
     mkdir $context_dir/discover_domain
     cp -R $domain_home/config $context_dir/discover_domain/
     echo "# == config: $context_dir/discover_domain/config" >>$tmp/discover_domain.dump
-    
-    tar -zcvf $context_dir/discover_domain.tar.gz $domain_home/config >/dev/null
-    echo "# == config tar: $context_dir/discover_domain.tar.gz" >>$tmp/discover_domain.dump
+    echo "# == nodemanager: $context_dir/discover_domain/bin/nodemanager" >>$tmp/discover_domain.dump
+
+    tar -zcvf $context_dir/discover_domain.tar.gz $domain_home/config $domain_home/bin/nodemanager >/dev/null
+
+    echo "# == domain tar: $context_dir/discover_domain.tar.gz" >>$tmp/discover_domain.dump
     echo "# ======================================="  >>$tmp/discover_domain.dump
     
     # compute md5
