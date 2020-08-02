@@ -146,7 +146,11 @@ function compareHosts() {
                                 #cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
 
                                 cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | 
-                                sed -n '/<body>/,/<\/body>/p' | grep -v '<[\/]*body>' >> $report_root/report.html
+                                sed -n '/<body>/,/<\/body>/p' | grep -v '<[\/]*body>' | 
+                                sed 's/00f000/00802b/g' | # replace green
+                                sed 's/f00000/cc0000/g' | # replace red
+                                sed 's/00f0f0/0000ff/g' | # replace blue
+                                cat >> $report_root/report.html
 
                             fi
                         fi
@@ -276,5 +280,6 @@ echo "</html>"               >> $report_root/diff_report.html
 mv $report_root/diff_report.html $report_root/index.html
 chmod -R o+x $base_dir
 chmod -R o+r $base_dir
+cd
 
 
