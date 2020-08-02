@@ -96,6 +96,8 @@ if [ "$src_servers" != none ]; then
         echo -n "Fetching $server"
         mkdir -p $cfgmon_root/$server
         echo -n '.'
+
+        rm -rf $cfgmon_root/$server/current
         rsync -rav $server:$cfgmon_root/* $cfgmon_root/$server
         # remove data if fetched during cfg dump
         while [ -f $cfgmon_root/$server/lock ]; do
@@ -106,7 +108,6 @@ if [ "$src_servers" != none ]; then
             if [ $cnt -gt 10 ]; then
                 break
             fi
-
             rsync -rav $server:$cfgmon_root/* $cfgmon_root/$server
             sleep 1
         done
