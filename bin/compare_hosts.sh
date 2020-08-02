@@ -17,10 +17,16 @@ function compareHosts() {
     right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
 
     # make links to instances to compare
+    rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     ln -s $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
+
+    rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance 
     ln -s $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/$left_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance 
 
+    rm -rf $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance 
     ln -s $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance 
+    
+    rm -rf $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance 
     ln -s $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/$right_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance 
     read -p "press enter" aqq
 
