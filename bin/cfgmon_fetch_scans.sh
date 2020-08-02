@@ -47,6 +47,12 @@ Alias /cfgmon $cfgmon_root
     Require all granted
     ForceType text/plain
 </Directory>
+
+<Directory $cfgmon_root/reports>
+    Options +Indexes  
+    #RH7 only
+    Require all granted
+</Directory>
 EOF
     chmod 644 ~/cfgmon.tmp
     sudo mv ~/cfgmon.tmp /etc/httpd/conf.d/cfgmon.conf

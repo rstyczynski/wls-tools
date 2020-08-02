@@ -237,6 +237,8 @@ cat $report_root/report.html >>$report_root/diff_report.html
 echo "</body>"               >>$report_root/diff_report.html
 echo "</html>"               >> $report_root/diff_report.html
 
-cd $base_dir
+mv $report_root/diff_report.html $report_root/index.html
+chmod -R o+x $base_dir
+chmod -R o+r $base_dir
 
 
