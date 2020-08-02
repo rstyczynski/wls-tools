@@ -394,7 +394,7 @@ EOF
 
             # prepare direcotry to keep domain data with link to make generic place
             mkdir $wlsdoc_now/$domain_name
-            ln -s $wlsdoc_now/domain $wlsdoc_now/$domain_name
+            ln -s $domain_name $wlsdoc_now/domain
 
             #
             # prepare domain substitutions
