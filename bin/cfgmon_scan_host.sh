@@ -129,7 +129,6 @@ cd $cfgmon_now
 mkdir -p $cfgmon_root/outbox
 tar -zcvf $cfgmon_root/outbox/$(hostname).$today.scan_host.tar.gz . >/dev/null
 
-
 # copy to shared location
 if [ ! -z "$nfs_root" ]; then
     echo ">> copying tar file to shared location..."
@@ -151,6 +150,7 @@ fi
 #
 
 mv $cfgmon_root/current $cfgmon_root/current.prv
+echo ln -s $wlsdoc_now $cfgmon_root/current 
 ln -s $wlsdoc_now $cfgmon_root/current 
 rm -rf $cfgmon_root/current.prv
 
