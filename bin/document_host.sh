@@ -392,8 +392,9 @@ EOF
         if [ ! -z "$domain_home" ]; then
             echo $domain_home >$wlsdoc_now/context/status/domain_home.done
 
-            # prepare direcotry to keep domain data with link to make generic place
+            # prepare directory to keep domain data with link to make generic place
             mkdir -p $wlsdoc_now/$domain_name
+            echo ln -s $domain_name $wlsdoc_now/domain
             ln -s $domain_name $wlsdoc_now/domain
 
             #
