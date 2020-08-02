@@ -150,8 +150,8 @@ fi
 #
 
 mv $cfgmon_root/current $cfgmon_root/current.prv
-echo ln -s $wlsdoc_now $cfgmon_root/current 
-ln -s $wlsdoc_now $cfgmon_root/current 
+echo ln -s $cfgmon_now $cfgmon_root/current 
+ln -s $cfgmon_now $cfgmon_root/current 
 rm -rf $cfgmon_root/current.prv
 
 # remove lock
