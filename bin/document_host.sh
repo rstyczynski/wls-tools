@@ -583,6 +583,11 @@ function recover_discoverDomain_error() {
     wlsdoc_bin="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
     # proceed
+    if [ -f $cfgmon_root/$server/current/wls/context/status/discoverDomain.done ]; then
+        echo Recovery not needed. Server data already processed with sucess.
+        return 1
+    fi
+
     if [ -f $cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.done ]; then
         echo "Already done."
         return 0
