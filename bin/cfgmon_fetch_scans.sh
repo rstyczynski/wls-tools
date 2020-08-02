@@ -96,11 +96,14 @@ if [ "$src_servers" != none ]; then
     # server
     for server in $src_servers; do
         cnt=0
-        echo -n "Fetching $server"
+        
+        echo -n ">> Removing current folder: $cfgmon_root/$server/current"
+        rm -rf $cfgmon_root/$server/current
+        echo -n '.'
+        
+        echo -n ">> Fetching $server"
         mkdir -p $cfgmon_root/$server
         echo -n '.'
-
-        rm -rf $cfgmon_root/$server/current
         rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
         # remove data if fetched during cfg dump
         while [ -f $cfgmon_root/$server/lock ]; do
