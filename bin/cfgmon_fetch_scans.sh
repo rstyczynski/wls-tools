@@ -1,14 +1,14 @@
 #!/bin/bash
 
 src_servers=$1
-cfgmon_root=$2
+cfgmon_root/servers=$2
 nfs_root=$3
 
 function usage() {
-    echo "Usage: cfgmon_fetch_scans.sh [init|none|src_servers] [cfgmon_root ] [nfs_root]"
+    echo "Usage: cfgmon_fetch_scans.sh [init|none|src_servers] [cfgmon_root/servers ] [nfs_root]"
 }
 
-: ${cfgmon_root:=/home/pmaker/cfgmon}
+: ${cfgmon_root/servers:=/home/pmaker/cfgmon}
 [ -z "$src_servers" ] && echo "Error. $(usage)" && exit 1
 
 if [ "$src_servers" == init ]; then
@@ -21,7 +21,7 @@ if [ "$src_servers" == init ]; then
     echo "== user: $(whoami)"
     echo "== date: $(date)"
     echo "======================================="
-    echo "== cfgmon_root: $cfgmon_root"
+    echo "== cfgmon_root/servers: $cfgmon_root/servers"
     echo "== mode: init"
     echo "======================================="
     echo "======================================="
@@ -41,7 +41,7 @@ if [ "$src_servers" == init ]; then
 
     cat >~/cfgmon.tmp <<EOF
 Alias /cfgmon $cfgmon_root
-<Directory $cfgmon_root>
+<Directory $cfgmon_root/servers>
     Options +Indexes  
     #RH7 only
     Require all granted
@@ -88,7 +88,7 @@ echo "== nfs_root   : $nfs_root"
 echo "======================================="
 echo "======================================="
 
-if [ ! -d $cfgmon_root ]; then
+if [ ! -d $cfgmon_root/servers ]; then
     echo 'Scan env not initialized. Run the script with init argument first.'
     exit 1
 fi
@@ -103,24 +103,24 @@ if [ "$src_servers" != none ]; then
     for server in $src_servers; do
         cnt=0
         
-        echo -n ">> Removing current folder: $cfgmon_root/$server/current"
-        rm -rf $cfgmon_root/$server/current/*
-        rmdir $cfgmon_root/$server/current
+        echo -n ">> Removing current folder: $cfgmon_root/servers/$server/current"
+        rm -rf $cfgmon_root/servers/$server/current/*
+        rmdir $cfgmon_root/servers/$server/current
 
         echo -n ">> Fetching $server"
-        mkdir -p $cfgmon_root/$server
+        mkdir -p $cfgmon_root/servers/$server
         echo -n '.'
-        rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
+        rsync -ra $server:$cfgmon_root/servers/* $cfgmon_root/servers/$server
         # remove data if fetched during cfg dump
-        while [ -f $cfgmon_root/$server/lock ]; do
+        while [ -f $cfgmon_root/servers/$server/lock ]; do
             echo -n '.'
-            rm -rf $cfgmon_root/$server/lock
+            rm -rf $cfgmon_root/servers/$server/lock
 
             cnt=$(($cnt + 1))
             if [ $cnt -gt 10 ]; then
                 break
             fi
-            rsync -ra $server:$cfgmon_root/* $cfgmon_root/$server
+            rsync -ra $server:$cfgmon_root/servers/* $cfgmon_root/servers/$server
             sleep 1
         done
         
@@ -130,20 +130,20 @@ if [ "$src_servers" != none ]; then
             echo Done.
         fi
 
-        if [ -f $cfgmon_root/$server/current/wls/context/status/discoverDomain.error ]; then
+        if [ -f $cfgmon_root/servers/$server/current/wls/context/status/discoverDomain.error ]; then
             echo ">> Recovering domain scan." 
             recover_discoverDomain_error $server
         fi
 
         # fix permissions
-        chmod -R o+x $cfgmon_root/$server
-        chmod -R o+r $cfgmon_root/$server
+        chmod -R o+x $cfgmon_root/servers/$server
+        chmod -R o+r $cfgmon_root/servers/$server
     done
 fi
 
 if [ ! -z "$nfs_root" ]; then
 
-    rsync -ra $nfs_root/* $cfgmon_root
+    rsync -ra $nfs_root/* $cfgmon_root/servers
     
 fi
 
@@ -152,7 +152,7 @@ fi
 #
 
 # add to version control
-cd $cfgmon_root
+cd $cfgmon_root/servers
 git add --all >/dev/null 2>&1
 git commit -am "system fetch" >/dev/null 2>&1
 cd - >/dev/null
