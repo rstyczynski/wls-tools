@@ -35,6 +35,10 @@ if [ "$src_servers" == init ]; then
 
     # preare cfg dump directory
     cfgmon_root=/home/pmaker/cfgmon
+
+    mkdir -p $cfgmon_root/servers
+    mkdir -p $cfgmon_root/reports
+
     git init $cfgmon_root
 
     # prepare http
@@ -60,6 +64,8 @@ EOF
 
     permission=$(ls -la --context /var/www/html | head -1 | cut -d' ' -f4)
     chcon -R $permission $cfgmon_root
+    chmod -R o+x $cfgmon_root/servers
+    chmod -R o+x $cfgmon_root/reports
     chmod -R o+x $cfgmon_root
 
     sudo systemctl restart httpd
