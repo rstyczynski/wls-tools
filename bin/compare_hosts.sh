@@ -128,8 +128,11 @@ function compareHosts() {
                             ansifilter -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
 
                             # report
+                            cat $report_root/$directory/$file.html
+
                             cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
 
+                            read -p "Press enter" aqq
                         fi
 
 
