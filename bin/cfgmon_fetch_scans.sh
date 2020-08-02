@@ -98,8 +98,8 @@ if [ "$src_servers" != none ]; then
         cnt=0
         
         echo -n ">> Removing current folder: $cfgmon_root/$server/current"
-        rm -rf $cfgmon_root/$server/current
-        echo -n '.'
+        rm -rf $cfgmon_root/$server/current/*
+        rmdir $cfgmon_root/$server/current
         
         echo -n ">> Fetching $server"
         mkdir -p $cfgmon_root/$server
