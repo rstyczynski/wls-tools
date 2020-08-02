@@ -130,9 +130,12 @@ function compareHosts() {
                             # report
                             cat $report_root/$directory/$file.html
 
-                            cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
+                            # xmllint does not work complaing with xml errors
+                            #cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | xmllint --xpath '/html/body'  - >> $report_root/report.html
 
-                            read -p "Press enter" aqq
+                            cat $report_root/$directory/$file.html | grep -v '<meta charset="ISO-8859-1">' | 
+                            sed -n '/<body>/,/<\/body>/p' | grep -v '<[\/]*body>' >> $report_root/report.html
+
                         fi
 
 
