@@ -160,10 +160,11 @@ function analyzeWLSjava() {
     wls_attributes_groups[$wls_server$delim\info$delim\java_bin]=$java_bin
 
     #echo 'Java binary version:'
-    java_version="$(sudo su - $os_user <<EOF
-$java_bin -version 2>&1 | tr '\n' ' ' 
-EOF
-)"
+#     java_version="$(sudo su - $os_user <<EOF
+# $java_bin -version 2>&1 | tr '\n' ' ' 
+# EOF
+# )"
+    java_version="$($java_bin -version 2>&1 | tr '\n' ' ')"
     echo $java_version >$tmp/skiplines.$$
     wls_attributes[$wls_server$delim\java_version]="$java_version"
     wls_attributes_groups[$wls_server$delim\info$delim\java_version]="$java_version"
