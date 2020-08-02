@@ -392,6 +392,10 @@ EOF
         if [ ! -z "$domain_home" ]; then
             echo $domain_home >$wlsdoc_now/context/status/domain_home.done
 
+            # prepare direcotry to keep domain data with link to make generic place
+            mkdir $wlsdoc_now/$domain_name
+            ln -s $wlsdoc_now/domain $wlsdoc_now/$domain_name
+
             #
             # prepare domain substitutions
             #
@@ -493,6 +497,8 @@ EOF
     mv $wlsdoc_root/current $wlsdoc_root/current.prv
     ln -s $wlsdoc_now $wlsdoc_root/current 
     rm -rf $wlsdoc_root/current.prv
+
+    # TODO - move it to other script
 
     # delete old files; checking few dirs to protects against error leading to removel of wrong files
     if [ ! -z "$wlsdoc_root" ]; then
