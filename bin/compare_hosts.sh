@@ -16,6 +16,13 @@ function compareHosts() {
     left_domain_home=$base_dir/servers/$left_host/$left_snapshot/wls/$left_domain
     right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
 
+    # make links to instances to compare
+    ln -s wls_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance
+    ln -s wls_instance $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/$left_instance
+
+    ln -s wls_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance
+    ln -s wls_instance $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/$right_instance
+
     echo $left_domain_home vs. $right_domain_home
 
     # initialize 
@@ -59,7 +66,7 @@ function compareHosts() {
     # apart from differences, compare dirs
     for directory in $(cat $tmp/dirs_left); do
         echo Checking $directory
-        cd $left_domain_home/$directory
+        cd $left_domain_home/$directory 
         find .  -maxdepth 1 -type f | cut -d'/' -f2 | sort >$tmp/files_left
         files_left=$(cat $tmp/files_left | grep -v variables | grep -v '.DS_Store')
 
