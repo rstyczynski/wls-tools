@@ -88,8 +88,8 @@ echo "== nfs_root   : $nfs_root"
 echo "======================================="
 echo "======================================="
 
-if [ ! -d $cfgmon_root/servers ]; then
-    echo 'Scan env not initialized. Run the script with init argument first.'
+if [ ! -d $cfgmon_root ]; then
+    echo 'Fetch scan utility not initialized. Run the script with init argument first.'
     exit 1
 fi
 
