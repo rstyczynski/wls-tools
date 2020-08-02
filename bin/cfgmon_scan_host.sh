@@ -65,6 +65,10 @@ fi
 # prepare cfg mon for today
 today=$(date -u +"%Y-%m-%d")
 cfgmon_now=$cfgmon_root/$today
+
+# remove today to avoind file mixing between multiple runs on the sme day
+rm -rf $cfgmon_now
+
 touch $cfgmon_root/lock
 
 # sysctl
@@ -118,7 +122,6 @@ fi
 EOF
 
 if [ -f /tmp/document_host.ok ]; then
-    rm -rf $cfgmon_now
     mkdir -p $cfgmon_now/wls
     cp -R $pmaker_home/cfgmon/inbox/* $cfgmon_now/wls/
     rm -rf $pmaker_home/cfgmon/inbox
