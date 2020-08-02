@@ -47,13 +47,13 @@ function compareHosts() {
     for directory in $(cat $tmp/dirs_left); do
         echo Checking $directory
         cd $left_domain_home/$directory
-        find . -type f -depth 1 | cut -d'/' -f2 | sort >$tmp/files_left
+        find . -type f | cut -d'/' -f2 | sort >$tmp/files_left
         files_left=$(cat $tmp/files_left | grep -v variables | grep -v '.DS_Store')
 
         if [ ! -z "$files_left" ]; then
             if [ -d $right_domain_home/$directory ]; then
                 cd $right_domain_home/$directory
-                find . -type f -depth 1 | cut -d'/' -f2  | sort >$tmp/files_right
+                find . -type f | cut -d'/' -f2  | sort >$tmp/files_right
                 files_right=$(cat $tmp/files_right)
 
                 if [ ! -z "$files_right" ]; then
@@ -163,11 +163,11 @@ tmp=/tmp/$$
 mkdir -p $tmp
 
 wls_diff_root=~/cfgmon
-base_dir=$wls_diff_root/wls-index
+base_dir=$wls_diff_root
 report_root=$wls_diff_root/report
 
 left=10.196.3.40
-right=10.196.4.41
+right=10.196.7.51
 
 left_domain_name=domain
 right_domain_name=domain
@@ -179,16 +179,11 @@ rm -f $report_root/report.html
 rm -f $report_root/index.html
 anchorCnt=0
 
-cd $base_dir/servers/$left/$snapshot
-for left_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
-    cd $base_dir/servers/$right/$snapshot
-    for right_domain_name in $(find . -type d -depth 1 | cut -d'/' -f2 | sort); do
-        echo $left_domain_name vs. $right_domain_name
-        compareHosts \
-        $left  $left_domain_name  $left_snapshot \
-        $right $right_domain_name $right_snapshot
-    done
-done
+
+compareHosts \
+$left  $left_domain_name  $left_snapshot \
+$right $right_domain_name $right_snapshot
+
 
 echo "<html>" > $report_root/diff_report.html
 
