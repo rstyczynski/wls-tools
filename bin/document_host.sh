@@ -563,6 +563,83 @@ EOF
     echo "========================================================================================="
 }
 
+
+#
+# domain discovery - recovery
+#
+
+function recover_discoverDomain_error() {
+    server=$1
+
+    [ -z "$server" ] && echo "Missing server name/ip." && return 1
+
+    echo "========================================================================================="
+    echo "======================= Discover domain recovery started ================================"
+    echo "========================================================================================="
+    echo
+
+    : ${cfgmon_root:=~/cfgmon}
+
+    wlsdoc_bin="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+    # proceed
+    if [ -f $cfgmon_root/$server/current/context/status/discoverDomain_recovery.done ]; then
+        echo "Already done."
+        return 0
+
+    else
+        # load process info
+        if [ ! -f $cfgmon_root/$server/current/wls/context/discover_processes.dump ]; then
+            echo Failure. Missing  discover_processes dump file. Cannot continue.
+            echo Missing  discover_processes dump file. Cannot continue.. Failure >$cfgmon_root/$server/current/context/status/discoverDomain_recovery.failure
+        fi
+        source $cfgmon_root/$server/current/wls/context/discover_processes.dump
+
+        # discover domain from copy
+        source $wlsdoc_bin/discover_domain.sh
+        discoverDomain $cfgmon_root/$server/current/wls/context/discover_domain
+        if [ $? -eq 0 ]; then
+            discoverDomain=OK
+            echo "OK"
+            echo discoverDomain. Done >$cfgmon_root/$server/current/context/status/discoverDomain_recovery.done
+            
+            # document domain
+            source $wlsdoc_bin/document_host.sh
+
+            unset domain_name
+            if [ ! -z "${wls_admin[0]}" ]; then
+                domain_name=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
+                prepareDomainSubstitutions $domain_name ${wls_admin[0]}
+            fi
+
+            if [ ! -z "${wls_managed[0]}" ]; then
+                domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
+                prepareDomainSubstitutions $domain_name ${wls_managed[0]}
+            fi
+
+            cfgmon_root/$server/current=$cfgmon_root/$server/current/wls
+            documentDomain $domain_name
+
+            # document servers
+            for wls_name in $(getWLSnames); do
+                echo "************************************************************"
+                echo "*** WebLogic server snapshot started for: $wls_name"
+                documentWLSruntime $wls_name
+                echo "*** WebLogic server snapshot completed for: $wls_name"
+                echo "************************************************************"
+                echo
+            done
+        else
+            echo Faulure.
+            echo discoverDomain. Failure >$cfgmon_root/$server/current/context/status/discoverDomain_recovery.failure
+        fi
+    fi
+
+    echo Done.
+}
+
+
+
 if [ "$1" == document ]; then
     document_host
 fi
