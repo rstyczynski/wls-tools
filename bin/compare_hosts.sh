@@ -181,7 +181,7 @@ base_dir=$wls_diff_root
 report_root=$wls_diff_root/report
 
 left=10.196.3.40
-right=10.196.7.51
+right=10.196.3.40
 
 left_domain_name=domain
 right_domain_name=domain
