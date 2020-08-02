@@ -30,19 +30,23 @@ function compareHosts() {
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     cp -R $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance/* $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
+    find $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance -type f -exec sed -i "s/$right_instance/\$[WLS_INSTANCE]/g" {} \;
 
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance 
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance
     cp -R $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/$left_instance/* $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance 
+    find $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/runtime/servers/wls_instance -type f -exec sed -i "s/$right_instance/\$[WLS_INSTANCE]/g" {} \;
 
     rm -rf $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance 
     mkdir $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance
     cp -R $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance/* $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance 
+    find $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/wls_instance -type f -exec sed -i "s/$right_instance/\$[WLS_INSTANCE]/g" {} \;
     
     rm -rf $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance
     mkdir $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance 
     cp -R $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/$right_instance/* $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance 
-    read -p "press enter" aqq
+    find $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance -type f -exec sed -i "s/$right_instance/\$[WLS_INSTANCE]/g" {} \;
+ 
 
     echo $left_domain_home vs. $right_domain_home
 
