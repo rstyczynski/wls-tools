@@ -393,7 +393,7 @@ EOF
             echo $domain_home >$wlsdoc_now/context/status/domain_home.done
 
             # prepare direcotry to keep domain data with link to make generic place
-            mkdir $wlsdoc_now/$domain_name
+            mkdir -p $wlsdoc_now/$domain_name
             ln -s $domain_name $wlsdoc_now/domain
 
             #
@@ -495,8 +495,8 @@ EOF
 
     # copying snapshot to current
     mv $wlsdoc_root/current $wlsdoc_root/current.prv
-    echo ln -s $(basename $wlsdoc_now) $wlsdoc_root/current
-    ln -s $(basename $wlsdoc_now) $wlsdoc_root/current 
+    echo ln -s history/$(basename $wlsdoc_now) $wlsdoc_root/current
+    ln -s history/$(basename $wlsdoc_now) $wlsdoc_root/current 
     rm -rf $wlsdoc_root/current.prv
 
     # TODO - move it to other script
