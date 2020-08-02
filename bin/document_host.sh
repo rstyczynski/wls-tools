@@ -623,7 +623,7 @@ function recover_discoverDomain_error() {
                 prepareDomainSubstitutions $domain_name ${wls_managed[0]}
             fi
 
-            cfgmon_root/$server/current=$cfgmon_root/$server/current/wls
+            wlsdoc_now=$cfgmon_root/$server/current/wls
             documentDomain $domain_name
 
             # document servers
