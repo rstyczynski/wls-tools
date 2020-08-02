@@ -42,7 +42,7 @@ function documentWLSruntime() {
     mkdir -p $dst
 
     # jvm version
-    $(getWLSjvmAttr $wls_name java_version) >$dst/version
+    getWLSjvmAttr $wls_name java_version >$dst/version
     substituteStringsGlobal $dst/version
 
     # jvm arguments
