@@ -181,15 +181,13 @@ function compareHosts() {
     done
 }
 
-tmp=/tmp/$$
-mkdir -p $tmp
 
-wls_diff_root=~/cfgmon
-base_dir=$wls_diff_root
-report_root=$wls_diff_root/report
+# 
+# main
+# 
 
 left=10.196.3.40
-right=10.196.3.40
+right=10.196.7.51
 
 left_domain_name=domain
 right_domain_name=domain
@@ -197,10 +195,26 @@ right_domain_name=domain
 left_snapshot=current
 right_snapshot=current
 
+#
+# initialize
+# 
+
+wls_diff_root=~/cfgmon
+
+tmp=/tmp/$$
+mkdir -p $tmp
+
+base_dir=$wls_diff_root
+report_root=$wls_diff_root/report
+
 rm -f $report_root/report.html
 rm -f $report_root/index.html
 anchorCnt=0
 
+
+#
+# do work
+# 
 
 compareHosts \
 $left  $left_domain_name  $left_snapshot \
