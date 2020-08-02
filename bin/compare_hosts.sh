@@ -5,10 +5,13 @@ unset compareHosts
 function compareHosts() {
     left_host=$1
     left_domain=$2
-    left_snapshot=$3
-    right_host=$4
-    right_domain=$5
-    right_snapshot=$6
+    left_instance=$3
+    left_snapshot=$4
+
+    right_host=$5
+    right_domain=$6
+    left_instance=$7
+    right_snapshot=$8
 
     left_domain_home=$base_dir/servers/$left_host/$left_snapshot/wls/$left_domain
     right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
@@ -24,9 +27,14 @@ function compareHosts() {
     #
 
     cd $left_domain_home
-    find . -type d | sort >$tmp/dirs_left
+    find . -type d | 
+    sed "s/$left_instance/wls_insnce/g"
+    sort >$tmp/dirs_left
+    
     cd $right_domain_home
-    find . -type d | sort >$tmp/dirs_right
+    find . -type d | 
+    sed "s/$right_instance/wls_insnce/g"
+    sort >$tmp/dirs_right
 
     diff $tmp/dirs_left $tmp/dirs_right >$tmp/diff_dirs
     if [ $? -ne 0 ]; then
@@ -169,7 +177,7 @@ function compareHosts() {
                         echo "</a>" >> $report_root/index.html
                         echo "</li>" >> $report_root/index.html
 
-                        echo echo $directory/$file 
+                        echo $directory/$file 
                         read -p "press enter" aqq
                     done
 
@@ -196,6 +204,9 @@ right=10.196.7.51
 left_domain_name=domain
 right_domain_name=domain
 
+left_instance=prodmftc_server_1
+right_instance=preprdmf_server_1
+
 left_snapshot=current
 right_snapshot=current
 
@@ -221,8 +232,8 @@ anchorCnt=0
 # 
 
 compareHosts \
-$left  $left_domain_name  $left_snapshot \
-$right $right_domain_name $right_snapshot
+$left  $left_domain_name  $left_instance $left_snapshot \
+$right $right_domain_name $right_instance $right_snapshot
 
 
 echo "<html>" > $report_root/diff_report.html
