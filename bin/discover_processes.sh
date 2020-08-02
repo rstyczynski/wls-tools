@@ -161,7 +161,7 @@ function analyzeWLSjava() {
 
     #echo 'Java binary version:'
     java_version="$(sudo su - $os_user <<EOF
-$java_bin -version | tr '\n' ' '
+$java_bin -version | tr '\n' ' ' 2>&1
 EOF
 )"
     echo $java_version >$tmp/skiplines.$$
