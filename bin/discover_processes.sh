@@ -235,7 +235,6 @@ function discoverWLSroles() {
         wls_attributes[$wls_server$delim\domain_home]=$(getWLSjvmAttr $wls_server -Ddomain.home)
         wls_attributes[$wls_server$delim\domain_name]=$(basename $(getWLSjvmAttr $wls_server -Ddomain.home))
         echo "================================"
-
     done
 }
 

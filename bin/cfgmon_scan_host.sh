@@ -81,13 +81,14 @@ chmod -R o+x ~/wls-tools
 chmod -R o+x ~/wls-tools/*
 wlstools_bin=$(cd ~/wls-tools/bin; pwd)
 
-sudo su $wls_user <<EOF
+# perform document_host
+sudo su - $wls_user <<EOF
 $wlstools_bin/document_host.sh document
 if [ \$? -eq 0 ]; then 
     touch /tmp/document_host.ok
     chmod -R o+r /tmp/document_host.ok
     rm -rf /tmp/document_host.error
-    chmod -R o+r /home/$wls_user/oracle/weblogic/current
+    chmod -R o+r $HOME/oracle/weblogic/current
 else
     touch /tmp/document_host.error
     chmod -R o+r /tmp/document_host.error
@@ -95,9 +96,12 @@ else
 fi
 EOF
 
+# take wls owner home dir
+wls_user_home=$(cat /etc/passwd | grep $wls_user | cut -d: -f6)
+
 if [ -f /tmp/document_host.ok ]; then
     mkdir -p $cfgmon_now/wls
-    cp -r /home/applsoad/oracle/weblogic/current/* $cfgmon_now/wls
+    cp -r $wls_user_home/oracle/weblogic/current/* $cfgmon_now/wls
 fi
 
 # make archive

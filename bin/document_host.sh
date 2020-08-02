@@ -294,9 +294,6 @@ function substituteStrings() {
 }
 
 function prepareSystemSubstitutions() {
-
-    set -x
-
     dst=$wlsdoc_now
     mkdir -p $dst
 
@@ -305,9 +302,6 @@ Password, *********=assword",.*
 [name="Password"]/value, *********=[name="Password"]/value,.*
 {AES}********={AES}.*
 EOF
-
-set +x
-
 }
 
 function prepareDomainSubstitutions() {
@@ -407,7 +401,7 @@ EOF
                 #
                 # prepare domain substitutions
                 #
-                prepareSystemSubstitutions # generic - discoverDomain nor reguired
+                prepareSystemSubstitutions # generic - discoverDomain not reguired
 
                 #
                 # get domain name | thre may be no admin or no managed server on this host...
