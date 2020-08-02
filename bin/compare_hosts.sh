@@ -16,6 +16,16 @@ function compareHosts() {
     left_domain_home=$base_dir/servers/$left_host/$left_snapshot/wls/$left_domain
     right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
 
+    if [ ! -d $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance ]; then
+        echo Error: Left instance selected to compare does not exist on server snapshot.
+        return 1
+    fi
+
+    if [ ! -d $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/$right_instance ]; then
+        echo Error: Right instance selected to compare does not exist on server snapshot.
+        return 1
+    fi 
+
     # make links to instances to compare
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
@@ -221,7 +231,7 @@ left_domain_name=domain
 right_domain_name=domain
 
 left_instance=preprdmf_server_1
-right_instance=prodmftc_server_1
+right_instance=prodmftc_server_2
 
 left_snapshot=current
 right_snapshot=current
