@@ -28,12 +28,12 @@ function compareHosts() {
 
     cd $left_domain_home
     find . -type d | 
-    sed "s/$left_instance/wls_insnce/g"
+    sed "s/$left_instance/wls_insnce/g" |
     sort >$tmp/dirs_left
     
     cd $right_domain_home
     find . -type d | 
-    sed "s/$right_instance/wls_insnce/g"
+    sed "s/$right_instance/wls_insnce/g" |
     sort >$tmp/dirs_right
 
     diff $tmp/dirs_left $tmp/dirs_right >$tmp/diff_dirs
