@@ -601,6 +601,7 @@ function recover_discoverDomain_error() {
         source $cfgmon_root/$server/current/wls/context/discover_processes.dump
 
         # discover domain from copy
+        source $wlsdoc_bin/discover_processes.sh
         source $wlsdoc_bin/discover_domain.sh
         discoverDomain $cfgmon_root/$server/current/wls/context/discover_domain
         if [ $? -eq 0 ]; then
