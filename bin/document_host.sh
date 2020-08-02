@@ -41,13 +41,10 @@ function documentWLSruntime() {
     dst=$wlsdoc_now/$domain_name/runtime/servers/$wls_name/jvm
     mkdir -p $dst
 
-    set -x
     # jvm version
-    $(getWLSjvmAttr $wls_name java_version) >$dst/version 2>&1
+    $(getWLSjvmAttr $wls_name java_version) >$dst/version
     substituteStringsGlobal $dst/version
-    set +x
-    read -p 'enter' qaa
-    
+
     # jvm arguments
     rm -f $dst/args
     for group in $(getWLSjvmGroups $wls_name); do
