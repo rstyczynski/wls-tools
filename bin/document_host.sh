@@ -591,7 +591,7 @@ function recover_discoverDomain_error() {
         # load process info
         if [ ! -f $cfgmon_root/$server/current/wls/context/discover_processes.dump ]; then
             echo Failure. Missing  discover_processes dump file. Cannot continue.
-            echo Missing  discover_processes dump file. Cannot continue.. Failure >$cfgmon_root/$server/current/context/status/discoverDomain_recovery.failure
+            echo Missing  discover_processes dump file. Cannot continue.. Failure >$cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.failure
         fi
         source $cfgmon_root/$server/current/wls/context/discover_processes.dump
 
@@ -601,7 +601,7 @@ function recover_discoverDomain_error() {
         if [ $? -eq 0 ]; then
             discoverDomain=OK
             echo "OK"
-            echo discoverDomain. Done >$cfgmon_root/$server/current/context/status/discoverDomain_recovery.done
+            echo discoverDomain. Done >$cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.done
             
             # document domain
             source $wlsdoc_bin/document_host.sh
@@ -631,7 +631,7 @@ function recover_discoverDomain_error() {
             done
         else
             echo Faulure.
-            echo discoverDomain. Failure >$cfgmon_root/$server/current/context/status/discoverDomain_recovery.failure
+            echo discoverDomain. Failure >$cfgmon_root/$server/current/wls/context/status/discoverDomain_recovery.failure
         fi
     fi
 
