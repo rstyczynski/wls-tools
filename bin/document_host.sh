@@ -42,7 +42,7 @@ function documentWLSruntime() {
     mkdir -p $dst
 
     # jvm version
-    $(getWLSjvmAttr $wls_name java_bin) -version >$dst/version 2>&1
+    $(getWLSjvmAttr $wls_name java_version) >$dst/version 2>&1
     substituteStringsGlobal $dst/version
 
     # jvm arguments
@@ -456,7 +456,7 @@ EOF
                     echo "************************************************************"
                     echo
 
-                    # document servers
+                    # document servers - must be here as requires domain substitutions
                     for wls_name in $(getWLSnames); do
                         echo "************************************************************"
                         echo "*** WebLogic server snapshot started for: $wls_name"
@@ -610,6 +610,7 @@ function recover_discoverDomain_error() {
         source $wlsdoc_bin/discover_processes.sh
         source $wlsdoc_bin/discover_domain.sh
 
+        # restore context for discover_process
         source $cfgmon_root/servers/$server/current/wls/context/discover_processes.dump
 
         wlsdoc_now=$cfgmon_root/servers/$server/current/wls
@@ -636,7 +637,7 @@ function recover_discoverDomain_error() {
 
             documentDomain $domain_name
 
-            # document servers
+            # document servers - must be here as requires domain substitutions
             for wls_name in $(getWLSnames); do
                 echo "************************************************************"
                 echo "*** WebLogic server snapshot started for: $wls_name"

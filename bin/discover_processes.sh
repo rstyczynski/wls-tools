@@ -159,6 +159,12 @@ function analyzeWLSjava() {
     wls_attributes[$wls_server$delim\java_bin]=$java_bin
     wls_attributes_groups[$wls_server$delim\info$delim\java_bin]=$java_bin
 
+    #echo 'Java binary version:'
+    java_version="$($java_bin -version)"
+    echo $java_version >$tmp/skiplines.$$
+    wls_attributes[$wls_server$delim\java_version]="$java_version"
+    wls_attributes_groups[$wls_server$delim\info$delim\java_version]="$java_version"
+
     #echo
     #echo 'Java boot jar:'
     boot_jar=$(echo $proc_cmd | tr ' ' '\n' | tail -1)
