@@ -109,12 +109,14 @@ fi
 #
 if [ $heapdump == "yes" ]; then
     echo ">> taking heap dump "
+    echo -n "Collecting heap dump "
     $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-        echo "| Done."
+        echo -n "| OK "
     else
-        echo "| Error."
+        echo -n "| Error "
     fi
+    echo "| Done."
 fi
 
 echo "Dumps saved to $log_dir"
