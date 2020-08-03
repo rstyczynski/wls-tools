@@ -65,6 +65,7 @@ function quit(){
 
 collection_timestamp=$(date::now)_$(time::now)
 log_dir=$debug_root/$(hostname)_$collection_timestamp; mkdir -p $log_dir
+mkdir -p $log_dir
 
 java_pid=$(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $2}')
 if [ -z $java_pid ]; then
