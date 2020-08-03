@@ -64,7 +64,7 @@ function quit(){
 }
 
 
-log_dir=$log_root/$(hostname)/$(date::now)_$(timenow); mkdir -p $log_dir
+log_dir=$log_root/$(hostname)/$(date::now)_$(time::now); mkdir -p $log_dir
 
 java_pid=$(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $2}')
 if [ -z $java_pid ]; then
