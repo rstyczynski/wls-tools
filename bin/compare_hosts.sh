@@ -236,8 +236,8 @@ function prepare_html_report() {
     # do work
 
     compareHosts \
-    $left  $left_domain  $left_instance $left_snapshot \
-    $right $right_domain $right_instance $right_snapshot
+    $left_host  $left_domain  $left_instance $left_snapshot \
+    $right_host $right_domain $right_instance $right_snapshot
 
 
     echo "<html>" > $report_root/diff_report.html
@@ -267,7 +267,7 @@ function prepare_html_report() {
     echo "<h1>Substituted variables</h1>"  >>$report_root/diff_report.html
     echo "<h2>Global</h2>"  >>$report_root/diff_report.html
     # cat $base_dir/servers/$right/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-    cat $base_dir/servers/$left/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+    cat $base_dir/servers/$left_host/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
 
 
     # echo "<h2>$left</h2>"  >>$report_root/diff_report.html
@@ -344,13 +344,13 @@ report_root=$wls_diff_root/report
 #
 # verify parameters
 #
-if [ ! -d $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers/$left_instance ]; then
+if [ ! -d $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance ]; then
     echo "Error. Left server does not exist in repository."
     usage
     exit 1
 fi
 
-if [ ! -d $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers/$right_instance ]; then
+if [ ! -d $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance ]; then
     echo "Error. Right server does not exist in repository."
     usage
     exit 1
