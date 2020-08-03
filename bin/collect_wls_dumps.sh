@@ -7,12 +7,13 @@ function usage() {
 
 server_name=$1; shift
 
+reg_int='^[0-9]+$'
 if [[ $1 == 'threadump' ]] ; then
     threadump=yes; shift
-    if [[ $1 =~ '^[0-9]+$' ]] ; then
+    if [[ $1 =~ $reg_int ]] ; then
         count=$1; shift
     fi
-    if [[ $1 =~ '^[0-9]+$' ]] ; then
+    if [[ $1 =~ $reg_int ]] ; then
         interval=$1; shift
     fi
 fi
