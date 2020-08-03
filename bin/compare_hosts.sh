@@ -25,8 +25,11 @@ function compareHosts() {
         return 1
     fi 
 
-    rm -f $report_root/report.html
-    rm -f $report_root/index.html
+    # initialize 
+
+    report_root=$base_dir/reports/$left_host\_$left_domain\_$left_instance\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_instance\_$right_snapshot
+    mkdir -p $report_root
+    rm -rf $report_root/*
     anchorCnt=0
 
     # make links to instances to compare
@@ -52,12 +55,6 @@ function compareHosts() {
  
 
     echo $left_domain_home vs. $right_domain_home
-
-    # initialize 
-
-    report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
-    mkdir -p $report_root
-    rm -rf $report_root/*
 
     #
 
@@ -335,13 +332,10 @@ EOF
 # initialize
 # 
 
-wls_diff_root=~/cfgmon
+base_dir=~/cfgmon
 
 tmp=/tmp/$$
 mkdir -p $tmp
-
-base_dir=$wls_diff_root
-report_root=$wls_diff_root/report
 
 # 
 # main
