@@ -29,7 +29,7 @@ fi
 : ${threaddump:yes}
 : ${count:=5}
 : ${interval:=5}
-: ${heapdump:=no}
+: ${heapdump:=yes}
 : ${log_root:=~/debug_data}
 
 ##
@@ -109,7 +109,7 @@ fi
 #
 if [ $heapdump == "yes" ]; then
     echo ">> taking heap dump"
-    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof 2>/dev/null
+    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "| Done."
     else
