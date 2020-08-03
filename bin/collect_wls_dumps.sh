@@ -173,17 +173,17 @@ mkdir -p $debug_root/outbox
 cd $log_dir
 if [ $threaddump == "yes" ]; then
     echo ">> compressing thread dumps..."
-    tar -zcvf $debug_root/outbox/$collection_timestamp\_jvm-$server_name\-threaddump.tar.gz *.jstack >/dev/null
+    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-threaddump.tar.gz *.jstack >/dev/null
 fi
 
 if [ $heapdump == "yes" ]; then
     echo ">> compressing heap dumps..."
-    tar -zcvf $debug_root/outbox/$collection_timestamp\_jvm-$server_name\-heapdump.tar.gz *.hprof >/dev/null
+    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-heapdump.tar.gz *.hprof >/dev/null
 fi
 
 if [ $lsof == "yes" ]; then
     echo ">> compressing lsof dumps..."
-    tar -zcvf $debug_root/outbox/$collection_timestamp\_jvm-$server_name\-lsof.tar.gz *.lsof >/dev/null
+    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-lsof.tar.gz *.lsof >/dev/null
 fi
 
 cd -
@@ -193,7 +193,7 @@ if [ $oswatcher == 'yes' ]; then
     if [ -f /etc/sysconfig/oswatcher ]; then
         osw_dir=$(grep "^DATADIR=" /etc/sysconfig/oswatcher | cut -f2 -d=)
         cd $osw_dir
-        tar -zcvf $debug_root/outbox/$collection_timestamp\_osw.tar.gz ./ >/dev/null
+        tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_osw.tar.gz ./ >/dev/null
         cd -
     else
         echo Warning: OSWatcher not available. Skipping...
@@ -201,7 +201,7 @@ if [ $oswatcher == 'yes' ]; then
 fi
 
 echo "Transportable tar files saved to $debug_root/outbox:"
-ls -l -h $debug_root/outbox/$collection_timestamp
+ls -l -h $debug_root/outbox/wls_dumps_$collection_timestamp*
 
 
 
