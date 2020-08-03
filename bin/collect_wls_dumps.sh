@@ -95,7 +95,7 @@ if [ $threaddump == "yes" ] && [ $lsof == "yes" ]; then
     echo ">> taking thread dumps and lsof"
     echo -n "Collecting thread dump and list of open files"
     for cnt in $(seq 1 $count); do
-        $java_bin/jstack $java_pid > $log_dir/threaddump.$(time::now).jstack
+        $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
@@ -111,8 +111,8 @@ elif [ $threaddump == "yes" ]; then
     echo ">> taking thread dumps"
     echo -n "Collecting thread dump "
     for cnt in $(seq 1 $count); do
-        lsof -p $java_pid > $log_dir/lsof_$(time::now).log
-        $java_bin/jstack $java_pid > $log_dir/threaddump.$(time::now).jstack
+        lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).log
+        $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
@@ -132,7 +132,7 @@ fi
 if [ $heapdump == "yes" ]; then
     echo ">> taking heap dump "
     echo -n "Collecting heap dump "
-    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof >/dev/null 2>&1
+    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/$server_name\_heapdump_$(time::now).hprof >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo -n "| OK "
     else
@@ -147,7 +147,7 @@ fi
 if [ $threaddump == "no" ] && [ $lsof == "yes" ]; then
     echo ">> taking list of open files "
     echo -n "Collecting lsof "
-    lsof -p $java_pid > $log_dir/lsof_$(time::now).log
+    lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).log
     if [ $? -eq 0 ]; then
         echo -n "| OK "
     else
