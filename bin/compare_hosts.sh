@@ -304,7 +304,8 @@ function prepare_html_report() {
     cd
 }
 
-unset usagefunction usage() {
+unset usage
+function usage() {
     cat <<EOF
 Usage: compare_hosts.sh host domain instance snapshot host domain instance snapshot
 e.g.
