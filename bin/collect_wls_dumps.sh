@@ -75,7 +75,7 @@ function init() {
     echo ">> installing oswatcher"
 
     timeout 1 sudo ls >/dev/null 2>&1
-    if [ $? -eq 127 ]; then
+    if [ $? -eq 124 ]; then
         echo "Error: must have rights to do sudo, but $(whoami) has no rights. Switch sodo user and repeat."
         quit 1
     else
