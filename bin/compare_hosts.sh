@@ -28,7 +28,7 @@ function compareHosts() {
     rm -f $report_root/report.html
     rm -f $report_root/index.html
     anchorCnt=0
-    
+
     # make links to instances to compare
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
@@ -284,30 +284,52 @@ function prepare_html_report() {
     cd
 }
 
+unset batch_reports
+function batch_reports() {
+    export batch_cfg=$1
+
+    if [ ! -f $report_cfg ]; then
+        echo "
+Usage: batch_reports batch_cfg
+
+Exeplary batch_cfg format:
+# preprod isfelf
+10.196.3.40 preprdmf_domain preprdmf_server_1 current 10.196.3.41 preprdmf_domain preprdmf_server_2 current
+
+# prod isfelf
+10.196.7.49 prodmftc_domain prodmftc_server_1 current 10.196.7.51 prodmftc_domain prodmftc_server_2 current
+"  
+        return 1
+    fi
+
+    while IFS= read -r compare_params_line; do
+        read -r -a compare_params <<< "$compare_params_line"
+
+        echo "${compare_params[@]}"
+        left_host=${compare_params[0]}
+        left_domain=${compare_params[1]}
+        left_instance=${compare_params[2]}
+        left_snapshot=${compare_params[3]}
+
+        right_host=${compare_params[4]}
+        right_domain=${compare_params[5]}
+        right_instance=${compare_params[6]}
+        right_snapshot=${compare_params[7]}
+        prepare_html_report
+
+    done < <(cat $batch_cfg | grep -v '^#' | sed -r '/^\s*$/d')
+}
+
 unset usage
 function usage() {
     cat <<EOF
-Usage: compare_hosts.sh host domain instance snapshot host domain instance snapshot
+Usage: compare_hosts.sh [batch batch_cfg] [host domain instance snapshot host domain instance snapshot]
 e.g.
 compare_hosts.sh \
 10.196.3.40 preprdmf_domain preprdmf_server_1 current \
 10.196.7.51 prodmftc_domain prodmftc_server_2 current
 EOF
 }
-
-# 
-# main
-# 
-
-left_host=$1
-left_domain=$2
-left_instance=$3
-left_snapshot=$4
-
-right_host=$5
-right_domain=$6
-right_instance=$7
-right_snapshot=$8
 
 #
 # initialize
@@ -321,20 +343,41 @@ mkdir -p $tmp
 base_dir=$wls_diff_root
 report_root=$wls_diff_root/report
 
-#
-# verify parameters
-#
-if [ ! -d $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance ]; then
-    echo "Error. Left server does not exist in repository."
-    usage
-    exit 1
-fi
+# 
+# main
+# 
 
-if [ ! -d $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance ]; then
-    echo "Error. Right server does not exist in repository."
-    usage
-    exit 1
-fi
+case $1 in
+batch)
+    batch_reports $2
+    ;;
+*)
+    left_host=$1
+    left_domain=$2
+    left_instance=$3
+    left_snapshot=$4
 
+    right_host=$5
+    right_domain=$6
+    right_instance=$7
+    right_snapshot=$8
 
-prepare_html_report
+    #
+    # verify parameters
+    #
+    if [ ! -d $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance ]; then
+        echo "Error. Left server does not exist in repository."
+        usage
+        exit 1
+    fi
+
+    if [ ! -d $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/servers/$right_instance ]; then
+        echo "Error. Right server does not exist in repository."
+        usage
+        exit 1
+    fi
+
+    prepare_html_report
+    exit $?
+    ;;
+esac
