@@ -184,7 +184,7 @@ if [ $oswatcher == 'yes' ]; then
     if [ -f /etc/sysconfig/oswatcher ]; then
         osw_dir=$(grep "^DATADIR=" /etc/sysconfig/oswatcher | cut -f2 -d=)
         cd $osw_dir/archive
-        tar -zcvf $debug_root/outbox/$collection_timestmap\_osw.tar.gz *. >/dev/null
+        tar -zcvf $debug_root/outbox/$collection_timestmap\_osw.tar.gz ./ >/dev/null
         cd -
     else
         echo Warning: OSWatcher not available. Skipping...
