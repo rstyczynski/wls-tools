@@ -67,8 +67,7 @@ $(curl http://$cfgmon_server/cfgmon/servers/$left_host/current/wls/domain/middle
 curl http://$cfgmon_server/cfgmon/servers/$right_host/current/wls/domain/middleware/opatch/patches > /tmp/right.patches;
 sdiff /tmp/left.patches /tmp/right.patches)
 
-
 -Ryszard
 EOF
-break
+
 done
