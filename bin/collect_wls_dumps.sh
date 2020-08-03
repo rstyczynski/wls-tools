@@ -80,14 +80,27 @@ fi
 #
 # thread dumps
 #
-echo ">> taking thread dumps"
-echo -n "Collecting thread dump "
-for cnt in $(seq 1 $count); do
-  $java_bin/jstack $java_pid > $log_dir/threaddump.$(time::now).jstack
-  echo -n "| $cnt of $count"
-  if [ $cnt -ne $count ]; then
-    sleep $interval
-  fi
-done
-echo "| Done. Thread dumps saved to $log_dir"
+if [ $threaddump == "yes" ]; then
+    echo ">> taking thread dumps"
+    echo -n "Collecting thread dump "
+    for cnt in $(seq 1 $count); do
+    $java_bin/jstack $java_pid > $log_dir/threaddump.$(time::now).jstack
+    echo -n "| $cnt of $count"
+    if [ $cnt -ne $count ]; then
+        sleep $interval
+    fi
+    done
+    echo "| Done."
+fi
+
+#
+# heap dump
+#
+if [ $heapdump == "yes" ]; then
+    echo ">> taking heap dump"
+    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof 
+    echo "| Done."
+fi
+
+echo "Dumps saved to $log_dir"
 
