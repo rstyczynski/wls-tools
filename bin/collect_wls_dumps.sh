@@ -2,7 +2,7 @@
 
 
 function usage() {
-    echo "Usage: collect_wls_dump.sh server_name [threaddump count interval] [heapdump] [lsof] [log_root dir]"
+    echo "Usage: collect_wls_dump.sh server_name [threaddump count interval] [heapdump] [lsof] [oswatcher] [log_root dir]"
 }
 
 server_name=$1; shift
@@ -26,6 +26,10 @@ if [[ $1 == 'lsof' ]] ; then
     lsof=yes; shift
 fi
 
+if [[ $1 == 'oswatcher' ]] ; then
+    oswatcher=yes; shift
+fi
+
 if [[ $1 == 'log_root' ]] ; then
     log_root=$2; shift; shift
 fi
@@ -35,6 +39,7 @@ fi
 : ${interval:=5}
 : ${heapdump:=no}
 : ${lsof:=no}
+: ${oswatcher:=no}
 : ${log_root:=~/debug_data}
 
 ##
@@ -59,7 +64,7 @@ function quit(){
 }
 
 
-log_dir=$log_root/$(hostname)/$(date::now); mkdir -p $log_dir
+log_dir=$log_root/$(hostname)/$(date::now)_$(timenow); mkdir -p $log_dir
 
 java_pid=$(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $2}')
 if [ -z $java_pid ]; then
@@ -157,4 +162,9 @@ if [ $threaddump == "no" ] && [ $lsof == "yes" ]; then
 fi
 
 echo "Dumps saved to $log_dir"
+
+#
+# tar
+#
+
 
