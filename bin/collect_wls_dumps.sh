@@ -201,7 +201,7 @@ if [ $oswatcher == 'yes' ]; then
 fi
 
 echo "Transportable tar files saved to $debug_root/outbox:"
-ll -h $debug_root/outbox/$collection_timestamp
+ls -l -h $debug_root/outbox/$collection_timestamp
 
 
 
