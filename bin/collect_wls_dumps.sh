@@ -271,5 +271,7 @@ if [ $oswatcher == 'yes' ]; then
     fi
 fi
 
+chmod o+r $debug_root/outbox/wls_dumps_$collection_timestamp*
+
 echo "Transportable tar files saved to $debug_root/outbox:"
 ls -l -h $debug_root/outbox/wls_dumps_$collection_timestamp* | cut -d' ' -f5-999
