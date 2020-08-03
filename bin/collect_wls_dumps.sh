@@ -271,6 +271,7 @@ if [ $oswatcher == 'yes' ]; then
     fi
 fi
 
+echo ">> making everyone able to read dump files..."
 chmod o+r $debug_root/outbox/wls_dumps_$collection_timestamp*
 
 echo "Transportable tar files saved to $debug_root/outbox:"
