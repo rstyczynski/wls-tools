@@ -84,12 +84,12 @@ function init() {
         os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
         case $os_release in
         6)
-            sudo chkconfig oswatcher on
-            sudo service oswatcher start
+            sudo chkconfig oswatcher on; echo "oswatcher service enabled on boot."
+            sudo service oswatcher start; echo "oswatcher service started."
             ;;
         7)
-            sudo systemctl enable oswatcher
-            sudo systemctl start oswatcher
+            sudo systemctl enable oswatcher; echo "oswatcher service enabled on boot."
+            sudo systemctl start oswatcher; echo "oswatcher service started."
             ;;
         *)
             echo Error. Unsupported OS release.
