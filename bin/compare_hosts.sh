@@ -257,8 +257,8 @@ function prepare_html_report() {
 
     echo "<h1>"                  >>$report_root/diff_report.html
     echo "Weblogic compare report for: " >>$report_root/diff_report.html
-    echo "$left_host | $left_domain | $left_snapshot | $left_instance " >>$report_root/diff_report.html
-    echo "vs." >>$report_root/diff_report.html
+    echo "$left_host | $left_domain | $left_snapshot | $left_instance </br>"      >>$report_root/diff_report.html
+    echo "vs. </br>"                                                              >>$report_root/diff_report.html
     echo "$right_host | $right_domain | $right_snapshot | $right_instance </br>"  >>$report_root/diff_report.html
     echo "</h1>"                  >>$report_root/diff_report.html
 
