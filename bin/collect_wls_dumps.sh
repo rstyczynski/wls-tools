@@ -2,13 +2,13 @@
 
 
 function usage() {
-    echo"Usage: collect_wls_dump.sh server_name [threadump count interval] [heapdump] [log_root dir]"
+    echo "Usage: collect_wls_dump.sh server_name [threadump count interval] [heapdump] [log_root dir]"
 }
 
 server_name=$1; shift
 
 if [[ $1 == 'threadump' ]] ; then
-    threadump=yes; shift]
+    threadump=yes; shift
     if [[ $1 =~ '^[0-9]+$' ]] ; then
         count=$1; shift
     fi
