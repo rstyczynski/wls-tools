@@ -102,6 +102,14 @@ function init() {
 
 
 #
+# init
+#
+if [ $init == "yes" ]; then
+    init
+    quit 0
+fi
+
+#
 # do work
 #
 
@@ -134,13 +142,6 @@ $java_bin/jcmd >/dev/null 2>&1
 if [ $? -eq 127 ]; then 
   echo Error: jcmd not found.
   quit 1 
-fi
-
-#
-# init
-#
-if [ $init == "yes" ]; then
-    init
 fi
 
 #
