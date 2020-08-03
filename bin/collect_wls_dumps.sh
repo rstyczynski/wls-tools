@@ -133,13 +133,13 @@ fi
 
 java_bin=$(dirname $(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $8}'))
 $java_bin/jstack >/dev/null 2>&1
-if [ $? -eq 127 ]; then 
+if [ $? -eq 127 ]; then
   echo Error: jstack not found.
   quit 1 
 fi
 
 $java_bin/jcmd >/dev/null 2>&1
-if [ $? -eq 127 ]; then 
+if [ $? -eq 127 ]; then
   echo Error: jcmd not found.
   quit 1 
 fi
