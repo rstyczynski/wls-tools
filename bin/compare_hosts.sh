@@ -334,7 +334,7 @@ Exeplary batch_cfg format:
         right_snapshot=${compare_params[7]}
         prepare_html_report
 
-    done < <(cat $batch_cfg | grep -v '^#' | sed -r '/^\s*$/d')
+    done < <(cat $batch_cfg | grep -v '^#' | sed -r '/^\s*$/d' | egrep '^compare_set[0-9]+=' | cut -d= -f2)
 }
 
 unset usage
