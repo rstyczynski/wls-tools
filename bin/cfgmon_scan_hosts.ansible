@@ -1,6 +1,11 @@
 ---
 - hosts: all
   tasks:
+  - name: Install git
+    yum:
+      name: git
+      state: present
+      
   - name: clone wls-tools
     git:
       repo: 'https://github.com/rstyczynski/wls-tools.git'
