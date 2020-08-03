@@ -12,9 +12,6 @@ function compareHosts() {
     right_instance=$7
     right_snapshot=$8
 
-    left_domain_home=$base_dir/servers/$left_host/$left_snapshot/wls/$left_domain
-    right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
-
     if [ ! -d $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/$left_instance ]; then
         echo Error: Left instance selected to compare does not exist on server snapshot.
         return 1
@@ -53,6 +50,13 @@ function compareHosts() {
     cp -R $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/$right_instance/* $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance 
     find $base_dir/servers/$right_host/$right_snapshot/wls/$right_domain/runtime/servers/wls_instance -type f -exec sed -i "s/$right_instance/\$[WLS_INSTANCE]/g" {} \;
  
+    # set domain dirs
+    left_domain_home=$base_dir/servers/$left_host/$left_snapshot/wls/$left_domain
+    right_domain_home=$base_dir/servers/$right_host/$right_snapshot/wls/$right_domain
+
+    #
+    # do work
+    #
 
     echo $left_domain_home vs. $right_domain_home
 
@@ -80,8 +84,8 @@ function compareHosts() {
         if [ ! -z "$extra_right" ]; then
             echo "MISMATCH: Extra directories at $right. Extra dirs: $extra_right"
 
-            report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
-            mkdir -p $report_root
+            #report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+            #mkdir -p $report_root
             cat $tmp/diff_dirs | grep '>' >$report_root/extra_dirs_at_right
         fi 
     fi
@@ -108,7 +112,7 @@ function compareHosts() {
                         if [ ! -z "$extra_left" ]; then
                             echo "MISMATCH: Missing files at $right. Extra files: $extra_left"
 
-                            report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+                            #report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
                             mkdir -p $report_root/$directory
                             cat $tmp/diff_files | grep '<' >$report_root/$directory/missing_files_at_right
                         fi 
@@ -118,7 +122,7 @@ function compareHosts() {
                         if [ ! -z "$extra_right" ]; then
                             echo "MISMATCH: Extra files at $right. Extra files: $extra_right"
 
-                            report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+                            #report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
                             mkdir -p $report_root/$directory
                             cat $tmp/diff_files | grep '>' >$report_root/$directory/extra_files_at_right
                         fi 
@@ -155,7 +159,7 @@ function compareHosts() {
                                 diff_result=NO
                                 echo OK
 
-                                report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+                                #report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
                                 mkdir -p $report_root/$directory
 
                                 cat $left_domain_home/$directory/$file > $report_root/$directory/$file.txt
@@ -172,7 +176,7 @@ function compareHosts() {
                                 echo "MISMATCH detected."
                                 cat $tmp/diff_file
 
-                                report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
+                                #report_root=$base_dir/reports/$left_host\_$left_domain\_$left_snapshot\_vs_$right_host\_$right_domain\_$right_snapshot
                                 mkdir -p $report_root/$directory
                                 git diff --color-words --no-index $left_domain_home/$directory/$file $right_domain_home/$directory/$file > $report_root/$directory/$file.txt
                                 ansifilter -i $report_root/$directory/$file.txt -H -o $report_root/$directory/$file.html
