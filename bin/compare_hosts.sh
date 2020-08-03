@@ -29,6 +29,22 @@ function compareHosts() {
     rm -rf $report_root/*
     anchorCnt=0
 
+    #
+    # 
+    #
+    cat > $report_root/parameters <<EOF
+left_host=$left_host
+left_domain=$left_domain
+left_instance=$left_instance
+left_snapshot=$left_snapshot
+
+right_host=$right_host
+right_domain=$right_domain
+right_instance=$right_instance
+right_snapshot=$right_snapshot
+EOF
+
+
     # make links to instances to compare
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance

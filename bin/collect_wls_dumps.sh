@@ -47,6 +47,17 @@ fi
 : ${debug_root:=~/debug_data}
 : ${init:=no}
 
+
+echo "==================================="
+echo "======= WebLogic data dump ========"
+echo "==================================="
+echo "=== Host:       $(hostname)"
+echo "=== Reporter:   $(whoami)"
+echo "=== Date:       $(date)"
+echo "==="
+echo "=== Server:     $server_name"
+echo "==================================="
+
 ##
 ## shared functions
 ##
