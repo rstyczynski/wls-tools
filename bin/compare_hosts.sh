@@ -25,6 +25,10 @@ function compareHosts() {
         return 1
     fi 
 
+    rm -f $report_root/report.html
+    rm -f $report_root/index.html
+    anchorCnt=0
+    
     # make links to instances to compare
     rm -rf $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
     mkdir $base_dir/servers/$left_host/$left_snapshot/wls/$left_domain/servers/wls_instance
@@ -228,18 +232,12 @@ function compareHosts() {
 unset prepare_html_report
 function prepare_html_report() {
     
-
-    rm -f $report_root/report.html
-    rm -f $report_root/index.html
-    anchorCnt=0
-
     # do work
-
     compareHosts \
     $left_host  $left_domain  $left_instance $left_snapshot \
     $right_host $right_domain $right_instance $right_snapshot
 
-
+    # wrap up the report
     echo "<html>" > $report_root/diff_report.html
 
     echo "<head>"                >>$report_root/diff_report.html
@@ -253,13 +251,14 @@ function prepare_html_report() {
 
     echo "<p style=\"font-size:20px\">" >>$report_root/diff_report.html
 
-    date  >>$report_root/diff_report.html
-    echo "</br>"              >>$report_root/diff_report.html
+    date                         >>$report_root/diff_report.html
+    echo "</br>"                 >>$report_root/diff_report.html
 
     echo "<h1>"                  >>$report_root/diff_report.html
     echo "Weblogic compare report for: " >>$report_root/diff_report.html
-    echo "$left_host | $left_domain | $left_snapshot vs." >>$report_root/diff_report.html
-    echo "$right_host | $right_domain | $right_snapshot </br>"  >>$report_root/diff_report.html
+    echo "$left_host | $left_domain | $left_snapshot | $left_instance " >>$report_root/diff_report.html
+    echo "vs." >>$report_root/diff_report.html
+    echo "$right_host | $right_domain | $right_snapshot | $right_instance </br>"  >>$report_root/diff_report.html
     echo "</h1>"                  >>$report_root/diff_report.html
 
     echo "</p>"              >>$report_root/diff_report.html
@@ -269,31 +268,12 @@ function prepare_html_report() {
     # cat $base_dir/servers/$right/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
     cat $base_dir/servers/$left_host/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
 
-
-    # echo "<h2>$left</h2>"  >>$report_root/diff_report.html
-    # echo "<h3>domain</h3>"  >>$report_root/diff_report.html
-    # #cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-    # #for wls_name in $(ls $base_dir/servers/$right/$left_snapshot/wls/$left_domain/servers); do
-    
-    # cat $base_dir/servers/$left/$left_snapshot/wls/$left_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-    # for wls_name in $(ls $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers); do
-    #     echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
-    #     # cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain/servers/$wls_name/variables >>$report_root/diff_report.html
-    #     cat $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers/$wls_name/variables >>$report_root/diff_report.html
-    # done
-
-    # echo "<h2>$right</h2>"  >>$report_root/diff_report.html
-    # echo "<h3>domain</h3>"  >>$report_root/diff_report.html
-    # cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-    # for wls_name in $(ls $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers); do
-    #     echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
-    #     cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers/$wls_name/variables >>$report_root/diff_report.html
-    # done
-
     echo "<h1>Compared files</h1>"  >>$report_root/diff_report.html
     echo "<ul>"                     >>$report_root/diff_report.html
+    # index
     cat $report_root/index.html     >>$report_root/diff_report.html
     echo "</ul>"                    >>$report_root/diff_report.html
+    # report body
     cat $report_root/report.html    >>$report_root/diff_report.html
     echo "</body>"                  >>$report_root/diff_report.html
     echo "</html>"                  >> $report_root/diff_report.html
