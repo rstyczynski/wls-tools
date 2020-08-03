@@ -2,14 +2,14 @@
 
 
 function usage() {
-    echo "Usage: collect_wls_dump.sh server_name [threadump count interval] [heapdump] [log_root dir]"
+    echo "Usage: collect_wls_dump.sh server_name [threaddump count interval] [heapdump] [log_root dir]"
 }
 
 server_name=$1; shift
 
 reg_int='^[0-9]+$'
-if [[ $1 == 'threadump' ]] ; then
-    threadump=yes; shift
+if [[ $1 == 'threaddump' ]] ; then
+    threaddump=yes; shift
     if [[ $1 =~ $reg_int ]] ; then
         count=$1; shift
     fi
@@ -26,7 +26,7 @@ if [[ $1 == 'log_root' ]] ; then
     log_root=$2; shift; shift
 fi
 
-: ${threadump:yes}
+: ${threaddump:yes}
 : ${count:=5}
 : ${interval:=5}
 : ${heapdump:=no}
@@ -74,7 +74,13 @@ java_bin=$(dirname $(ps -ef | grep java | grep $server_name | grep -v grep | awk
 $java_bin/jstack >/dev/null 2>&1
 if [ $? -eq 127 ]; then 
   echo Error: jstack not found.
-  return 1 
+  quit 1 
+fi
+
+$java_bin/jcmd >/dev/null 2>&1
+if [ $? -eq 127 ]; then 
+  echo Error: jcmd not found.
+  quit 1 
 fi
 
 #
@@ -84,11 +90,16 @@ if [ $threaddump == "yes" ]; then
     echo ">> taking thread dumps"
     echo -n "Collecting thread dump "
     for cnt in $(seq 1 $count); do
-    $java_bin/jstack $java_pid > $log_dir/threaddump.$(time::now).jstack
-    echo -n "| $cnt of $count"
-    if [ $cnt -ne $count ]; then
-        sleep $interval
-    fi
+        $java_bin/jstack $java_pid > $log_dir/threaddump.$(time::now).jstack
+        if [ $? -eq 0 ]; then
+            echo -n "| $cnt of $count Done."
+        else
+            echo -n "| $cnt of $count Error."
+        fi
+        
+        if [ $cnt -ne $count ]; then
+            sleep $interval
+        fi
     done
     echo "| Done."
 fi
@@ -98,8 +109,12 @@ fi
 #
 if [ $heapdump == "yes" ]; then
     echo ">> taking heap dump"
-    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof 
-    echo "| Done."
+    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof 2>/dev/null
+    if [ $? -eq 0 ]; then
+        echo "| Done."
+    else
+        echo "| Error."
+    fi
 fi
 
 echo "Dumps saved to $log_dir"
