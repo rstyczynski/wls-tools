@@ -131,7 +131,7 @@ fi
 #
 # init
 #
-[ $init == "yes" ]; then
+if [ $init == "yes" ]; then
     init
 fi
 
