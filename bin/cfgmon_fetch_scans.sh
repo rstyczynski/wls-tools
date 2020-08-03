@@ -44,10 +44,8 @@ if [ "$src_servers" == init ]; then
     # prepare http
 
     cat >~/cfgmon.tmp <<EOF
-AllowOverride ALL
-
 Alias /cfgmon $cfgmon_root
-
+IndexOptions NameWidth=*
 <Directory $cfgmon_root>
     Options +Indexes  
     #RH7 only
@@ -71,11 +69,11 @@ EOF
     sudo mv ~/cfgmon.tmp /etc/httpd/conf.d/cfgmon.conf
     sudo chcon unconfined_u:object_r:httpd_config_t:s0 /etc/httpd/conf.d/cfgmon.conf
 
-    echo 'IndexOptions NameWidth=*' > $cfgmon_root/servers/.htaccess
-    sudo chcon unconfined_u:object_r:httpd_config_t:s0 $cfgmon_root/servers/.htaccess
+    # echo 'IndexOptions NameWidth=*' > $cfgmon_root/servers/.htaccess
+    # sudo chcon unconfined_u:object_r:httpd_config_t:s0 $cfgmon_root/servers/.htaccess
 
-    echo 'IndexOptions NameWidth=*' > $cfgmon_root/reports/.htaccess
-    sudo chcon unconfined_u:object_r:httpd_config_t:s0 $cfgmon_root/servers/.htaccess
+    # echo 'IndexOptions NameWidth=*' > $cfgmon_root/reports/.htaccess
+    # sudo chcon unconfined_u:object_r:httpd_config_t:s0 $cfgmon_root/servers/.htaccess
 
     permission=$(ls -la --context /var/www/html | head -1 | cut -d' ' -f4)
     chcon -R $permission $cfgmon_root/servers
