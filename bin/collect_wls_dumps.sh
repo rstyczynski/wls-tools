@@ -26,7 +26,7 @@ if [[ $1 == 'log_root' ]] ; then
     log_root=$2; shift; shift
 fi
 
-: ${threaddump:yes}
+: ${threaddump:=yes}
 : ${count:=5}
 : ${interval:=5}
 : ${heapdump:=yes}
