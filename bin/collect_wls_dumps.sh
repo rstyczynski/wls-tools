@@ -92,9 +92,9 @@ if [ $threaddump == "yes" ]; then
     for cnt in $(seq 1 $count); do
         $java_bin/jstack $java_pid > $log_dir/threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
-            echo -n "| $cnt of $count Done."
+            echo -n "| $cnt of $count OK "
         else
-            echo -n "| $cnt of $count Error."
+            echo -n "| $cnt of $count Error "
         fi
         
         if [ $cnt -ne $count ]; then
@@ -108,7 +108,7 @@ fi
 # heap dump
 #
 if [ $heapdump == "yes" ]; then
-    echo ">> taking heap dump"
+    echo ">> taking heap dump "
     $java_bin/jcmd $java_pid GC.heap_dump $log_dir/heapdump_$(time::now).hprof >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "| Done."
