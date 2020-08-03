@@ -63,8 +63,8 @@ function quit(){
     fi
 }
 
-collection_timestmap=$(date::now)_$(time::now)
-log_dir=$debug_root/$(hostname)/$collection_timestamp; mkdir -p $log_dir
+collection_timestamp=$(date::now)_$(time::now)
+log_dir=$debug_root/$(hostname)_$collection_timestamp; mkdir -p $log_dir
 
 java_pid=$(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $2}')
 if [ -z $java_pid ]; then
@@ -170,16 +170,16 @@ echo "Dumps saved to $log_dir"
 mkdir -p $debug_root/outbox
 
 cd $log_dir
-echo ">> archiving heap dumps..."
+echo ">> compressing heap dumps..."
 tar -zcvf $debug_root/outbox/$collection_timestmap\_jvm-$server_name\-heapdump.tar.gz *.hprof >/dev/null
-echo ">> archiving thread dumps..."
+echo ">> compressing thread dumps..."
 tar -zcvf $debug_root/outbox/$collection_timestmap\_jvm-$server_name\-threaddump.tar.gz *.jstack >/dev/null
-echo ">> archiving lsof dumps..."
+echo ">> compressing lsof dumps..."
 tar -zcvf $debug_root/outbox/$collection_timestmap\_jvm-$server_name\-lsof.tar.gz *.lsof >/dev/null
 cd -
 
 if [ $oswatcher == 'yes' ]; then
-    echo ">> archiving oswatcher files..."
+    echo ">> compressing oswatcher files..."
     if [ -f /etc/sysconfig/oswatcher ]; then
         osw_dir=$(grep "^DATADIR=" /etc/sysconfig/oswatcher | cut -f2 -d=)
         cd $osw_dir/archive
