@@ -1,3 +1,4 @@
+#!/bin/bash
 
 source ~/etc/smtp.cfg
 
@@ -5,8 +6,8 @@ cfgmon_root=~/cfgmon
 
 cfgmon_server=$(cat ~/etc/compare.hosts.cfg | grep '^cfgmon_server' | cut -d= -f2)
 cfgmon_jump=$(cat ~/etc/compare.hosts.cfg | grep '^cfgmon_jump' | cut -d= -f2)
-
 TO_EMAIL_ADDRESS=$(cat ~/etc/compare.hosts.cfg | grep '^email_to' | cut -d= -f2)
+
 reports_pdf=$(ls $cfgmon_root/reports/*.pdf)
 for report_pdf in $reports_pdf; do
 
@@ -51,12 +52,12 @@ From Project VCN you can use curl i.e.
 curl http://  (remove) $cfgmon_server/cfgmon/servers/$left_host/current/wls/domain/middleware/opatch/patches
 $(curl http://$cfgmon_server/cfgmon/servers/$left_host/current/wls/domain/middleware/opatch/patches)
 
-Interested in current JVM args? You have it as eacy as executing curl. 
+Interested in current JVM args? You have it as easy as executing curl. 
 
-curl http://  (remove) $cfgmon_server//cfgmon/servers/$left_host/current/wls/domain/runtime/servers/$left_instance/jvm/args
-$(curl http://$cfgmon_server//cfgmon/servers/$left_host/current/wls/domain/runtime/servers/$left_instance/jvm/args)
+curl http://  (remove) $cfgmon_server/cfgmon/servers/$left_host/current/wls/domain/runtime/servers/$left_instance/jvm/args
+$(curl http://$cfgmon_server/cfgmon/servers/$left_host/current/wls/domain/runtime/servers/$left_instance/jvm/args)
 
-Want fo compare patches?
+Want fo compare patches? Not a problem.
 
 left_host=$left_host
 right_host=$right_host
@@ -67,7 +68,10 @@ $(curl http://$cfgmon_server/cfgmon/servers/$left_host/current/wls/domain/middle
 curl http://$cfgmon_server/cfgmon/servers/$right_host/current/wls/domain/middleware/opatch/patches > /tmp/right.patches;
 sdiff /tmp/left.patches /tmp/right.patches)
 
--Ryszard
+Browse for available data at http://  (remove) $cfgmon_server/cfgmon/servers/
+
+Regards
+Ryszard Styczynski
 EOF
 
 done

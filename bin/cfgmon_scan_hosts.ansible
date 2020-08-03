@@ -1,13 +1,6 @@
 ---
 - hosts: all
   tasks:
-  - name: Install git
-    become: yes
-    yum:
-      name: git
-      state: present
-    when: host_type is defined and host_type == "application"
-      
   - name: clone wls-tools
     git:
       repo: 'https://github.com/rstyczynski/wls-tools.git'
