@@ -2,7 +2,7 @@
 
 
 function usage() {
-    echo "Usage: collect_wls_dump.sh server_name [threaddump count interval] [heapdump] [lsof] [oswatcher] [log_root dir]"
+    echo "Usage: collect_wls_dump.sh server_name [threaddump count interval] [heapdump] [lsof] [oswatcher] [debug_root dir]"
 }
 
 server_name=$1; shift
@@ -30,8 +30,8 @@ if [[ $1 == 'oswatcher' ]] ; then
     oswatcher=yes; shift
 fi
 
-if [[ $1 == 'log_root' ]] ; then
-    log_root=$2; shift; shift
+if [[ $1 == 'debug_root' ]] ; then
+    debug_root=$2; shift; shift
 fi
 
 : ${threaddump:=no}
@@ -39,8 +39,8 @@ fi
 : ${interval:=5}
 : ${heapdump:=no}
 : ${lsof:=no}
-: ${oswatcher:=no}
-: ${log_root:=~/debug_data}
+: ${oswatcher:=yes}
+: ${debug_root:=~/debug_data}
 
 ##
 ## shared functions
@@ -63,8 +63,8 @@ function quit(){
     fi
 }
 
-
-log_dir=$log_root/$(hostname)/$(date::now)_$(time::now); mkdir -p $log_dir
+collection_timestmap=$(date::now)_$(time::now)
+log_dir=$debug_root/$(hostname)/$collection_timestamp; mkdir -p $log_dir
 
 java_pid=$(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $2}')
 if [ -z $java_pid ]; then
@@ -100,6 +100,7 @@ if [ $threaddump == "yes" ] && [ $lsof == "yes" ]; then
     echo ">> taking thread dumps and lsof"
     echo -n "Collecting thread dump and list of open files"
     for cnt in $(seq 1 $count); do
+        lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
         $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
@@ -116,7 +117,6 @@ elif [ $threaddump == "yes" ]; then
     echo ">> taking thread dumps"
     echo -n "Collecting thread dump "
     for cnt in $(seq 1 $count); do
-        lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).log
         $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
@@ -152,7 +152,7 @@ fi
 if [ $threaddump == "no" ] && [ $lsof == "yes" ]; then
     echo ">> taking list of open files "
     echo -n "Collecting lsof "
-    lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).log
+    lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
     if [ $? -eq 0 ]; then
         echo -n "| OK "
     else
@@ -166,5 +166,30 @@ echo "Dumps saved to $log_dir"
 #
 # tar
 #
+
+mkdir -p $debug_root/outbox
+
+cd $log_dir
+echo ">> archiving heap dumps..."
+tar -zcvf $log_root/outbox/$collection_timestmap\_jvm-$server_name\-heapdump.tar.gz *.hprof >/dev/null
+echo ">> archiving thread dumps..."
+tar -zcvf $log_root/outbox/$collection_timestmap\_jvm-$server_name\-threaddump.tar.gz *.jstack >/dev/null
+echo ">> archiving lsof dumps..."
+tar -zcvf $log_root/outbox/$collection_timestmap\_jvm-$server_name\-lsof.tar.gz *.lsof >/dev/null
+cd -
+
+if [ $oswatcher == 'yes' ]; then
+    echo ">> archiving oswatcher files..."
+    if [ -f /etc/sysconfig/oswatcher ]; then
+        osw_dir=$(grep "^DATADIR=" /etc/sysconfig/oswatcher | cut -f2 -d=)
+        cd $osw_dir/archive
+        tar -zcvf $log_root/outbox/$collection_timestmap\_osw.tar.gz *. >/dev/null
+        cd -
+    else
+        echo Warning: OSWatcher not available. Skipping...
+    fi
+fi
+
+echo "Transportable tar files saved to $debug_root/outbox"
 
 
