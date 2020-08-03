@@ -110,6 +110,12 @@ function init() {
         esac
         echo "Done."
     fi
+
+    echo ">> preparing inbox directory for oracle user."
+    mkdir ~/inbox
+    chmod o+x ~/inbox $HOME
+    chmod o+w ~/inbox
+    echo "Done."
 }
 
 
