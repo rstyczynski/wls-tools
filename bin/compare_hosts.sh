@@ -270,25 +270,25 @@ function prepare_html_report() {
     cat $base_dir/servers/$left/$left_snapshot/wls/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
 
 
-    echo "<h2>$left</h2>"  >>$report_root/diff_report.html
-    echo "<h3>domain</h3>"  >>$report_root/diff_report.html
-    #cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-    #for wls_name in $(ls $base_dir/servers/$right/$left_snapshot/wls/$left_domain/servers); do
+    # echo "<h2>$left</h2>"  >>$report_root/diff_report.html
+    # echo "<h3>domain</h3>"  >>$report_root/diff_report.html
+    # #cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+    # #for wls_name in $(ls $base_dir/servers/$right/$left_snapshot/wls/$left_domain/servers); do
     
-    cat $base_dir/servers/$left/$left_snapshot/wls/$left_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-    for wls_name in $(ls $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers); do
-        echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
-        # cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain/servers/$wls_name/variables >>$report_root/diff_report.html
-        cat $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers/$wls_name/variables >>$report_root/diff_report.html
-    done
+    # cat $base_dir/servers/$left/$left_snapshot/wls/$left_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+    # for wls_name in $(ls $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers); do
+    #     echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
+    #     # cat $base_dir/servers/$right/$left_snapshot/wls/$left_domain/servers/$wls_name/variables >>$report_root/diff_report.html
+    #     cat $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers/$wls_name/variables >>$report_root/diff_report.html
+    # done
 
-    echo "<h2>$right</h2>"  >>$report_root/diff_report.html
-    echo "<h3>domain</h3>"  >>$report_root/diff_report.html
-    cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
-    for wls_name in $(ls $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers); do
-        echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
-        cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers/$wls_name/variables >>$report_root/diff_report.html
-    done
+    # echo "<h2>$right</h2>"  >>$report_root/diff_report.html
+    # echo "<h3>domain</h3>"  >>$report_root/diff_report.html
+    # cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain/variables | sed 's|$|</br>|g' >>$report_root/diff_report.html
+    # for wls_name in $(ls $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers); do
+    #     echo "<h3>$wls_name</h3>"  >>$report_root/diff_report.html
+    #     cat $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers/$wls_name/variables >>$report_root/diff_report.html
+    # done
 
     echo "<h1>Compared files</h1>"  >>$report_root/diff_report.html
     echo "<ul>"                     >>$report_root/diff_report.html
@@ -344,13 +344,13 @@ report_root=$wls_diff_root/report
 #
 # verify parameters
 #
-if [ ! -d $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers/$wls_name ]; then
+if [ ! -d $base_dir/servers/$left/$left_snapshot/wls/$left_domain/servers/$left_instance ]; then
     echo "Error. Left server does not exist in repository."
     usage
     exit 1
 fi
 
-if [ ! -d $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers/$wls_name ]; then
+if [ ! -d $base_dir/servers/$right/$right_snapshot/wls/$right_domain/servers/$right_instance ]; then
     echo "Error. Right server does not exist in repository."
     usage
     exit 1
