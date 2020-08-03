@@ -2,8 +2,12 @@
 
 
 function usage() {
-    echo "Usage: collect_wls_dump.sh server_name [threaddump count interval] [heapdump] [lsof] [oswatcher] [debug_root dir]"
+    echo "Usage: collect_wls_dump.sh [init] server_name [threaddump count interval] [heapdump] [lsof] [oswatcher] [debug_root dir]"
 }
+
+if [[ $1 == 'init' ]] ; then
+    init=yes; shift
+fi
 
 server_name=$1; shift
 
@@ -63,6 +67,36 @@ function quit(){
     fi
 }
 
+#
+# init
+#
+function init() {
+
+    echo ">> installing oswatcher"
+    sudo yum install -y oswatcher
+
+    os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
+    case $os_release in
+    6)
+        sudo chkconfig oswatcher on
+        sudo service oswatcher start
+        ;;
+    7)
+        sudo systemctl enable oswatcher
+        sudo systemctl start oswatcher
+        ;;
+    *)
+        echo Error. Unsupported OS release.
+        quit 1
+        ;;
+    esac
+}
+
+
+#
+# do work
+#
+
 collection_timestamp=$(date::now)_$(time::now)
 log_dir=$debug_root/$(hostname)_$collection_timestamp; mkdir -p $log_dir
 mkdir -p $log_dir
@@ -92,6 +126,13 @@ $java_bin/jcmd >/dev/null 2>&1
 if [ $? -eq 127 ]; then 
   echo Error: jcmd not found.
   quit 1 
+fi
+
+#
+# init
+#
+[ $init == "yes" ]; then
+    init
 fi
 
 #
@@ -169,6 +210,9 @@ echo "Dumps saved to $log_dir"
 #
 
 mkdir -p $debug_root/outbox
+
+echo ">> removing old wls_dumps..."
+rm -rf $debug_root/outbox/wls_dumps_*
 
 cd $log_dir
 if [ $threaddump == "yes" ]; then
