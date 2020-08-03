@@ -73,23 +73,31 @@ function quit(){
 function init() {
 
     echo ">> installing oswatcher"
-    sudo yum install -y oswatcher
 
-    os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
-    case $os_release in
-    6)
-        sudo chkconfig oswatcher on
-        sudo service oswatcher start
-        ;;
-    7)
-        sudo systemctl enable oswatcher
-        sudo systemctl start oswatcher
-        ;;
-    *)
-        echo Error. Unsupported OS release.
+    timeout 1 sudo ls >/dev/null 2>&1
+    if [ $? -eq 127 ]; then
+        echo "Error: must have rights to do sudo, but $(whoami) has no rights. Switch sodo user and repeat."
         quit 1
-        ;;
-    esac
+    else
+        sudo yum install -y oswatcher
+
+        os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
+        case $os_release in
+        6)
+            sudo chkconfig oswatcher on
+            sudo service oswatcher start
+            ;;
+        7)
+            sudo systemctl enable oswatcher
+            sudo systemctl start oswatcher
+            ;;
+        *)
+            echo Error. Unsupported OS release.
+            quit 1
+            ;;
+        esac
+        echo "Done."
+    fi
 }
 
 
