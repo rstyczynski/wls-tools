@@ -39,12 +39,12 @@ if [[ $1 == 'debug_root' ]] ; then
 fi
 
 : ${threaddump:=no}
-: ${count:=5}
-: ${interval:=5}
+: ${count:=10}
+: ${interval:=6}
 : ${heapdump:=no}
 : ${lsof:=no}
 : ${top:=no}
-: ${debug_root:=~/debug_data}
+: ${debug_root:=~/trace}
 : ${init:=no}
 
 
@@ -112,9 +112,10 @@ function init() {
     # fi
 
     echo ">> preparing inbox directory for oracle user."
-    mkdir ~/inbox
-    chmod o+x ~/inbox $HOME
-    chmod o+w ~/inbox
+    sudo mkdir /var/outbox
+    sudo chmod o+x /var/outbox
+    sudo chmod o+r /var/outbox
+    sudo chmod o+w /var/outbox
     echo "Done."
 }
 
