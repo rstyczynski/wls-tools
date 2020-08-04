@@ -67,8 +67,8 @@ function wls_jfr() {
     mkdir -p /tmp/$$
     tmp=/tmp/$$
 
+    mkdir -p $dump_location 
     if [ $dump_location == "$HOME/outbox/public" ]; then
-        mkdir -p $HOME/outbox/public
         chmod 755 $HOME/outbox/public
     fi
 
