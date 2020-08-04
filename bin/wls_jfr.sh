@@ -45,7 +45,7 @@ function wls_jfr() {
     : ${wls_server:=soa_server1}
     : ${operation:=start}
     : ${duration:=5m}
-    : ${dump_location:="~/outbox/public"}
+    : ${dump_location:="$HOME/outbox/public"}
     : ${debug:=no}
 
     echo "======================================="
@@ -67,9 +67,9 @@ function wls_jfr() {
     mkdir -p /tmp/$$
     tmp=/tmp/$$
 
-    if [ $dump_location == "~/outbox/public" ]; then
-        mkdir -p ~/outbox/public
-        chmod 755 ~/outbox/public
+    if [ $dump_location == "$HOME/outbox/public" ]; then
+        mkdir -p $HOME/outbox/public
+        chmod 755 $HOME/outbox/public
     fi
 
     export wls_server
