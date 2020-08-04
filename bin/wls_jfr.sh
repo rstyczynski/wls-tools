@@ -1,38 +1,52 @@
 #!/bin/bash
 
-function makePublicRead() {
-    file_fullpath=$1
-
-    while [ ! -f $file_fullpath ]; do
-        echo "waiting for file..."
-        sleep 1
-    done
-
-    chmod o+r $file_fullpath
-    chmod g+r $file_fullpath
+function usage() {
+    echo "Usage: wls_jfr.sh server_name operation [duration] [dump_location dir]
+    
+, where:
+- operation: start, stop, check; default start
+- duration: time given as e.g. 30s, 1m, 1h; default 5m
+- dump_location: directoruy to store jfr files. 15 minutes takes approx. 3MB; default ~/outbox/public
+"
 }
+
 
 unset wls_jfr
 function wls_jfr() {
-    wls_server=$1
-    shift
-    operation=$1
-    shift
-    duration=$1
-    shift
-    opt=$1
-
-    if [ -z "$wls_server" ]; then
-        wls_server=soa_server1
+    wls_server=$1; shift
+    if [ -z "wls_server" ]; then
+        usage
+        exit 1
     fi
 
-    if [ -z "$operation" ]; then
-        operation=start
+    case $$1 in
+    start|stop|check) 
+        operation=$1; shift
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+    esac
+
+    reg_int='^[0-9]+$'
+    if [[ $1 =~ $reg_int ]] ; then
+        duration=$1; shift
     fi
 
-    if [ -z "$duration" ]; then
-        duration=1m
+    if [[ $1 == 'dump_location' ]] ; then
+        dump_location=$2; shift; shift
     fi
+
+    if [[ $1 == 'debug' ]] ; then
+        debug=yes; shift
+    fi
+
+    : ${wls_server:=soa_server1}
+    : ${operation:=start}
+    : ${duration:=5m}
+    : ${dump_location:=~/outbox/public}
+    : ${debug:=no}
 
     echo "======================================="
     echo "============ WebLogic JFR  ============"
@@ -42,14 +56,21 @@ function wls_jfr() {
     echo "== user: $(whoami)"
     echo "== date: $(date)"
     echo "======================================="
+    echo "== wls_server:    $wls_server"
+    echo "== operation:     $operation"
+    echo "== duration:      $duration"
+    echo "== dump_location: $dump_location"
+    echo "======================================="
     echo "======================================="
     echo "======================================="
 
     mkdir -p /tmp/$$
     tmp=/tmp/$$
 
-    mkdir -p ~/outbox/public
-    chmod 755 ~/outbox/public
+    if [ $dump_location == "~/outbox/public" ]; then
+        mkdir -p ~/outbox/public
+        chmod 755 ~/outbox/public
+    fi
 
     export wls_server
     os_pid=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1 "')
@@ -68,20 +89,27 @@ function wls_jfr() {
         if [ -z "$recNo" ]; then
 
             file_name=$(hostname)_$wls_server\_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
-            $java_bin/jcmd $os_pid JFR.start name=wls-tools_JFR duration=$duration filename=$HOME/outbox/public/$file_name compress=true
+            $java_bin/jcmd $os_pid JFR.start name=wls-tools_JFR duration=$duration filename=$dump_location/$file_name compress=true
             if [ $? -eq 0 ]; then
-                echo "Started $duration long recording. Output file will be written to $HOME/outbox/public/$file_name"
+                echo "Started $duration long recording. Output file will be written to $dump_location/$file_name"
 
                 echo
 
                 host_ip=$(ip route get 8.8.8.8 | cut -d' ' -f7 | head -1)
                 echo "Use scp to get recording: "
                 echo 
-                echo "scp -o \"ProxyJump \$user@\$jumpserver\" \$user@$host_ip:$HOME/outbox/public/$file_name ."
+                echo "scp -o \"ProxyJump \$user@\$jumpserver\" \$user@$host_ip:$dump_location/$file_name ."
                 echo 
                 echo "Once collected open with Java Mission Control - jmc / jmc.exe"
-                makePublicRead $HOME/outbox/public/$file_name
+                
+                # wait for file and make readable for all
+                while [ ! -f $dump_location/$file_name ]; do
+                    echo "waiting for file..."
+                    sleep 1
+                done
 
+                chmod o+r $dump_location/$file_name 
+                chmod g+r $dump_location/$file_name 
             else
                 echo "Error starting recording."
             fi
@@ -110,6 +138,7 @@ function wls_jfr() {
 
     esac
 
+    # todo
     if [ ! "$opt" == debug ]; then
         rm -rf /tmp/$$
     fi
