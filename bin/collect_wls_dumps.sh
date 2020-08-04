@@ -166,7 +166,7 @@ fi
 # thread dumps
 #
 if [ $threaddump == "yes" ] && [ $lsof == "yes" ] && [ $top == "yes" ]; then
-    echo ">> taking thread dumps and lsof"
+    echo ">> taking thread dumps, lsof and processes"
     echo -n "Collecting thread dump with list of open files and processes"
     for cnt in $(seq 1 $count); do
         lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
