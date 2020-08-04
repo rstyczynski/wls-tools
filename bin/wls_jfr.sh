@@ -29,7 +29,7 @@ function wls_jfr() {
         ;;
     esac
 
-    reg_int='^[0-9]+$'
+    reg_int='^[0-9]+[smh]*$'
     if [[ $1 =~ $reg_int ]] ; then
         duration=$1; shift
     fi
