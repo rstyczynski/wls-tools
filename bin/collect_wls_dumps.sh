@@ -84,32 +84,32 @@ function quit(){
 #
 function init() {
 
-    echo ">> installing oswatcher"
+    # echo ">> installing oswatcher"
 
-    timeout 1 sudo ls >/dev/null 2>&1
-    if [ $? -eq 124 ]; then
-        echo "Error: must have rights to do sudo, but $(whoami) has no rights. Switch sodo user and repeat."
-        quit 1
-    else
-        sudo yum install -y oswatcher
+    # timeout 1 sudo ls >/dev/null 2>&1
+    # if [ $? -eq 124 ]; then
+    #     echo "Error: must have rights to do sudo, but $(whoami) has no rights. Switch sodo user and repeat."
+    #     quit 1
+    # else
+    #     sudo yum install -y oswatcher
 
-        os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
-        case $os_release in
-        6)
-            sudo chkconfig oswatcher on; echo "oswatcher service enabled on boot."
-            sudo service oswatcher start; echo "oswatcher service started."
-            ;;
-        7)
-            sudo systemctl enable oswatcher; echo "oswatcher service enabled on boot."
-            sudo systemctl start oswatcher; echo "oswatcher service started."
-            ;;
-        *)
-            echo Error. Unsupported OS release.
-            quit 1
-            ;;
-        esac
-        echo "Done."
-    fi
+    #     os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
+    #     case $os_release in
+    #     6)
+    #         sudo chkconfig oswatcher on; echo "oswatcher service enabled on boot."
+    #         sudo service oswatcher start; echo "oswatcher service started."
+    #         ;;
+    #     7)
+    #         sudo systemctl enable oswatcher; echo "oswatcher service enabled on boot."
+    #         sudo systemctl start oswatcher; echo "oswatcher service started."
+    #         ;;
+    #     *)
+    #         echo Error. Unsupported OS release.
+    #         quit 1
+    #         ;;
+    #     esac
+    #     echo "Done."
+    # fi
 
     echo ">> preparing inbox directory for oracle user."
     mkdir ~/inbox
