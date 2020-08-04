@@ -2,7 +2,7 @@
 
 
 function usage() {
-    echo "Usage: collect_wls_dump.sh [init] server_name [threaddump count interval] [heapdump] [lsof] [oswatcher] [debug_root dir]"
+    echo "Usage: collect_wls_dump.sh [init] server_name [threaddump count interval] [heapdump] [lsof] [top] [debug_root dir]"
 }
 
 if [[ $1 == 'init' ]] ; then
@@ -30,8 +30,8 @@ if [[ $1 == 'lsof' ]] ; then
     lsof=yes; shift
 fi
 
-if [[ $1 == 'oswatcher' ]] ; then
-    oswatcher=yes; shift
+if [[ $1 == 'top' ]] ; then
+    top=yes; shift
 fi
 
 if [[ $1 == 'debug_root' ]] ; then
@@ -43,7 +43,7 @@ fi
 : ${interval:=5}
 : ${heapdump:=no}
 : ${lsof:=no}
-: ${oswatcher:=yes}
+: ${top:=no}
 : ${debug_root:=~/debug_data}
 : ${init:=no}
 
@@ -165,7 +165,25 @@ fi
 #
 # thread dumps
 #
-if [ $threaddump == "yes" ] && [ $lsof == "yes" ]; then
+if [ $threaddump == "yes" ] && [ $lsof == "yes" ] && [ $top == "yes" ]; then
+    echo ">> taking thread dumps and lsof"
+    echo -n "Collecting thread dump with list of open files and processes"
+    for cnt in $(seq 1 $count); do
+        lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
+        $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
+        top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
+        if [ $? -eq 0 ]; then
+            echo -n "| $cnt of $count OK "
+        else
+            echo -n "| $cnt of $count Error "
+        fi
+        
+        if [ $cnt -ne $count ]; then
+            sleep $interval
+        fi
+    done
+    echo "| Done."
+elif [ $threaddump == "yes" ] && [ $lsof == "yes" ]; then
     echo ">> taking thread dumps and lsof"
     echo -n "Collecting thread dump and list of open files"
     for cnt in $(seq 1 $count); do
@@ -230,6 +248,21 @@ if [ $threaddump == "no" ] && [ $lsof == "yes" ]; then
     echo "| Done."
 fi
 
+#
+# lsof
+#
+if [ $threaddump == "no" ] && [ $top == "yes" ]; then
+    echo ">> taking list of processes "
+    echo -n "Collecting top "
+    top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
+    if [ $? -eq 0 ]; then
+        echo -n "| OK "
+    else
+        echo -n "| Error "
+    fi
+    echo "| Done."
+fi
+
 echo "Dumps saved to $log_dir"
 
 #
@@ -257,19 +290,24 @@ if [ $lsof == "yes" ]; then
     tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-lsof.tar.gz *.lsof >/dev/null
 fi
 
+if [ $top == "yes" ]; then
+    echo ">> compressing top dumps..."
+    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-top.tar.gz *.top >/dev/null
+fi
+
 cd -
 
-if [ $oswatcher == 'yes' ]; then
-    echo ">> compressing oswatcher files..."
-    if [ -f /etc/sysconfig/oswatcher ]; then
-        osw_dir=$(grep "^DATADIR=" /etc/sysconfig/oswatcher | cut -f2 -d=)
-        cd $osw_dir
-        tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_osw.tar.gz ./ >/dev/null
-        cd -
-    else
-        echo Warning: OSWatcher not available. Skipping...
-    fi
-fi
+# if [ $oswatcher == 'yes' ]; then
+#     echo ">> compressing oswatcher files..."
+#     if [ -f /etc/sysconfig/oswatcher ]; then
+#         osw_dir=$(grep "^DATADIR=" /etc/sysconfig/oswatcher | cut -f2 -d=)
+#         cd $osw_dir
+#         tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_osw.tar.gz ./ >/dev/null
+#         cd -
+#     else
+#         echo Warning: OSWatcher not available. Skipping...
+#     fi
+# fi
 
 echo ">> making everyone able to read dump files..."
 chmod o+r $debug_root/outbox/wls_dumps_$collection_timestamp*
