@@ -45,7 +45,7 @@ function wls_jfr() {
     : ${wls_server:=soa_server1}
     : ${operation:=start}
     : ${duration:=5m}
-    : ${dump_location:=~/outbox/public}
+    : ${dump_location:="~/outbox/public"}
     : ${debug:=no}
 
     echo "======================================="
