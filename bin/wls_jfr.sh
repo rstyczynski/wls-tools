@@ -14,12 +14,12 @@ function usage() {
 unset wls_jfr
 function wls_jfr() {
     wls_server=$1; shift
-    if [ -z "wls_server" ]; then
+    if [ -z "$wls_server" ]; then
         usage
         exit 1
     fi
 
-    case $$1 in
+    case $1 in
     start|stop|check) 
         operation=$1; shift
         ;;
