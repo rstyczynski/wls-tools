@@ -95,7 +95,7 @@ function wls_jfr() {
 
                 echo
 
-                host_ip=$(ip route get 8.8.8.8 | cut -d' ' -f7 | head -1)
+                host_ip=$(hostname -i)
                 echo "Use scp to get recording: "
                 echo 
                 echo "scp -o \"ProxyJump \$user@\$jumpserver\" \$user@$host_ip:$dump_location/$file_name ."
