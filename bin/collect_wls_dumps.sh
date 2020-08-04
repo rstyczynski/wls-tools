@@ -249,7 +249,7 @@ if [ $threaddump == "no" ] && [ $lsof == "yes" ]; then
 fi
 
 #
-# lsof
+# top
 #
 if [ $threaddump == "no" ] && [ $top == "yes" ]; then
     echo ">> taking list of processes "
