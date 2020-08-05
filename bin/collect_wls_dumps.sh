@@ -2,14 +2,14 @@
 
 
 function usage() {
-    echo "Usage: collect_wls_dump.sh [init] server_name [threaddump count interval] [heapdump] [lsof] [top] [trace_root dir]"
+    echo "Usage: collect_wls_dump.sh [init | server_name] [threaddump count interval] [heapdump] [lsof] [top] [trace_root dir]"
 }
 
 if [[ $1 == 'init' ]] ; then
     init=yes; shift
+else
+    server_name=$1; shift
 fi
-
-server_name=$1; shift
 
 reg_int='^[0-9]+$'
 if [[ $1 == 'threaddump' ]] ; then
@@ -122,7 +122,7 @@ function init() {
     path=$trace_root/outbox
     x_on_path=yes
     while [ ! $path == '/' ]; do
-        chmod o+x $path; chmod g+x $path
+        sudo chmod o+x $path; chmod g+x $path
         if [ $? -ne 0 ]; then
             x_on_path=no
         fi
@@ -141,8 +141,10 @@ function init() {
 
 
     echo ">> saving configuration to /etc/collect_wls_dumps.conf"
-    sudo echo trace_root=$trace_root >> /etc/collect_wls_dumps.conf
-    sudo echo trace_outbox=$trace_root/outbox >> /etc/collect_wls_dumps.conf
+    sudo cat >> /etc/collect_wls_dumps.conf <<EOF
+trace_root=$trace_root 
+trace_outbox=$trace_root/outbox
+EOF
 
     echo "Directory to expose files, reachable by any user, set to: $trace_outbox"
     echo "Done."
