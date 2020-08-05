@@ -5,6 +5,9 @@ function usage() {
     echo "Usage: collect_wls_dump.sh [init | server_name] [threaddump count interval] [heapdump] [lsof] [top] [trace_root dir]"
 }
 
+source /etc/collect_wls_dumps.conf
+source ~/etc/collect_wls_dumps.conf
+
 if [[ $1 == 'init' ]] ; then
     init=yes; shift
 else
