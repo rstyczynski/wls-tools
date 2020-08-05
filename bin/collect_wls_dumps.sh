@@ -170,13 +170,14 @@ if [ $threaddump == "yes" ] && [ $lsof == "yes" ] && [ $top == "yes" ]; then
     echo ">> taking thread dumps, lsof and processes"
     echo -n "Collecting thread dump with list of open files and processes"
     for cnt in $(seq 1 $count); do
-        lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
-        $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
-        top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
+        timeout 5 lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
+        timeout 5 top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
+        timeout 5 kill -3 $java_pid
+        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
-            echo -n "| $cnt of $count Error "
+            echo -n "| $cnt of $count Error (hope kill -3 producted dump in out file)"
         fi
         
         if [ $cnt -ne $count ]; then
@@ -188,12 +189,13 @@ elif [ $threaddump == "yes" ] && [ $lsof == "yes" ]; then
     echo ">> taking thread dumps and lsof"
     echo -n "Collecting thread dump and list of open files"
     for cnt in $(seq 1 $count); do
-        lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
-        $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
+        timeout 5 lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
+        timeout 5 kill -3 $java_pid
+        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
-            echo -n "| $cnt of $count Error "
+            echo -n "| $cnt of $count Error (hope kill -3 producted dump in out file)"
         fi
         
         if [ $cnt -ne $count ]; then
@@ -205,11 +207,12 @@ elif [ $threaddump == "yes" ]; then
     echo ">> taking thread dumps"
     echo -n "Collecting thread dump "
     for cnt in $(seq 1 $count); do
-        $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
+        timeout 5 kill -3 $java_pid
+        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
-            echo -n "| $cnt of $count Error "
+            echo -n "| $cnt of $count Error (hope kill -3 producted dump in out file)"
         fi
         
         if [ $cnt -ne $count ]; then
@@ -225,7 +228,7 @@ fi
 if [ $heapdump == "yes" ]; then
     echo ">> taking heap dump "
     echo -n "Collecting heap dump "
-    $java_bin/jcmd $java_pid GC.heap_dump $log_dir/$server_name\_heapdump_$(time::now).hprof >/dev/null 2>&1
+    timeout 600 $java_bin/jcmd $java_pid GC.heap_dump $log_dir/$server_name\_heapdump_$(time::now).hprof >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo -n "| OK "
     else
@@ -240,7 +243,7 @@ fi
 if [ $threaddump == "no" ] && [ $lsof == "yes" ]; then
     echo ">> taking list of open files "
     echo -n "Collecting lsof "
-    lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
+    timeout 5 lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
     if [ $? -eq 0 ]; then
         echo -n "| OK "
     else
@@ -255,7 +258,7 @@ fi
 if [ $threaddump == "no" ] && [ $top == "yes" ]; then
     echo ">> taking list of processes "
     echo -n "Collecting top "
-    top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
+    timeout 5 top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
     if [ $? -eq 0 ]; then
         echo -n "| OK "
     else
@@ -297,18 +300,6 @@ if [ $top == "yes" ]; then
 fi
 
 cd -
-
-# if [ $oswatcher == 'yes' ]; then
-#     echo ">> compressing oswatcher files..."
-#     if [ -f /etc/sysconfig/oswatcher ]; then
-#         osw_dir=$(grep "^DATADIR=" /etc/sysconfig/oswatcher | cut -f2 -d=)
-#         cd $osw_dir
-#         tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_osw.tar.gz ./ >/dev/null
-#         cd -
-#     else
-#         echo Warning: OSWatcher not available. Skipping...
-#     fi
-# fi
 
 echo ">> making everyone able to read dump files..."
 chmod o+r $debug_root/outbox/wls_dumps_$collection_timestamp*
