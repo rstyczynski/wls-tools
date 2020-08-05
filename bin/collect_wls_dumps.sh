@@ -60,6 +60,7 @@ echo "=== count:      $count"
 echo "=== interval:   $interval"
 echo "=== lsof:       $lsof"
 echo "=== top:        $top"
+echo "=== heapdump:   $heapdump"
 echo "=== trace_root: $trace_root"
 echo "==================================="
 
