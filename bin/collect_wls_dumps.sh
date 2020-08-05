@@ -120,6 +120,11 @@ function init() {
     echo ">> preparing inbox directory for users."
 
     path=$trace_root/outbox
+    sudo chmod o+r $path
+    sudo chmod o+w $path
+    sudo chmod g+r $path
+    sudo chmod g+w $path
+
     x_on_path=yes
     while [ ! $path == '/' ]; do
         sudo chmod o+x $path
