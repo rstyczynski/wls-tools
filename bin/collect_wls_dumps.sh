@@ -117,11 +117,34 @@ function init() {
     #     echo "Done."
     # fi
 
-    echo ">> preparing inbox directory for oracle user."
-    sudo mkdir /var/outbox
-    sudo chmod o+x /var/outbox
-    sudo chmod o+r /var/outbox
-    sudo chmod o+w /var/outbox
+    echo ">> preparing inbox directory for users."
+
+    path=$trace_root/outbox
+    x_on_path=yes
+    while [ ! $path == '/' ]; do
+        chmod o+x $path; chmod g+x $path
+        if [ $? -ne 0 ]; then
+            x_on_path=no
+        fi
+        path=$(dirname $path)
+    done
+
+    if [ $x_on_path = "yes" ]; then
+        trace_outbox=$trace_root/outbox 
+    else
+        trace_outbox=/var/outbox
+        sudo mkdir $trace_outbox
+        sudo chmod o+x $trace_outbox
+        sudo chmod o+r $trace_outbox
+        sudo chmod o+w $trace_outbox
+    fi
+
+
+    echo ">> saving configuration to /etc/collect_wls_dumps.conf"
+    sudo echo trace_root=$trace_root >> /etc/collect_wls_dumps.conf
+    sudo echo trace_outbox=$trace_root/outbox >> /etc/collect_wls_dumps.conf
+
+    echo "Directory to expose files, reachable by any user, set to: $trace_outbox"
     echo "Done."
 }
 
@@ -138,8 +161,10 @@ fi
 # do work
 #
 
-collection_timestamp=$(date::now)_$(time::now)
-log_dir=$trace_root/$(hostname)_$collection_timestamp; mkdir -p $log_dir
+# reuse collection timestamp if already set | if -z $collection_timestamp then set
+: ${collection_timestamp:=$(date::now)_$(time::now)}
+
+log_dir=$trace_root/wls_dumps/$(hostname)_$collection_timestamp
 mkdir -p $log_dir
 
 java_pid=$(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $2}')
