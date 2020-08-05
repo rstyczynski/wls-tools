@@ -2,7 +2,7 @@
 
 
 function usage() {
-    echo "Usage: collect_wls_dump.sh [init] server_name [threaddump count interval] [heapdump] [lsof] [top] [debug_root dir]"
+    echo "Usage: collect_wls_dump.sh [init] server_name [threaddump count interval] [heapdump] [lsof] [top] [trace_root dir]"
 }
 
 if [[ $1 == 'init' ]] ; then
@@ -34,8 +34,8 @@ if [[ $1 == 'top' ]] ; then
     top=yes; shift
 fi
 
-if [[ $1 == 'debug_root' ]] ; then
-    debug_root=$2; shift; shift
+if [[ $1 == 'trace_root' ]] ; then
+    trace_root=$2; shift; shift
 fi
 
 : ${threaddump:=no}
@@ -44,7 +44,7 @@ fi
 : ${heapdump:=no}
 : ${lsof:=no}
 : ${top:=no}
-: ${debug_root:=~/trace}
+: ${trace_root:=~/trace}
 : ${init:=no}
 
 
@@ -55,7 +55,12 @@ echo "=== Host:       $(hostname)"
 echo "=== Reporter:   $(whoami)"
 echo "=== Date:       $(date)"
 echo "==="
-echo "=== Server:     $server_name"
+echo "=== threaddump: $threaddump"
+echo "=== count:      $count"
+echo "=== interval:   $interval"
+echo "=== lsof:       $lsof"
+echo "=== top:        $top"
+echo "=== trace_root: $trace_root"
 echo "==================================="
 
 ##
@@ -133,7 +138,7 @@ fi
 #
 
 collection_timestamp=$(date::now)_$(time::now)
-log_dir=$debug_root/$(hostname)_$collection_timestamp; mkdir -p $log_dir
+log_dir=$trace_root/$(hostname)_$collection_timestamp; mkdir -p $log_dir
 mkdir -p $log_dir
 
 java_pid=$(ps -ef | grep java | grep $server_name | grep -v grep | awk '{print $2}')
@@ -273,39 +278,39 @@ echo "Dumps saved to $log_dir"
 # tar
 #
 
-mkdir -p $debug_root/outbox
+mkdir -p $trace_root/outbox
 
 echo ">> removing old wls_dumps..."
-rm -rf $debug_root/outbox/wls_dumps_*
+rm -rf $trace_root/outbox/wls_dumps_*
 
 cd $log_dir
 if [ $threaddump == "yes" ]; then
     echo ">> compressing thread dumps..."
-    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-threaddump.tar.gz *.jstack >/dev/null
+    tar -zcvf $trace_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-threaddump.tar.gz *.jstack >/dev/null
 fi
 
 if [ $heapdump == "yes" ]; then
     echo ">> compressing heap dumps..."
-    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-heapdump.tar.gz *.hprof >/dev/null
+    tar -zcvf $trace_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-heapdump.tar.gz *.hprof >/dev/null
 fi
 
 if [ $lsof == "yes" ]; then
     echo ">> compressing lsof dumps..."
-    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-lsof.tar.gz *.lsof >/dev/null
+    tar -zcvf $trace_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-lsof.tar.gz *.lsof >/dev/null
 fi
 
 if [ $top == "yes" ]; then
     echo ">> compressing top dumps..."
-    tar -zcvf $debug_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-top.tar.gz *.top >/dev/null
+    tar -zcvf $trace_root/outbox/wls_dumps_$collection_timestamp\_jvm-$server_name\-top.tar.gz *.top >/dev/null
 fi
 
 cd -
 
 echo ">> making everyone able to read dump files..."
-chmod o+r $debug_root/outbox/wls_dumps_$collection_timestamp*
+chmod o+r $trace_root/outbox/wls_dumps_$collection_timestamp*
 
-echo "Transportable tar files saved to $debug_root/outbox:"
-ls -l -h $debug_root/outbox/wls_dumps_$collection_timestamp* | cut -d' ' -f5-999
+echo "Transportable tar files saved to $trace_root/outbox:"
+ls -l -h $trace_root/outbox/wls_dumps_$collection_timestamp* | cut -d' ' -f5-999
 
 echo
 
