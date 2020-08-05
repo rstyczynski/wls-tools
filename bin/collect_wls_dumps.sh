@@ -122,7 +122,8 @@ function init() {
     path=$trace_root/outbox
     x_on_path=yes
     while [ ! $path == '/' ]; do
-        sudo chmod o+x $path; chmod g+x $path
+        sudo chmod o+x $path
+        sudo chmod g+x $path
         if [ $? -ne 0 ]; then
             x_on_path=no
         fi
@@ -141,10 +142,8 @@ function init() {
 
 
     echo ">> saving configuration to /etc/collect_wls_dumps.conf"
-    sudo cat >> /etc/collect_wls_dumps.conf <<EOF
-trace_root=$trace_root 
-trace_outbox=$trace_root/outbox
-EOF
+    echo "trace_root=$trace_root" | sudo tee -a /etc/collect_wls_dumps.conf
+    echo "trace_outbox=$trace_root/outbox" | sudo tee -a /etc/collect_wls_dumps.conf
 
     echo "Directory to expose files, reachable by any user, set to: $trace_outbox"
     echo "Done."
