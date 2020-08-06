@@ -170,6 +170,7 @@ function init() {
     if [ $x_on_path = "yes" ]; then
         trace_outbox=$trace_root/outbox
     else
+        echo "Error settin o+x on full path for $trace_root/outbox. You are not owner of part of path. Trying /var/outbox..."
         echo -n ">> setting /var/outbox..."
         if [ $has_sudo == 'yes' ]; then    
             trace_outbox=/var/outbox
@@ -179,7 +180,7 @@ function init() {
             sudo chmod o+w $trace_outbox
             echo "Done."
         else
-            echo "Skipped."
+            echo "Skipped. no sudo rights."
         fi
     fi
 
