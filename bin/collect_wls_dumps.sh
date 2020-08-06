@@ -146,7 +146,6 @@ function init() {
 
     echo ">> preparing inbox directory for users."
     # may be done with sudo or w/o sudo if user is owner of all path | check_sude sets sudo variable
-    set -x
     path=$trace_root/outbox    
     $sudo chmod o+x $path
     $sudo chmod g+x $path
@@ -161,8 +160,7 @@ function init() {
         path=$(dirname $path)
     done
     unset path
-    set +x
-    
+
     if [ $x_on_path = "yes" ]; then
         trace_outbox=$trace_root/outbox
     else
