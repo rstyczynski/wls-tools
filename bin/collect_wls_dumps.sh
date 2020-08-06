@@ -88,6 +88,20 @@ function quit(){
     fi
 }
 
+function check_sudo() {
+
+    echo -n ">> checking sudo rights..."    
+    sudo=sudo
+    has_sudo=yes
+    sudo -A /bin/ls ls >/dev/null 2>&1
+    if [ $? -eq 1 ]; then
+        sudo=
+        has_sudo=no
+        echo "No sudo rights."
+    else
+        echo "Has sudo rights."
+    fi
+}
 #
 # init
 #
@@ -120,18 +134,28 @@ function init() {
     #     echo "Done."
     # fi
 
-    echo ">> preparing inbox directory for users."
+    # check sudo rights
+    check_sudo
 
+    echo ">> installing gcore..."
+    if [ $has_sudo == 'yes' ]; then    
+        sudo yum install -y gdb crash-gcore-command
+    else
+        echo "Skipped. gcore may be not available on RH6. It's at RH7"
+    fi
+
+    echo ">> preparing inbox directory for users."
+    # may be done with sudo or w/o sudo if user is owner of all path | check_sude sets sudo variable
     path=$trace_root/outbox
-    sudo chmod o+r $path
-    sudo chmod o+w $path
-    sudo chmod g+r $path
-    sudo chmod g+w $path
+    $sudo chmod o+r $path
+    $sudo chmod o+w $path
+    $sudo chmod g+r $path
+    $sudo chmod g+w $path
 
     x_on_path=yes
     while [ ! $path == '/' ]; do
-        sudo chmod o+x $path
-        sudo chmod g+x $path
+        $sudo chmod o+x $path
+        $sudo chmod g+x $path
         if [ $? -ne 0 ]; then
             x_on_path=no
         fi
@@ -141,17 +165,32 @@ function init() {
     if [ $x_on_path = "yes" ]; then
         trace_outbox=$trace_root/outbox 
     else
-        trace_outbox=/var/outbox
-        sudo mkdir $trace_outbox
-        sudo chmod o+x $trace_outbox
-        sudo chmod o+r $trace_outbox
-        sudo chmod o+w $trace_outbox
+        echo -n ">> setting /var/outbox..."
+        if [ $has_sudo == 'yes' ]; then    
+            trace_outbox=/var/outbox
+            sudo mkdir $trace_outbox
+            sudo chmod o+x $trace_outbox
+            sudo chmod o+r $trace_outbox
+            sudo chmod o+w $trace_outbox
+            echo "Done."
+        else
+            echo "Skipped."
+        fi
     fi
 
-
-    echo ">> saving configuration to /etc/collect_wls_dumps.conf"
-    echo "trace_root=$trace_root" | sudo tee -a /etc/collect_wls_dumps.conf
-    echo "trace_outbox=$trace_root/outbox" | sudo tee -a /etc/collect_wls_dumps.conf
+    # echo ">> subdirectories osw, jfr, oom"
+    # mkdir $trace_root/osw
+    # mkdir $trace_root/jfr
+    # mkdir $trace_root/oom
+    if [ $has_sudo == 'yes' ]; then    
+        echo ">> saving configuration to /etc/collect_wls_dumps.conf"
+        echo "trace_root=$trace_root" | sudo tee -a /etc/collect_wls_dumps.conf
+        echo "trace_outbox=$trace_root/outbox" | sudo tee -a /etc/collect_wls_dumps.conf
+    else
+        echo ">> saving configuration to ~/etc/collect_wls_dumps.conf"
+        echo "trace_root=$trace_root" >> ~/etc/collect_wls_dumps.conf
+        echo "trace_outbox=$trace_root/outbox" >> ~/etc/collect_wls_dumps.conf
+    fi
 
     echo "Directory to expose files, reachable by any user, set to: $trace_outbox"
     echo "Done."
@@ -169,6 +208,7 @@ fi
 #
 # do work
 #
+
 
 # reuse collection timestamp if already set | if -z $collection_timestamp then set
 : ${collection_timestamp:=$(date::now)_$(time::now)}
@@ -211,9 +251,9 @@ if [ $threaddump == "yes" ] && [ $lsof == "yes" ] && [ $top == "yes" ]; then
     echo -n "Collecting thread dump with list of open files and processes"
     for cnt in $(seq 1 $count); do
         timeout 5 lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
-        timeout 5 top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
+        timeout 5 top -b -n 1 > $log_dir/$server_name\_top_$(time::now).top
         timeout 5 kill -3 $java_pid
-        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
+        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump_$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
@@ -231,7 +271,7 @@ elif [ $threaddump == "yes" ] && [ $lsof == "yes" ]; then
     for cnt in $(seq 1 $count); do
         timeout 5 lsof -p $java_pid > $log_dir/$server_name\_lsof_$(time::now).lsof
         timeout 5 kill -3 $java_pid
-        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
+        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump_$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
@@ -248,7 +288,7 @@ elif [ $threaddump == "yes" ]; then
     echo -n "Collecting thread dump "
     for cnt in $(seq 1 $count); do
         timeout 5 kill -3 $java_pid
-        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump.$(time::now).jstack
+        timeout 5 $java_bin/jstack $java_pid > $log_dir/$server_name\_threaddump_$(time::now).jstack
         if [ $? -eq 0 ]; then
             echo -n "| $cnt of $count OK "
         else
@@ -298,7 +338,7 @@ fi
 if [ $threaddump == "no" ] && [ $top == "yes" ]; then
     echo ">> taking list of processes "
     echo -n "Collecting top "
-    timeout 5 top -b -n 1 > $log_dir/$server_name\_lsof_$(time::now).top
+    timeout 5 top -b -n 1 > $log_dir/$server_name\_top_$(time::now).top
     if [ $? -eq 0 ]; then
         echo -n "| OK "
     else
