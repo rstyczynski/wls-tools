@@ -193,6 +193,7 @@ function init() {
         echo "trace_outbox=$trace_root/outbox" | sudo tee -a /etc/collect_wls_dumps.conf
     else
         echo ">> saving configuration to ~/etc/collect_wls_dumps.conf"
+        mkdir ~/etc
         echo "trace_root=$trace_root" >> ~/etc/collect_wls_dumps.conf
         echo "trace_outbox=$trace_root/outbox" >> ~/etc/collect_wls_dumps.conf
     fi
