@@ -147,13 +147,9 @@ function init() {
     echo ">> preparing inbox directory for users."
     # may be done with sudo or w/o sudo if user is owner of all path | check_sude sets sudo variable
     path=$trace_root/outbox
-
-    if [ $has_sudo == 'no' ]; then
-        mkdir -p $trace_root/outbox
-    fi
-
-    $sudo chmod o+r $path
-    $sudo chmod g+r $path
+    
+    $sudo chmod o+x $path
+    $sudo chmod g+x $path
 
     x_on_path=yes
     while [ ! $path == '/' ]; do
