@@ -146,6 +146,9 @@ function init() {
 
     echo ">> preparing inbox directory for users."
     # may be done with sudo or w/o sudo if user is owner of all path | check_sude sets sudo variable
+    
+    
+    set -x
     path=$trace_root/outbox
 
     if [ $has_sudo == 'no' ]; then
@@ -166,7 +169,9 @@ function init() {
         fi
         path=$(dirname $path)
     done
-
+    unset path
+    set +x
+    
     if [ $x_on_path = "yes" ]; then
         trace_outbox=$trace_root/outbox
     else
@@ -194,7 +199,7 @@ function init() {
         echo "trace_outbox=$trace_root/outbox" | sudo tee -a /etc/collect_wls_dumps.conf
     else
         echo ">> saving configuration to ~/etc/collect_wls_dumps.conf"
-        mkdir ~/etc
+        mkdir -p ~/etc
         echo "trace_root=$trace_root" >> ~/etc/collect_wls_dumps.conf
         echo "trace_outbox=$trace_root/outbox" >> ~/etc/collect_wls_dumps.conf
     fi
