@@ -3,6 +3,11 @@
 wls_user=$1
 wls_pass=$2
 
+if [ -z "$wls_user" ] || [ -z "$wls_pass" ]; then
+    echo "Usage: install_soa_monitoring.sh user pass"
+    exit 1
+fi
+
 # get umc
 cd 
 if [ -d umc ]; then
@@ -63,4 +68,31 @@ dms-collector --url $url --connect "$wls_user/$wls_pass" --count 1 --delay 1 --l
 
 # Start SOA collector
 
-umc/lib/soadms-service.sh soadms-probe.yaml restart
+if [ ! -z "$admin_Server" ]; then
+    $HOME/umc/lib/soadms-service.sh soadms-probe.yaml restart
+else
+    echo "Admin server not found."
+fi
+
+# init cron
+
+cron_section_start="# START umc - $domain_name SOA DMS"
+cron_section_stop="# STOP umc - $domain_name SOA DMS"
+
+if [ ! -z "$admin_Server" ]; then
+cat >umc_dms.cron <<EOF
+$cron_section_start
+1 0 * * * $HOME/umc/lib/soadms-service.sh soadms-probe.yaml restart
+$cron_section_stop
+EOF
+
+(crontab -l 2>/dev/null | 
+sed "/$cron_section_start/,/$cron_section_stop/d"
+cat umc_dms.cron) | crontab -
+rm umc_dms.cron
+else
+(crontab -l 2>/dev/null | 
+sed "/$cron_section_start/,/$cron_section_stop/d") | crontab -
+fi
+
+crontab -l
