@@ -15,11 +15,12 @@ if [ -z "$os_user" ]; then
     exit 1
 else    
     if [ -f $1 ]; then
-    
+
+        script_to_run_path=$1
         script_to_run=/tmp/$$.$(basename $1)
         shift
 
-        cp $1 $script_to_run $@
+        cp $script_to_run_path $script_to_run
         sudo su - $os_user $@
         rm $script_to_run
         exit 0
