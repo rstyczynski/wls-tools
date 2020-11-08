@@ -36,3 +36,5 @@ cat umc_os.cron) | crontab -
 
 rm -rf umc_os.cron
 crontab -l
+
+

@@ -25,7 +25,7 @@ else
         rm $script_to_run
         exit 0
     else
-        echo "Error. Script not found."
+        sudo su - $os_user -c "$@"
         exit 2
     fi
 fi
