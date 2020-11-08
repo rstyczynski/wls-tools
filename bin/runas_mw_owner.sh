@@ -14,7 +14,7 @@ if [ -z "$os_user" ]; then
     echo "Error. Oracle middleware not detected."
     exit 1
 else    
-    if [ -f $1 ]; then
+    if [ -f "$1" ]; then
 
         script_to_run_path=$1
         script_to_run=/tmp/$$.$(basename $1)
