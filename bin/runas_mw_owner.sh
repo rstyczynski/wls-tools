@@ -15,9 +15,9 @@ if [ -z "$os_user" ]; then
     exit 1
 else    
     if [ -f $1 ]; then
-        cp $1 /tmp/$$.$1
+        cp $1 /tmp/$$.$(basename $1)
         sudo su - $os_user $@
-        rm /tmp/$$.$1
+        rm /tmp/$$.$(basename $1)
         exit 0
     else
         echo "Error. Script not found."
