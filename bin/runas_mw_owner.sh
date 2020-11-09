@@ -7,8 +7,9 @@ export LC_CTYPE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 discoverWLS
-os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user) 
-: ${os_user:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
+os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+: ${os_user:=$(getWLSjvmAttr ${wls_admin[0]} os_user)} 
+: ${os_user:=$( ps aux | grep weblogic.NodeManager | grep -v grep | cut -d' ' -f1)}
 
 if [ -z "$os_user" ]; then
     echo "Error. Oracle middleware not detected."
