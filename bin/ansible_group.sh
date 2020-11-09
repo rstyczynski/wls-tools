@@ -16,6 +16,9 @@ function usage() {
 #
 #
 # 
+# inventory=data/ocs.inventory.cfg
+# cmd=name
+# : ${host:=$(hostname -i)}
 
 group_names_raw=$(ansible -i $inventory $host -m debug -a 'var=group_names' -o)
 group_names_json=${group_names_raw#*=>}
@@ -26,9 +29,9 @@ count)
     echo $group_cnt
     ;;
 name)
-    group_cnt=$(echo $group_names_json | jq -r '.group_names' | tr -d '[\n] "' | tr , '\n' | wc -l)
-    if [ $group_cnt -q 1 ]; then
-        group_name=$(echo $group_names_json | jq -r '.group_names' | tr -d '[\n] "' | tr , ' ')
+    group_cnt=$(echo $group_names_json | jq -r '.group_names' | tr -d ' "' | sed '/^\[$/d;/^\]$/d' | tr , '\n'  | wc -l)
+    if [ $group_cnt -eq 1 ]; then
+        group_name=$(echo $group_names_json | jq -r '.group_names[0]')
         echo $group_name
     else
         echo "Error. More than one group assigned."
