@@ -46,9 +46,17 @@ test -f $domain_home/config/jdbc/MFTDataSource-jdbc.xml && jdbc_src=$domain_home
 
 jdbc_url=$(cat $jdbc_src | grep url | perl -ne 'while(/<url>(.+)<\/url>/gm){print "$1\n";}')
 
+export wls_jdbc_service_name=wls_db
+
+# simple URL
 export wls_jdbc_address=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$2";}')
 export wls_jdbc_port=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$3";}')
-export wls_jdbc_service_name=wls_db
+
+# orcle stuyle connectino string
+if [ -z "$wls_jdbc_address" ]; then
+    wls_jdbc_address=$(echo $jdbc_url | tr '(' '\n' | tr -d ')' | grep HOST | cut -f2 -d=)
+    wls_jdbc_port=$(echo $jdbc_url | tr '(' '\n' | tr -d ')' | grep PORT | cut -f2 -d=)
+fi
 
 echo $wls_jdbc_address
 echo $wls_jdbc_port
