@@ -1,12 +1,21 @@
 #!/bin/bash
 
-# get umc
-cd 
-if [ -d umc ]; then
-    cd ~/umc; git pull; cd -
-else
-    git clone https://github.com/rstyczynski/umc.git
-fi
+tools_src=$1; shift
+
+: ${tools_src:=git}
+
+
+# get libraries
+case $tools_src in
+git)
+    cd ~
+    test -d umc && (cd umc; git pull)
+    test -d umc || git clone https://github.com/rstyczynski/umc.git
+    ;;
+*)
+    cp -rf $tools_src/umc ~/
+    ;;
+esac
 
 # prepare cfg directory
 umc_cfg=~/.umc

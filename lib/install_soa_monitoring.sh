@@ -1,30 +1,40 @@
 #!/bin/bash
 
-wls_user=$1
-wls_pass=$2
+wls_user=$1; shift
+wls_pass=$1; shift
 
 if [ -z "$wls_user" ] || [ -z "$wls_pass" ]; then
     echo "Usage: install_soa_monitoring.sh user pass"
     exit 1
 fi
 
-# get umc
-cd 
-if [ -d umc ]; then
-    cd ~/umc; git pull; cd -
-else
-    git clone https://github.com/rstyczynski/umc.git
-fi
+tools_src=$1; shift
+
+: ${tools_src:=git}
+
+# get libraries
+case $tools_src in
+git)
+    cd ~
+    test -d umc && (cd umc; git pull)
+    test -d umc || git clone https://github.com/rstyczynski/umc.git
+
+    test -d wls-tools && (cd wls-tools; git pull)
+    test -d wls-tools || git clone https://github.com/rstyczynski/wls-tools.git
+
+    test -d oci-tools && (cd oci-tools; git pull)
+    test -d oci-tools || git clone https://github.com/rstyczynski/oci-tools.git
+    ;;
+*)
+    cp -rf $tools_src/umc ~/
+    cp -rf $tools_src/wls-tools ~/
+    cp -rf $tools_src/oci-tools ~/
+    ;;
+esac
 
 # prepare cfg directory
 umc_cfg=~/.umc
 mkdir -p $umc_cfg
-
-if [ -d wls-tools ]; then
-    cd wls-tools; git pull; cd -
-else
-    git clone https://github.com/rstyczynski/wls-tools.git
-fi
 
 source wls-tools/bin/discover_processes.sh 
 

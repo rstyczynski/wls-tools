@@ -1,22 +1,33 @@
 #!/bin/bash
 
-# get umc
-cd 
-if [ -d umc ]; then
-    cd ~/umc; git pull; cd -
-else
-    git clone https://github.com/rstyczynski/umc.git
-fi
+tools_src=$1; shift
+
+: ${tools_src:=git}
+
+# get libraries
+case $tools_src in
+git)
+    cd ~
+    test -d umc && (cd umc; git pull)
+    test -d umc || git clone https://github.com/rstyczynski/umc.git
+
+    test -d wls-tools && (cd wls-tools; git pull)
+    test -d wls-tools || git clone https://github.com/rstyczynski/wls-tools.git
+
+    test -d oci-tools && (cd oci-tools; git pull)
+    test -d oci-tools || git clone https://github.com/rstyczynski/oci-tools.git
+    ;;
+*)
+    cp -rf $tools_src/umc ~/
+    cp -rf $tools_src/wls-tools ~/
+    cp -rf $tools_src/oci-tools ~/
+    ;;
+esac
+
 
 # prepare cfg directory
 umc_cfg=~/.umc
 mkdir -p $umc_cfg
-
-if [ -d wls-tools ]; then
-    cd wls-tools; git pull; cd -
-else
-    git clone https://github.com/rstyczynski/wls-tools.git
-fi
 
 source wls-tools/bin/discover_processes.sh 
 
@@ -28,8 +39,12 @@ discoverWLS
 export domain_home=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
 export domain_name=$(basename $domain_home)
 
+test -f $domain_home/config/jdbc/WLSSchemaDataSource-jdbc.xml && jdbc_src=$domain_home/config/jdbc/WLSSchemaDataSource-jdbc.xml 
+test -f $domain_home/config/jdbc/SOADataSource-jdbc.xml && jdbc_src=$domain_home/config/jdbc/SOADataSource-jdbc.xml 
+test -f $domain_home/config/jdbc/MFTDataSource-jdbc.xml && jdbc_src=$domain_home/config/jdbc/MFTDataSource-jdbc.xml 
 
-jdbc_url=$(cat $domain_home/config/jdbc/SOADataSource-jdbc.xml | grep url | perl -ne 'while(/<url>(.+)<\/url>/gm){print "$1\n";}')
+
+jdbc_url=$(cat $jdbc_src | grep url | perl -ne 'while(/<url>(.+)<\/url>/gm){print "$1\n";}')
 
 export soa_jdbc_address=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$2";}')
 export soa_jdbc_port=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$3";}')
