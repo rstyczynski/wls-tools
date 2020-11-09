@@ -16,9 +16,6 @@ function usage() {
 #
 #
 # 
-# inventory=data/ocs.inventory.cfg
-# cmd=name
-# : ${host:=$(hostname -i)}
 
 group_names_raw=$(ansible -i $inventory $host -m debug -a 'var=group_names' -o)
 group_names_json=${group_names_raw#*=>}
@@ -34,7 +31,7 @@ name)
         group_name=$(echo $group_names_json | jq -r '.group_names[0]')
         echo $group_name
     else
-        echo "Error. More than one group assigned."
+        >&2 echo "Error. More than one group assigned."
         exit 2
     fi
     ;;
@@ -43,7 +40,7 @@ names)
     echo $group_names
     ;;
 *)
-    echo "Error. Unknown command"
+    >&2 echo "Error. Unknown command"
     usage
     exit 1
     ;;
