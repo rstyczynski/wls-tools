@@ -77,7 +77,7 @@ if [ ! -z "$admin_Server" ]; then
     source ~/umc/bin/umc.h
     umc wls collect 1 2 --subsystem=datasource --url=$url --server=$admin_Server
 else
-    echo "Admin server not found."
+    echo "Admin server not found. Test skipped."
 fi
 
 
@@ -86,7 +86,8 @@ fi
 if [ ! -z "$admin_Server" ]; then
     $HOME/umc/lib/wls-service.sh wls-probe.yaml restart
 else
-    echo "Admin server not found."
+    echo "Admin server not found. Service start skipped. Stoping as sanity step."
+    $HOME/umc/lib/wls-service.sh wls-probe.yaml stop
 fi
 
 # init cron
