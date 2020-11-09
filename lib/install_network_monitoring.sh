@@ -46,17 +46,20 @@ test -f $domain_home/config/jdbc/MFTDataSource-jdbc.xml && jdbc_src=$domain_home
 
 jdbc_url=$(cat $jdbc_src | grep url | perl -ne 'while(/<url>(.+)<\/url>/gm){print "$1\n";}')
 
-export soa_jdbc_address=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$2";}')
-export soa_jdbc_port=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$3";}')
-export soa_jdbc_service_name=soa_db
+export wls_jdbc_address=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$2";}')
+export wls_jdbc_port=$(echo $jdbc_url | perl -ne 'while(/(.+)@\/\/(.+):(\d+)\/(.+)/gm){print "$3";}')
+export wls_jdbc_service_name=wls_db
 
-echo $soa_jdbc_address
-echo $soa_jdbc_port
-echo $soa_jdbc_service_name
+echo $wls_jdbc_address
+echo $wls_jdbc_port
+echo $wls_jdbc_service_name
 
-umc pingSocket collect 1 1 --subsystem $soa_jdbc_address:$soa_jdbc_port
+# init and test umc
+source ~/umc/bin/umc.h
+umc pingSocket collect 1 1 --subsystem $wls_jdbc_address:$wls_jdbc_port
 
-cat >net-probe_soa-db.yml <<EOF
+# build data collection descriptor
+cat >net-probe_wls-db.yml <<EOF
 ---
 network:
       log_dir: ~/x-ray/diagnose/res/umc
@@ -75,18 +78,17 @@ network:
                         ip: "8.8.8.8:53"
         - \$domain_name:
                 icmp:
-                    - \$soa_jdbc_service_name:
-                        ip: "$soa_jdbc_address"
+                    - \$wls_jdbc_service_name:
+                        ip: "$wls_jdbc_address"
                 tcp:
-                    - \$soa_jdbc_service_name:
-                        ip: "\$soa_jdbc_address:\$soa_jdbc_port"
+                    - \$wls_jdbc_service_name:
+                        ip: "\$wls_jdbc_address:\$wls_jdbc_port"
 EOF
 
-
-oci-tools/bin/tpl2data.sh net-probe_soa-db.yml  > ~/.umc/net-probe_soa-db.yml
+oci-tools/bin/tpl2data.sh net-probe_wls-db.yml  > ~/.umc/net-probe_wls-db.yml
 
 # start
-~/umc/lib/net-service.sh net-probe_soa-db.yml restart
+~/umc/lib/net-service.sh net-probe_wls-db.yml restart
 
 # init cron
 cron_section_start="# START umc - $domain_name network"
@@ -94,7 +96,7 @@ cron_section_stop="# STOP umc - $domain_name network"
 
 cat >umc_net.cron <<EOF
 $cron_section_start
-1 0 * * * $HOME/umc/lib/net-service.sh net-probe_soa-db.yml restart
+1 0 * * * $HOME/umc/lib/net-service.sh net-probe_wls-db.yml restart
 $cron_section_stop
 EOF
 
