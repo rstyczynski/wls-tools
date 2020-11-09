@@ -47,10 +47,10 @@ adminURL_suffix=$admin_host_name:$admin_host_port
 admin_Server=${wls_admin[0]}
 
 if [ ! -z "$admin_Server" ]; then
-cat ~/umc/lib/wls-probe.yaml | 
-sed "s/admin: oracle/admin: $os_user/" | 
-sed "s/url: t3:\/\/localhost:7001/url: t3:\/\/$adminURL_suffix/" |
-sed "s/admin_server: AdminServer/admin_server: $admin_Server/" > ~/.umc/wls-probe.yaml
+    cat ~/umc/lib/wls-probe.yaml | 
+    sed "s/admin: oracle/admin: $os_user/" | 
+    sed "s/url: t3:\/\/localhost:7001/url: t3:\/\/$adminURL_suffix/" |
+    sed "s/admin_server: AdminServer/admin_server: $admin_Server/" > ~/.umc/wls-probe.yaml
 else
   rm -rf ~/.umc/wls-probe.yaml
 fi
@@ -77,7 +77,7 @@ url="t3://$adminURL_suffix"
 
 source ~/umc/bin/umc.h
 
-umc wls collect 1 2 --subsystem=datasource --url=$url
+umc wls collect 1 2 --subsystem=datasource --url=$url --server=$admin_Server
 
 # start OS collector
 
