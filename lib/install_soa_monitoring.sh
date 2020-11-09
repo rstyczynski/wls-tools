@@ -4,7 +4,7 @@ wls_user=$1; shift
 wls_pass=$1; shift
 
 if [ -z "$wls_user" ] || [ -z "$wls_pass" ]; then
-    echo "Usage: install_soa_monitoring.sh user pass"
+    echo "Usage: install_soa_monitoring.sh user pass [tools dir]"
     exit 1
 fi
 
