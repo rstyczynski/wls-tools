@@ -10,7 +10,7 @@ host=$1; shift
 #
 #
 function usage() {
-    echo "Usage: ansible_groups inventory [count|names] [host]"
+    echo "Usage: ansible_groups inventory [count|name|names] [host]"
 }
 
 #
@@ -24,6 +24,16 @@ case $cmd in:
 count)
     group_cnt=$(echo $group_names_json | jq -r '.group_names' | tr -d '[\n] "' | tr , '\n' | wc -l)
     echo $group_cnt
+    ;;
+name)
+    group_cnt=$(echo $group_names_json | jq -r '.group_names' | tr -d '[\n] "' | tr , '\n' | wc -l)
+    if [ $group_cnt -q 1 ]; then
+        group_name=$(echo $group_names_json | jq -r '.group_names' | tr -d '[\n] "' | tr , ' ')
+        echo $group_name
+    else
+        echo "Error. More than one group assigned."
+        exit 2
+    fi
     ;;
 names)
     group_names=$(echo $group_names_json | jq -r '.group_names' | tr -d '[\n] "' | tr , ' ')
