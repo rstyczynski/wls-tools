@@ -72,12 +72,14 @@ export DOMAIN_HOME=$domain_home
 EOF
 
 # Test WLS connectivity
+if [ ! -z "$admin_Server" ]; then
+    url="t3://$adminURL_suffix" 
+    source ~/umc/bin/umc.h
+    umc wls collect 1 2 --subsystem=datasource --url=$url --server=$admin_Server
+else
+    echo "Admin server not found."
+fi
 
-url="t3://$adminURL_suffix" 
-
-source ~/umc/bin/umc.h
-
-umc wls collect 1 2 --subsystem=datasource --url=$url --server=$admin_Server
 
 # start OS collector
 
