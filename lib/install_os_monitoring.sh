@@ -27,7 +27,7 @@ echo "Primary if: $primary_if"
 
 cat ~/umc/lib/os-probe.yaml | sed "s/eth0/$primary_if/" > $umc_cfg/os-probe.yaml
 
-$HOME/umc/lib/os-service.sh os-probe.yaml start
+$HOME/umc/lib/os-service.sh os-probe.yaml restart
 
 # init cron
 cron_section_start="# START umc - os"
