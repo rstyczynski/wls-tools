@@ -1,6 +1,7 @@
 #!/bin/bash
 
 tools_src=$1; shift
+extra_services=$1; shift
 
 : ${tools_src:=git}
 
@@ -18,8 +19,22 @@ git)
     test -d oci-tools || git clone https://github.com/rstyczynski/oci-tools.git
     ;;
 *)
+    if [ ! -f $tools_src/umc ]; then
+        echo "Error. umc not available at shared location. Put it there before proceeding"
+        exit 1
+    fi
     cp -rf $tools_src/umc ~/
+
+    if [ ! -f $tools_src/wls-tools ]; then
+        echo "Error. wls-tools not available at shared location. Put it there before proceeding"
+        exit 1
+    fi
     cp -rf $tools_src/wls-tools ~/
+    
+    if [ ! -f $tools_src/oci-tools ]; then
+        echo "Error. oci-tools not available at shared location. Put it there before proceeding"
+        exit 1
+    fi
     cp -rf $tools_src/oci-tools ~/
     ;;
 esac
@@ -71,7 +86,7 @@ source ~/umc/bin/umc.h
 umc pingSocket collect 1 1 --subsystem $wls_jdbc_address:$wls_jdbc_port
 
 # build data collection descriptor
-cat >net-probe_wls-db.yml <<EOF
+cat >net-probe.yml <<EOF
 ---
 network:
       log_dir: ~/x-ray/diagnose/res/umc
@@ -97,10 +112,12 @@ network:
                         ip: "\$wls_jdbc_address:\$wls_jdbc_port"
 EOF
 
-oci-tools/bin/tpl2data.sh net-probe_wls-db.yml  > ~/.umc/net-probe_wls-db.yml
+echo "$extra_services" >> net-probe.yml
+
+oci-tools/bin/tpl2data.sh net-probe.yml  > ~/.umc/net-probe.yml
 
 # start
-~/umc/lib/net-service.sh net-probe_wls-db.yml restart
+~/umc/lib/net-service.sh net-probe.yml restart
 
 # init cron
 cron_section_start="# START umc - $domain_name network"
@@ -108,7 +125,7 @@ cron_section_stop="# STOP umc - $domain_name network"
 
 cat >umc_net.cron <<EOF
 $cron_section_start
-1 0 * * * $HOME/umc/lib/net-service.sh net-probe_wls-db.yml restart
+1 0 * * * $HOME/umc/lib/net-service.sh net-probe.yml restart
 $cron_section_stop
 EOF
 
