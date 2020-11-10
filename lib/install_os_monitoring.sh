@@ -13,6 +13,10 @@ git)
     test -d umc || git clone https://github.com/rstyczynski/umc.git
     ;;
 *)
+    if [ ! -f $tools_src/umc ]; then
+        echo "Error. umc not available at shared location. Put it there before proceeding"
+        exit 1
+    fi
     cp -rf $tools_src/umc ~/
     ;;
 esac
