@@ -112,7 +112,9 @@ network:
                         ip: "\$wls_jdbc_address:\$wls_jdbc_port"
 EOF
 
-echo "$extra_services" >> net-probe.yml
+if [ ! -z "$extra_services" ]; then
+    echo "$extra_services" | sed 's/>/    /g' >> net-probe.yml
+fi
 
 oci-tools/bin/tpl2data.sh net-probe.yml  > ~/.umc/net-probe.yml
 
