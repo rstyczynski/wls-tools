@@ -26,19 +26,19 @@ git)
     test -d oci-tools || git clone https://github.com/rstyczynski/oci-tools.git
     ;;
 *)
-    if [ ! -f $tools_src/umc ]; then
+    if [ ! -d $tools_src/umc ]; then
         echo "Error. umc not available at shared location. Put it there before proceeding"
         exit 1
     fi
     cp -rf $tools_src/umc ~/
 
-    if [ ! -f $tools_src/wls-tools ]; then
+    if [ ! -d $tools_src/wls-tools ]; then
         echo "Error. wls-tools not available at shared location. Put it there before proceeding"
         exit 1
     fi
     cp -rf $tools_src/wls-tools ~/
     
-    if [ ! -f $tools_src/oci-tools ]; then
+    if [ ! -d $tools_src/oci-tools ]; then
         echo "Error. oci-tools not available at shared location. Put it there before proceeding"
         exit 1
     fi
