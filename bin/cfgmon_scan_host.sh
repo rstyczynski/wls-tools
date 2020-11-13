@@ -10,7 +10,7 @@ function usage() {
 
 [ -z "$scan_type" ] && echo "Error. $(usage)" && exit 1
 
-: ${cfgmon_root:=/home/pmaker/cfgmon}
+: ${cfgmon_root:=/home/pmaker}
 
 if [ $scan_type == init ]; then
 
@@ -22,7 +22,7 @@ if [ $scan_type == init ]; then
     echo "== user: $(whoami)"
     echo "== date: $(date)"
     echo "======================================="
-    echo "== cfgmon_root: $cfgmon_root"
+    echo "== cfgmon_root: $cfgmon_root/cfgmon"
     echo "== mode: init"
     echo "======================================="
     echo "======================================="
@@ -34,8 +34,8 @@ if [ $scan_type == init ]; then
     [ -z "$(git config user.name)" ] && git config --global user.name "$(hostname)"
 
     # preare cfg dump directory
-    mkdir -p $cfgmon_root
-    git init $cfgmon_root
+    mkdir -p $cfgmon_root/cfgmon
+    git init $cfgmon_root/cfgmon
 
     exit 0
 fi
@@ -51,27 +51,27 @@ echo "== host: $(hostname)"
 echo "== user: $(whoami)"
 echo "== date: $(date)"
 echo "======================================="
-echo "== cfgmon_root: $cfgmon_root"
+echo "== cfgmon_root: $cfgmon_root/cfgmon"
 echo "== mode: scan"
 echo "== scan_type: $scan_type"
 echo "======================================="
 echo "======================================="
 
-if [ ! -d $cfgmon_root ]; then
+if [ ! -d $cfgmon_root/cfgmon ]; then
         echo 'Scan env not initialized. Run the script with init argument first.'
         exit 1
 fi
 
 # prepare cfg mon for today
 today=$(date -u +"%Y-%m-%d")
-cfgmon_now=$cfgmon_root/$today
+cfgmon_now=$cfgmon_root/cfgmon/$today
 
 # remove today (if exists) to avoind file mixing between multiple runs on the sme day
 rm -rf $cfgmon_now
 mkdir -p $cfgmon_now
 
 # lock cfg mon directory
-touch $cfgmon_root/lock
+touch $cfgmon_root/cfgmon/lock
 
 # sysctl
 mkdir -p $cfgmon_now/os/sysctl
@@ -132,14 +132,14 @@ fi
 # make archive
 echo ">> preparing tar files..."
 cd $cfgmon_now
-mkdir -p $cfgmon_root/outbox
-tar -zcvf $cfgmon_root/outbox/$(hostname).$today.scan_host.tar.gz . >/dev/null
+mkdir -p $cfgmon_root/cfgmon/outbox
+tar -zcvf $cfgmon_root/cfgmon/outbox/$(hostname).$today.scan_host.tar.gz . >/dev/null
 
 # copy to shared location
 if [ ! -z "$nfs_root" ]; then
     echo ">> copying tar file to shared location..."
     mkdir -p $nfs_root/inbox
-    cp $cfgmon_root/outbox/$(hostname).$today.scan_host.tar.gz $nfs_root/inbox
+    cp $cfgmon_root/cfgmon/outbox/$(hostname).$today.scan_host.tar.gz $nfs_root/inbox
 
     echo ">> copying files to shared location..."
     mkdir -p $nfs_root/$(hostname)/$today
@@ -155,17 +155,20 @@ fi
 # finalize
 #
 
-echo ">> linking current to actual data: $cfgmon_root/current -> $cfgmon_now"
-mv $cfgmon_root/current $cfgmon_root/current.prv
-ln -s $(basename $cfgmon_now) $cfgmon_root/current 
-rm -rf $cfgmon_root/current.prv
+echo ">> linking current to actual data: $cfgmon_root/cfgmon/current -> $cfgmon_now"
+mv $cfgmon_root/cfgmon/current $cfgmon_root/cfgmon/current.prv
+ln -s $(basename $cfgmon_now) $cfgmon_root/cfgmon/current 
+rm -rf $cfgmon_root/cfgmon/current.prv
 
 # remove lock
-rm -rf $cfgmon_root/lock
+rm -rf $cfgmon_root/cfgmon/lock
+
+# remove old data
+find $cfgmon_root/cfgmon -maxdepth 1 -type d -mtime +7 | xargs rm -rf 
 
 # add to version control
 echo ">> keeping history in git"
-cd $cfgmon_root
+cd $cfgmon_root/cfgmon
 git add --all >/dev/null 2>&1
 git commit -am "config fetch" >/dev/null 2>&1
 cd - >/dev/null
