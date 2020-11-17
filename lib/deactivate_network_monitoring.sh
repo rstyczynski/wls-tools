@@ -1,6 +1,16 @@
 #!/bin/bash
 
-~/umc/lib/net-service.sh net-probe_soa-db.yml stop
+
+service_files=$(ls ~/.umc/net-probe*.yml)
+
+for service_file in $service_files; do
+    service=$(basename $service_file)
+
+    echo stopping $service...
+    $HOME/umc/lib/net-service.sh $service stop 
+    rm -rf $service_file
+done
+
 
 source wls-tools/bin/discover_processes.sh 
 
