@@ -58,6 +58,7 @@ export LC_ALL=en_US.UTF-8
 
 discoverWLS
 
+admin_Server=${wls_admin[0]}
 
 if [ ! -z "$admin_Server" ]; then
 
