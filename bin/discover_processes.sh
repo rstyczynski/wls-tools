@@ -11,6 +11,10 @@ declare -A wls_attributes
 unset wls_attributes_groups
 declare -A wls_attributes_groups
 
+# to stop per from complains about locale
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 ###
 ### shared functions
 ###
