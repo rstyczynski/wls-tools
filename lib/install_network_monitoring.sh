@@ -89,8 +89,8 @@ umc pingSocket collect 1 1 --subsystem $wls_jdbc_address:$wls_jdbc_port
 cat >net-probe.yml <<EOF
 ---
 network:
-      log_dir: ~/x-ray/diagnose/res/umc
-      runtime_dir: ~/x-ray/watch/res/obd
+      log_dir: ~/x-ray/diag/net/log
+      runtime_dir: ~/x-ray/watch/net/obd
       services:
         - oci:
                 icmp:
