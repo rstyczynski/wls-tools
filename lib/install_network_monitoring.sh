@@ -23,19 +23,19 @@ git)
         echo "Error. umc not available at shared location. Put it there before proceeding"
         exit 1
     fi
-    cp -rf $tools_src/umc ~/
+    cp -rf --preserve=mode,timestamps  $tools_src/umc ~/
 
     if [ ! -d $tools_src/wls-tools ]; then
         echo "Error. wls-tools not available at shared location. Put it there before proceeding"
         exit 1
     fi
-    cp -rf $tools_src/wls-tools ~/
+    cp -rf --preserve=mode,timestamps  $tools_src/wls-tools ~/
     
     if [ ! -d $tools_src/oci-tools ]; then
         echo "Error. oci-tools not available at shared location. Put it there before proceeding"
         exit 1
     fi
-    cp -rf $tools_src/oci-tools ~/
+    cp -rf --preserve=mode,timestamps  $tools_src/oci-tools ~/
     ;;
 esac
 

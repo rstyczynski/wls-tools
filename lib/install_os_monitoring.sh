@@ -17,7 +17,7 @@ git)
         echo "Error. umc not available at shared location. Put it there before proceeding"
         exit 1
     fi
-    cp -rf $tools_src/umc ~/
+    cp -rf --preserve=mode,timestamps $tools_src/umc ~/
     ;;
 esac
 
