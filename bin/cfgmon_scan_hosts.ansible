@@ -6,7 +6,7 @@
       repo: 'https://github.com/rstyczynski/wls-tools.git'
       dest: /home/pmaker/wls-tools
     when: host_type is defined and host_type == "application"
-
+  
   - name: scan host init
     script: /home/pmaker/wls-tools/bin/cfgmon_scan_host.sh init
     when: host_type is defined and host_type == "application"
