@@ -52,6 +52,8 @@ export LC_ALL=en_US.UTF-8
 
 discoverWLS
 export domain_home=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
+
+if [ ! -z $domain_home ]; then
 export domain_name=$(basename $domain_home)
 
 test -f $domain_home/config/jdbc/WLSSchemaDataSource-jdbc.xml && jdbc_src=$domain_home/config/jdbc/WLSSchemaDataSource-jdbc.xml 
@@ -111,6 +113,29 @@ network:
                     - \$wls_jdbc_service_name:
                         ip: "\$wls_jdbc_address:\$wls_jdbc_port"
 EOF
+
+else
+    echo Weblogic not detected.
+
+cat >net-probe.yml <<EOF
+---
+network:
+      log_dir: ~/x-ray/diag/net/log
+      runtime_dir: ~/x-ray/watch/net/obd
+      services:
+        - oci:
+                icmp:
+                    - vcn:
+                        ip: "169.254.169.254"
+                    - internet:
+                        ip: "8.8.8.8"
+                tcp:
+                    - vcn:
+                        ip: "169.254.169.254:53"
+                    - internet:
+                        ip: "8.8.8.8:53"
+EOF
+fi
 
 if [ ! -z "$extra_services" ]; then
     echo "$extra_services" | sed 's/>/    /g' >> net-probe.yml
