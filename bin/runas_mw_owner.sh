@@ -1,15 +1,12 @@
 #!/bin/bash
 
-# to stop per from complains about locale
-export LC_CTYPE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
-source wls-tools/bin/discover_processes.sh
-discoverWLS
-
 source ~/oci-tools/bin/config.sh
 export mw_os_user=$(getcfg x-ray mw_os_user | tr [A-Z] [a-z])
 if [ -z "$mw_os_user" ]; then
+    # to stop per from complains about locale
+    export LC_CTYPE=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+
     source wls-tools/bin/discover_processes.sh
     discoverWLS
     os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
