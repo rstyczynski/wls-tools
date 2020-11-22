@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source ~/oci-tools/bin/config.sh
-export mw_os_user=$(getcfg x-ray mw_os_user | tr [A-Z] [a-z])
+export mw_os_user=$(getcfg x-ray mw_os_user)
 if [ -z "$mw_os_user" ]; then
     # to stop per from complains about locale
     export LC_CTYPE=en_US.UTF-8
@@ -18,6 +18,7 @@ if [ -z "$mw_os_user" ]; then
     setcfg x-ray mw_os_user $mw_os_user
 fi
 
+export mw_os_user=$(getcfg x-ray mw_os_user)
 if [ -z "$mw_os_user" ]; then
     echo "Error. Oracle middleware not detected."
     exit 1
