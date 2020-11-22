@@ -9,13 +9,13 @@ if [ -z "$mw_os_user" ]; then
 
     source wls-tools/bin/discover_processes.sh
     discoverWLS
-    os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+    mw_os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
     # admin only?
-    : ${os_user:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
+    : ${mw_os_user:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
     # ohs only?
-    : ${os_user:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ')}
+    : ${mw_os_user:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ')}
 
-    setcfg x-ray mw_os_user $os_user
+    setcfg x-ray mw_os_user $mw_os_user
 fi
 
 if [ -z "$mw_os_user" ]; then
