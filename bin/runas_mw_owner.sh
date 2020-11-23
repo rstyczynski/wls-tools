@@ -13,7 +13,7 @@ if [ -z "$mw_os_user" ]; then
     # admin only?
     : ${mw_os_user:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
     # ohs only?
-    : ${mw_os_user:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ')}
+    : ${mw_os_user:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ' | sort -u)}
 
     setcfg x-ray mw_os_user $mw_os_user force
 fi
