@@ -7,7 +7,7 @@ if [ -z "$mw_os_user" ]; then
     export LC_CTYPE=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
 
-    source wls-tools/bin/discover_processes.sh
+    source ~/wls-tools/bin/discover_processes.sh
     discoverWLS
     mw_os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
     # admin only?
