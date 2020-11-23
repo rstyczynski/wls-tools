@@ -31,13 +31,14 @@ else
 
         cp $script_to_run_path $script_to_run
 
-        echo "Running: $script_to_run $@"
+        echo "Running as $mw_os_user: $script_to_run $@"
         sudo su - $mw_os_user $script_to_run $@
         rm $script_to_run
         exit 0
     else
-        echo "Running: $@"
+        echo "Running as $mw_os_user: $@"
+        echo "sudo su - $mw_os_user -c $@"
         sudo su - $mw_os_user -c "$@"
-        exit 2
+        exit 0
     fi
 fi
