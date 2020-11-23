@@ -37,8 +37,8 @@ else
         exit 0
     else
         invoke_cmd="$@"
-        echo "Running as $mw_os_user: $invoke_cmd
-        echo "sudo su - $mw_os_user -c $invoke_cmd
+        echo "Running as $mw_os_user: $invoke_cmd"
+        echo "sudo su - $mw_os_user -c $invoke_cmd"
         sudo su - $mw_os_user -c "$invoke_cmd"
         exit 0
     fi
