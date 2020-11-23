@@ -32,7 +32,7 @@ else
         cp $script_to_run_path $script_to_run
 
         echo "Running as $mw_os_user: $script_to_run $@"
-        sudo su - $mw_os_user $script_to_run $@
+        sudo su - $mw_os_user $script_to_run "$@"
         rm $script_to_run
         exit 0
     else
