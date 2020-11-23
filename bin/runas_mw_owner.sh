@@ -37,7 +37,7 @@ else
         exit 0
     else
         echo "Running as $mw_os_user: $@"
-        echo "sudo su - $mw_os_user -c $@"
+        echo "sudo su - $mw_os_user -c \"$@\""
         sudo su - $mw_os_user -c "$@"
         exit 0
     fi
