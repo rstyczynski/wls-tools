@@ -15,7 +15,7 @@ if [ -z "$mw_os_user" ]; then
     # ohs only?
     : ${mw_os_user:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ')}
 
-    setcfg x-ray mw_os_user $mw_os_user
+    setcfg x-ray mw_os_user $mw_os_user force
 fi
 
 export mw_os_user=$(getcfg x-ray mw_os_user)
@@ -30,10 +30,13 @@ else
         shift
 
         cp $script_to_run_path $script_to_run
+
+        echo "Running: $script_to_run $@"
         sudo su - $mw_os_user $script_to_run $@
         rm $script_to_run
         exit 0
     else
+        echo "Running: $@"
         sudo su - $mw_os_user -c "$@"
         exit 2
     fi
