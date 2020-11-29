@@ -138,10 +138,10 @@ EOF
 fi
 
 if [ ! -z "$extra_services" ]; then
-    echo "$extra_services" | sed 's/>/    /g' >> net-probe.yml
+    echo "$extra_services" | sed 's/>/    /g' >> net-probe.yaml
 fi
 
-oci-tools/bin/tpl2data.sh net-probe.yaml  > ~/.umc/net-probe.yml
+oci-tools/bin/tpl2data.sh net-probe.yaml  > ~/.umc/net-probe.yaml
 
 # start
 ~/umc/lib/net-service.sh net-probe.yaml restart
@@ -152,7 +152,7 @@ cron_section_stop="# STOP umc - $domain_name network"
 
 cat >umc_net.cron <<EOF
 $cron_section_start
-1 0 * * * $HOME/umc/lib/net-service.sh net-probe.yml restart
+1 0 * * * $HOME/umc/lib/net-service.sh net-probe.yaml restart
 $cron_section_stop
 EOF
 
