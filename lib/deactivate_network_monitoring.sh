@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-service_files=$(ls ~/.umc/net-probe*.yml)
+service_files=$(ls ~/.umc/net-probe*.yaml ~/.umc/net-probe*.yml)
 
 for service_file in $service_files; do
     service=$(basename $service_file)

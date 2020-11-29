@@ -88,7 +88,7 @@ source ~/umc/bin/umc.h
 umc pingSocket collect 1 1 --subsystem $wls_jdbc_address:$wls_jdbc_port
 
 # build data collection descriptor
-cat >net-probe.yml <<EOF
+cat >net-probe.yaml <<EOF
 ---
 network:
       log_dir: ~/x-ray/diag/net/log
@@ -117,7 +117,7 @@ EOF
 else
     echo Weblogic not detected.
 
-cat >net-probe.yml <<EOF
+cat >net-probe.yaml <<EOF
 ---
 network:
       log_dir: ~/x-ray/diag/net/log
@@ -141,10 +141,10 @@ if [ ! -z "$extra_services" ]; then
     echo "$extra_services" | sed 's/>/    /g' >> net-probe.yml
 fi
 
-oci-tools/bin/tpl2data.sh net-probe.yml  > ~/.umc/net-probe.yml
+oci-tools/bin/tpl2data.sh net-probe.yaml  > ~/.umc/net-probe.yml
 
 # start
-~/umc/lib/net-service.sh net-probe.yml restart
+~/umc/lib/net-service.sh net-probe.yaml restart
 
 # init cron
 cron_section_start="# START umc - $domain_name network"
