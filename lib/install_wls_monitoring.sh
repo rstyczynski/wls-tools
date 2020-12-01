@@ -89,12 +89,12 @@ export DOMAIN_HOME=$domain_home
 EOF
 
 # Test WLS connectivity
-if [ ! -z "$admin_Server" ]; then
+if [ -z "$admin_Server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
+    echo "Admin server not found. Test skipped."
+else
     url="t3://$adminURL_suffix" 
     source ~/umc/bin/umc.h
     umc wls collect 1 2 --subsystem=datasource --url=$url --server=$admin_Server
-else
-    echo "Admin server not found. Test skipped."
 fi
 
 
@@ -125,7 +125,8 @@ EOF
     sed "/$cron_section_start/,/$cron_section_stop/d"
     cat umc_dms.cron) | crontab -
     rm umc_dms.cron
+
+    crontab -l
 fi
 
-crontab -l
 
