@@ -100,11 +100,11 @@ fi
 
 # start OS collector
 
-if [ ! -z "$admin_Server" ]; then
-    $HOME/umc/lib/wls-service.sh wls-probe.yaml restart
-else
-    echo "Admin server not found. Service start skipped. Stoping service as sanity step."
+if [ -z "$admin_Server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
+        echo "Admin server not found. Service start skipped. Stoping service as sanity step."
     $HOME/umc/lib/wls-service.sh wls-probe.yaml stop
+else
+    $HOME/umc/lib/wls-service.sh wls-probe.yaml restart
 fi
 
 # init cron
