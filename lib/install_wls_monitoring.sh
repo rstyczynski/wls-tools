@@ -79,6 +79,7 @@ osb_home=$(getWLSjvmAttr ${wls_managed[0]} -Doracle.osb.home)
 wls_home=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.home)
 domain_home=$(getWLSjvmAttr ${wls_managed[0]} -Ddomain.home)
 
+
 cat > ~/.umc/umc.conf <<EOF
 export FMW_HOME=$mw_home
 export SOA_HOME=$soa_home
@@ -107,11 +108,14 @@ else
 fi
 
 # init cron
-
 cron_section_start="# START umc - $domain_name DMS"
 cron_section_stop="# STOP umc - $domain_name DMS"
 
-if [ ! -z "$admin_Server" ]; then
+if [ -z "$admin_Server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ];; then
+    echo "Admin server, MW home, WLS home, or Domain home not found - delete DMS section from cron"
+    (crontab -l 2>/dev/null | 
+    sed "/$cron_section_start/,/$cron_section_stop/d") | crontab -
+else
     cat >umc_dms.cron <<EOF
 $cron_section_start
 1 0 * * * $HOME/umc/lib/wls-service.sh wls-probe.yaml restart
@@ -121,10 +125,6 @@ EOF
     sed "/$cron_section_start/,/$cron_section_stop/d"
     cat umc_dms.cron) | crontab -
     rm umc_dms.cron
-else
-    echo "Admin server not found - delete DMS section from cron"
-    (crontab -l 2>/dev/null | 
-    sed "/$cron_section_start/,/$cron_section_stop/d") | crontab -
 fi
 
 crontab -l
