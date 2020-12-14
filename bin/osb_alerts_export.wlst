@@ -85,7 +85,7 @@ for opt, arg in opts:
         sys.exit(2)
 
 if fromDate is None:
-    fromDate =  toDate - timedelta(days=1)
+    fromDate =  toDate - timedelta(days=1) + timedelta(minutes=1)
 
 if wlst:
     connect(url=admin_url, adminServerName=admin_name)

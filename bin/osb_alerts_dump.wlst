@@ -37,6 +37,10 @@ def dump_osb_alerts(count=1, interval=0):
     startAt = calendar.timegm(pytime.gmtime()) - interval
     while count >0:
         #
+        if wlst:
+            connect(url=admin_url, adminServerName=admin_name)
+        #
+        #
         current_timestmap = calendar.timegm(pytime.gmtime())
         endAt = current_timestmap - safety_lag
         #
@@ -81,6 +85,8 @@ def dump_osb_alerts(count=1, interval=0):
         #
         count = count - 1
         #
+        if wlst:
+            disconnect()
 
 
 dst_dir='/tmp'
@@ -95,38 +101,35 @@ interval = 300 # 5 miutes interval
 
 
 try:
-    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'count=', 'interval=', 'dir=', 'osb=', 'safety_lag=' ] )
+    opts, args = getopt.getopt( sys.argv[1:], 'a:p:u:hc:i:d:o:s:', ['admin=','port=','url=', 'help', 'count=', 'interval=', 'dir=', 'osb=', 'safety_lag=' ] )
 except getopt.GetoptError, err:
     print str(err)
     usage()
     sys.exit(2)
 	
 for opt, arg in opts:
-    if opt in ('--help'):
+    if opt in ('-h', '--help'):
         usage()
         sys.exit(2)
-    elif opt in ('--admin'):
+    elif opt in ('-a', '--admin'):
         admin_name = arg
-    elif opt in ('--port'):
+    elif opt in ('-p', '--port'):
         admin_port = arg
         admin_url = admin_protocol + "://" + admin_address + ":" + str(admin_port)
-    elif opt in ('--url'):
+    elif opt in ('-u', '--url'):
         admin_url = arg
-    elif opt in ('--dir'):
+    elif opt in ('-d', '--dir'):
         dst_dir = arg
-    elif opt in ('--osb'):
+    elif opt in ('-o', '--osb'):
         server_name = arg
-    elif opt in ('--count'):
+    elif opt in ('-c', '--count'):
         count = int(arg)
-    elif opt in ('--interval'):
+    elif opt in ('-i', '--interval'):
         interval = int(arg)
-    elif opt in ('--safety_lag'):
+    elif opt in ('-s', '--safety_lag'):
         safety_lag = int(arg)
     else:
         usage()
         sys.exit(2)
-
-if wlst:
-    connect(url=admin_url, adminServerName=admin_name)
 
 dump_osb_alerts(count, interval)
