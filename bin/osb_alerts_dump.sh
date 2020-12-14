@@ -45,7 +45,7 @@ stop)
     ;;
 
 status)
-    if [ -f ~/.x-ray/pid/osb_alerts_dump.pid ]; then
+    if [ -f ~/.x-ray/pid/osb_alerts_dump_*.pid ]; then
         echo "Runnning at: $(cat ~/.x-ray/pid/osb_alerts_dump_*.pid)"
         for log in $(ls ~/.x-ray/stdout/osb_alerts_dump_*.out); do
             echo "Log: $log"
