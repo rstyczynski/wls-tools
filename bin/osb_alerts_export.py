@@ -14,7 +14,6 @@ def export_osb_alerts(startDate, endDate):
     #
     print "Exporting to " + dst_dir + "/osb_alert.xml"
     print "  server       : " + server_name
-    print "  current time : " + str(current_timestmap) + ", " + str(datetime.fromtimestamp(current_timestmap))
     print "  from         : " + str(startAt) + ", " + str(datetime.fromtimestamp(startAt))
     print "  to           : " + str(endAt) + ", " + str(datetime.fromtimestamp(endAt))
     #
