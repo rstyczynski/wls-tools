@@ -21,7 +21,7 @@ function export_day() {
             --url "t3://$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_name):$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_port)" \
             --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/${wls_managed[$srvNo]}/$to_date \
             --osb ${wls_managed[$srvNo]} \
-            --to_date $to_date \
+            --to_day $to_date \
             $@
 
             cd - >/dev/null
