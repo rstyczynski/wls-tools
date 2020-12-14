@@ -1,11 +1,11 @@
 #!wlst
 
 def usage():
-    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --from= --to_day= --dir= osb=
+    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --from_day= --to_day= --dir= osb=
 
 , where
     --to_day........end date for export in ISO format YYYY-MM-DD. no default
-    --from..........start date for export in ISO format YYYY-MM-DD. deafult is 1 day gefore start
+    --from_day......start date for export in ISO format YYYY-MM-DD. deafult is 1 day gefore start
 
     --dir...........output directory. default /tmp
 
@@ -27,10 +27,10 @@ wlst = True
 
 DATname='CUSTOM/com.bea.wli.monitoring.pipeline.alert'
 
-def export_osb_alerts(startDate, endDate):
+def export_osb_alerts(fromDate, toDate):
     #
-    startAt = pytime.mktime(startDate.timetuple())
-    endAt=pytime.mktime(endDate.timetuple())
+    startAt = pytime.mktime(fromDate.timetuple())
+    endAt=pytime.mktime(toDate.timetuple())
     #
     print "Exporting to " + dst_dir + "/osb_alert.xml"
     print "  server       : " + server_name
@@ -51,7 +51,7 @@ admin_name='AdminServer'
 admin_port = 7001
 
 try:
-    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'from=', 'to_day=', 'dir=', 'osb=' ] )
+    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'from_day=', 'to_day=', 'dir=', 'osb=' ] )
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -70,11 +70,10 @@ for opt, arg in opts:
         admin_url = arg
     elif opt in ('--to_day'):
         parts=arg.split('-')
-        endDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]), 23, 59, 59)
-    elif opt in ('--from'):
+        toDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]), 23, 59, 59)
+    elif opt in ('--from_day'):
         parts=arg.split('-')
-        startDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]), 0, 0, 0)
-        endDate = startDate + timedelta(days=1)
+        fromDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]), 0, 0, 0)
     elif opt in ('--dir'):
         dst_dir = arg
     elif opt in ('--osb'):
@@ -83,7 +82,10 @@ for opt, arg in opts:
         usage()
         sys.exit(2)
 
+if fromDate is None:
+    fromDate =  toDate - timedelta(days=1)
+
 if wlst:
     connect(url=admin_url, adminServerName=admin_name)
 
-export_osb_alerts(startDate, endDate)
+export_osb_alerts(fromDate, toDate)
