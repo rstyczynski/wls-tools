@@ -49,7 +49,8 @@ for opt, arg in opts:
     elif opt in ('--url'):
         admin_url = arg
     elif opt in ('--from'):
-        startDate = datetime.strptime(arg, '%d-%m-%Y')
+        parts=arg.split('-')
+        startDate = datetime(int(parts[2]), int(parts[1]), int(parts[0]))
         endDate = startDate + timedelta(days=1)
     elif opt in ('--to'):
         endDate = datetime.strptime(arg, '%d-%m-%Y')
@@ -60,7 +61,6 @@ for opt, arg in opts:
     else:
         usage()
         sys.exit(2)
-
 
 if wlst:
     connect(url=admin_url, adminServerName=admin_name)
