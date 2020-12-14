@@ -1,11 +1,4 @@
-#!/bin/python
-# 
-# !/u01/app/oracle/middleware/oracle_common/common/bin/wlst.sh 
-
-
-# dump previous 60 seconds
-# 1. execute in a loop with 60 seconds wait time. 
-# 1. 
+#!wlst
 
 import datetime
 from datetime import datetime
@@ -15,41 +8,22 @@ import time
 import os
 
 
-wlst = False
-
-dst_dir='/tmp'
-
-server_name='osb_server1'
+wlst = True
 
 DATname='CUSTOM/com.bea.wli.monitoring.pipeline.alert'
 
-admin_url='t3://omcscbailqkcuh:3015'
-admin_name='AdminServer'
-
-safety_time_lag = 5  # program takes older messages to avoid message loosing or overlapping
-
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print ('Error: Creating directory. ' +  directory)
-        
-if wlst:
-    connect(url=admin_url, adminServerName=admin_name)
-
-def export_osb_alerts(count=10, interval=5):
+def dump_osb_alerts(count=1, interval=0):
 
     startAt = calendar.timegm(time.gmtime()) - interval
     while count >0:
         #
         current_timestmap = calendar.timegm(time.gmtime())
-        endAt = current_timestmap - safety_time_lag
+        endAt = current_timestmap - safety_lag
         #
         dateISO=datetime.fromtimestamp(endAt).isoformat().split('T')[0]
         timeISO=datetime.fromtimestamp(endAt).isoformat().split('T')[1]
         #
-        print "Exporting to " + dst_dir + "/" + dateISO + "/osb_alert." + timeISO + ".xml"
+        print "Exporting to " + dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml"
         print "  server       : " + server_name
         print "  current time : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(current_timestmap))
         print "  from         : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(startAt))
@@ -61,7 +35,7 @@ def export_osb_alerts(count=10, interval=5):
         export_start = calendar.timegm(time.gmtime())
         if wlst:
             exportDiagnosticDataFromServer(logicalName=DATname, 
-            exportFileName=dst_dir + "/" + dateISO + "/osb_alert." + timeISO + ".xml", 
+            exportFileName=dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml", 
             server=server_name, 
             beginTimestamp=PyLong(startAt), endTimestamp= PyLong(endAt))
         else:
@@ -92,4 +66,48 @@ def export_osb_alerts(count=10, interval=5):
         #
 
 
-export_osb_alerts(10, 5)
+dst_dir='/tmp'
+server_name='osb_server1'
+admin_name='AdminServer'
+
+safety_lag = 5  # program takes older messages to avoid message loosing or overlapping
+
+count = 288 # 24 hours with 
+delay = 300 # 5 miutes interval
+
+try:
+    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'count=', 'delay=', 'dir=', 'osb=', 'safety_lag=' ] )
+except getopt.GetoptError, err:
+    print str(err)
+    usage()
+    sys.exit(2)
+	
+for opt, arg in opts:
+    if opt in ('--help'):
+        usage()
+        sys.exit(2)
+    elif opt in ('--admin'):
+        admin_name = arg
+    elif opt in ('--port'):
+        admin_port = arg
+        admin_url = admin_protocol + "://" + admin_address + ":" + str(admin_port)
+    elif opt in ('--url'):
+        admin_url = arg
+    elif opt in ('--dir'):
+        dst_dir = arg
+    elif opt in ('--osb'):
+        server_name = arg
+    elif opt in ('--count'):
+        count = int(arg)
+    elif opt in ('--delay'):
+        delay = int(arg)
+    elif opt in ('--safety_lag'):
+        safety_lag = int(arg)
+    else:
+        usage()
+        sys.exit(2)
+
+if wlst:
+    connect(url=admin_url, adminServerName=admin_name)
+
+dump_osb_alerts(count, delay)
