@@ -19,7 +19,7 @@ for srvNo in ${!wls_managed[@]}; do
         
         $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_export.wlst \
         --dir=~/x-ray/diag/wls/alert/$DOMAIN_NAME/${wls_managed[$srvNo]}/$(date -I) \
-        --osb=${wls_managed[$srvNo]}
+        --osb=${wls_managed[$srvNo]} \
         $@
 
         cd -
