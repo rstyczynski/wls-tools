@@ -30,7 +30,7 @@ server_name='osb_server1'
 admin_name='AdminServer'
 
 try:
-    opts, args = getopt.getopt( sys.argv[1:], '', ['server=','port=','url=', 'help', 'from=', 'to=', 'dir=', 'osb=' ] )
+    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'from=', 'to=', 'dir=', 'osb=' ] )
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -40,7 +40,7 @@ for opt, arg in opts:
     if opt in ('--help'):
         usage()
         sys.exit(2)
-    elif opt in ('--server'):
+    elif opt in ('--admin'):
         admin_name = arg
     elif opt in ('--port'):
         admin_port = arg
@@ -52,7 +52,8 @@ for opt, arg in opts:
         startDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]))
         endDate = startDate + timedelta(days=1)
     elif opt in ('--to'):
-        endDate = datetime.strptime(arg, '%d-%m-%Y')
+        parts=arg.split('-')
+        endDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]))
     elif opt in ('--dir'):
         dst_dir = arg
     elif opt in ('--osb'):
