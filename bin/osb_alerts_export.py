@@ -7,9 +7,6 @@ wlst = True
 
 DATname='CUSTOM/com.bea.wli.monitoring.pipeline.alert'
 
-if wlst:
-    connect(url=admin_url, adminServerName=admin_name)
-
 def export_osb_alerts(startDate, endDate):
     #
     startAt = pytime.mktime(startDate.timetuple())
@@ -64,5 +61,8 @@ for opt, arg in opts:
         usage()
         sys.exit(2)
 
+
+if wlst:
+    connect(url=admin_url, adminServerName=admin_name)
 
 export_osb_alerts(startDate, endDate)
