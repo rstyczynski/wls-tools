@@ -1,5 +1,25 @@
 #!wlst
 
+def usage():
+    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --from= --to= --dir= osb=
+
+, where
+    --from..........start date for export in ISO format YYYY-MM-DD. no default
+    --to............end date for export in ISO format YYYY-MM-DD. deafult 1 day before start
+
+    --dir...........output directory. default /tmp
+
+    --osb...........osb server name to get data from. default: osb_server1
+
+    --admin..........Admin server name used during WLST connect operation. default: AdminServer
+    --port...........TCP port used to connect to Admin server. default: 7001
+    --url............user specified URL. Will be used as provided
+
+    --help...........this help
+    #
+    """)
+
+    
 from datetime import datetime, timedelta
 import time as pytime
 
@@ -28,6 +48,8 @@ def export_osb_alerts(startDate, endDate):
 dst_dir='/tmp'
 server_name='osb_server1'
 admin_name='AdminServer'
+
+
 
 try:
     opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'from=', 'to=', 'dir=', 'osb=' ] )

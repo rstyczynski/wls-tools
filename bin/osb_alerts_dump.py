@@ -1,5 +1,25 @@
 #!wlst
 
+def usage():
+    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --count= --interval= --dir= osb= --safety-lag=
+
+, where
+    --count.........number of dumps. dafult 288 to cover 24 with 5 minutes interval
+    --interval......interval between dumps. default 300 seconds i.e. 5 minutes
+    --safety-lag....distance from current time to avid race conditions. default 5 seconds
+
+    --dir...........output directory. default /tmp
+
+    --osb...........osb server name to get data from. default: osb_server1
+
+    --admin..........Admin server name used during WLST connect operation. default: AdminServer
+    --port...........TCP port used to connect to Admin server. default: 7001
+    --url............user specified URL. Will be used as provided
+
+    --help...........this help
+    #
+    """)
+    
 import datetime
 from datetime import datetime
 import calendar
@@ -50,7 +70,7 @@ def dump_osb_alerts(count=1, interval=0):
         if wait_tme < 0:
             wait_tme = 0
 
-        print "Waiting " + str(wait_tme) + "..."
+        print "Waiting " + str(wait_tme) + " seconds ..."
         #
         if wlst:
             java.lang.Thread.sleep(wait_tme * 1000)
@@ -70,10 +90,12 @@ admin_name='AdminServer'
 safety_lag = 5  # program takes older messages to avoid message loosing or overlapping
 
 count = 288 # 24 hours with 
-delay = 300 # 5 miutes interval
+interval = 300 # 5 miutes interval
+
+
 
 try:
-    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'count=', 'delay=', 'dir=', 'osb=', 'safety_lag=' ] )
+    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'count=', 'interval=', 'dir=', 'osb=', 'safety_lag=' ] )
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -96,8 +118,8 @@ for opt, arg in opts:
         server_name = arg
     elif opt in ('--count'):
         count = int(arg)
-    elif opt in ('--delay'):
-        delay = int(arg)
+    elif opt in ('--interval'):
+        interval = int(arg)
     elif opt in ('--safety_lag'):
         safety_lag = int(arg)
     else:
@@ -107,4 +129,4 @@ for opt, arg in opts:
 if wlst:
     connect(url=admin_url, adminServerName=admin_name)
 
-dump_osb_alerts(count, delay)
+dump_osb_alerts(count, interval)
