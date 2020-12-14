@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source wls-tools/bin/discover_processes.sh 
+source ~/wls-tools/bin/discover_processes.sh 
 discoverWLS
 
 for srvNo in ${!wls_managed[@]}; do
