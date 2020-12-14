@@ -3,7 +3,7 @@
 import datetime
 from datetime import datetime
 import calendar
-import time
+import time as pytime
 
 import os
 
@@ -14,10 +14,10 @@ DATname='CUSTOM/com.bea.wli.monitoring.pipeline.alert'
 
 def dump_osb_alerts(count=1, interval=0):
 
-    startAt = calendar.timegm(time.gmtime()) - interval
+    startAt = calendar.timegm(pytime.gmtime()) - interval
     while count >0:
         #
-        current_timestmap = calendar.timegm(time.gmtime())
+        current_timestmap = calendar.timegm(pytime.gmtime())
         endAt = current_timestmap - safety_lag
         #
         dateISO=datetime.fromtimestamp(endAt).isoformat().split('T')[0]
@@ -32,7 +32,7 @@ def dump_osb_alerts(count=1, interval=0):
         createFolder(dst_dir + "/" + dateISO)
         #
         #
-        export_start = calendar.timegm(time.gmtime())
+        export_start = calendar.timegm(pytime.gmtime())
         if wlst:
             exportDiagnosticDataFromServer(logicalName=DATname, 
             exportFileName=dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml", 
@@ -41,7 +41,7 @@ def dump_osb_alerts(count=1, interval=0):
         else:
             time.sleep(6)
         #
-        export_stop = calendar.timegm(time.gmtime())
+        export_stop = calendar.timegm(pytime.gmtime())
         #
         export_delay = export_stop - export_start
         #
