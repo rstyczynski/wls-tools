@@ -19,7 +19,7 @@ def usage():
     --help...........this help
     #
     """)
-    
+
 import datetime
 from datetime import datetime
 import calendar
@@ -86,12 +86,12 @@ def dump_osb_alerts(count=1, interval=0):
 dst_dir='/tmp'
 server_name='osb_server1'
 admin_name='AdminServer'
+admin_port = 7001
 
 safety_lag = 5  # program takes older messages to avoid message loosing or overlapping
 
 count = 288 # 24 hours with 
 interval = 300 # 5 miutes interval
-
 
 
 try:
