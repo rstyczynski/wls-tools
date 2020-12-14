@@ -1,10 +1,10 @@
 #!wlst
 
 def usage():
-    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --from= --to= --dir= osb=
+    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --from= --to_day= --dir= osb=
 
 , where
-    --day...........end date for export in ISO format YYYY-MM-DD. no default
+    --to_day........end date for export in ISO format YYYY-MM-DD. no default
     --from..........start date for export in ISO format YYYY-MM-DD. deafult is 1 day gefore start
 
     --dir...........output directory. default /tmp
@@ -51,7 +51,7 @@ admin_name='AdminServer'
 admin_port = 7001
 
 try:
-    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'from=', 'day=', 'dir=', 'osb=' ] )
+    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'from=', 'to_day=', 'dir=', 'osb=' ] )
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -68,7 +68,7 @@ for opt, arg in opts:
         admin_url = admin_protocol + "://" + admin_address + ":" + str(admin_port)
     elif opt in ('--url'):
         admin_url = arg
-    elif opt in ('--day'):
+    elif opt in ('--to_day'):
         parts=arg.split('-')
         endDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]), 23, 59, 59)
     elif opt in ('--from'):
