@@ -1,5 +1,7 @@
 #!/bin/bash
 
+parameters=$@
+
 source ~/wls-tools/bin/discover_processes.sh 
 discoverWLS
 
@@ -21,7 +23,7 @@ for srvNo in ${!wls_managed[@]}; do
         --url="t3://$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_name):$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_port)"
         --dir=$HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/${wls_managed[$srvNo]}/$(date -I) \
         --osb=${wls_managed[$srvNo]} \
-        $@
+        $parameters
 
         cd -
     fi

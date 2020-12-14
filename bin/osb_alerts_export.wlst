@@ -1,7 +1,7 @@
 #!wlst
 
 def usage():
-    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --from_day= --to_day= --dir= osb=
+    sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin --port]|--url --help --from_day --to_day --dir --osb
 
 , where
     --to_day........end date for export in ISO format YYYY-MM-DD. no default
@@ -51,32 +51,32 @@ admin_name='AdminServer'
 admin_port = 7001
 
 try:
-    opts, args = getopt.getopt( sys.argv[1:], '', ['admin=','port=','url=', 'help', 'from_day=', 'to_day=', 'dir=', 'osb=' ] )
+    opts, args = getopt.getopt( sys.argv[1:], 'a:p:u:hf:t:d:o:', ['admin=','port=','url=', 'help', 'from_day=', 'to_day=', 'dir=', 'osb=' ] )
 except getopt.GetoptError, err:
     print str(err)
     usage()
     sys.exit(2)
 	
 for opt, arg in opts:
-    if opt in ('--help'):
+    if opt in ('-h', '--help'):
         usage()
         sys.exit(2)
-    elif opt in ('--admin'):
+    elif opt in ('-a', '--admin'):
         admin_name = arg
-    elif opt in ('--port'):
+    elif opt in ('-p', '--port'):
         admin_port = arg
         admin_url = admin_protocol + "://" + admin_address + ":" + str(admin_port)
-    elif opt in ('--url'):
+    elif opt in ('-u', '--url'):
         admin_url = arg
-    elif opt in ('--to_day'):
+    elif opt in ('-t', '--to_day'):
         parts=arg.split('-')
         toDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]), 23, 59, 59)
-    elif opt in ('--from_day'):
+    elif opt in ('-f', '--from_day'):
         parts=arg.split('-')
         fromDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]), 0, 0, 0)
-    elif opt in ('--dir'):
+    elif opt in ('-d', '--dir'):
         dst_dir = arg
-    elif opt in ('--osb'):
+    elif opt in ('-o', '--osb'):
         server_name = arg
     else:
         usage()
