@@ -29,9 +29,6 @@ def dump_osb_alerts(count=1, interval=0):
         print "  from         : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(startAt))
         print "  to           : " + str(endAt * 1000L) + ", " + str(datetime.fromtimestamp(endAt))
         #
-        createFolder(dst_dir + "/" + dateISO)
-        #
-        #
         export_start = calendar.timegm(pytime.gmtime())
         if wlst:
             exportDiagnosticDataFromServer(logicalName=DATname, 
