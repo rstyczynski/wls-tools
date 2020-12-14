@@ -50,7 +50,7 @@ for opt, arg in opts:
         admin_url = arg
     elif opt in ('--from'):
         parts=arg.split('-')
-        startDate = datetime(int(parts[2]), int(parts[1]), int(parts[0]))
+        startDate = datetime(int(parts[0]), int(parts[1]), int(parts[2]))
         endDate = startDate + timedelta(days=1)
     elif opt in ('--to'):
         endDate = datetime.strptime(arg, '%d-%m-%Y')
