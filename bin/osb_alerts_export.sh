@@ -18,7 +18,8 @@ for srvNo in ${!wls_managed[@]}; do
         cd $DOMAIN_HOME
         
         $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_export.wlst \
-        --dir=~/x-ray/diag/wls/alert/$DOMAIN_NAME/${wls_managed[$srvNo]}/$(date -I) \
+        --url="t3://$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_name):$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_port)"
+        --dir=$HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/${wls_managed[$srvNo]}/$(date -I) \
         --osb=${wls_managed[$srvNo]} \
         $@
 
