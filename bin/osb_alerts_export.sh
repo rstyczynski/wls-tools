@@ -23,6 +23,6 @@ for srvNo in ${!wls_managed[@]}; do
         --osb ${wls_managed[$srvNo]} \
         $@
 
-        cd -
+        cd - >/dev/null
     fi
 done
