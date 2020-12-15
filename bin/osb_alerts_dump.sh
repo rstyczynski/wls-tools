@@ -84,10 +84,13 @@ start)
 stop)
     pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
     if [ ! -z "$pid_files" ]; then
-        ~/wls-tools/bin/killtree.sh $(cat ~/.x-ray/pid/osb_alerts_dump_*.pid)
-        rm -rf ~/.x-ray/pid/osb_alerts_dump_*.pid
+        for pid_file in $pid_files; do
+            echo "Process: $pid_file"
+            ~/wls-tools/bin/killtree.sh $(cat $pid_file)
+            rm -rf $pid_file
+            echo "Stopped"
+        done
         rm -rf ~/.x-ray/stdout/osb_alerts_dump_*.out
-        echo "Stopped"
     else
         echo "Not running."
     fi
