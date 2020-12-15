@@ -50,7 +50,7 @@
          fi
           kill=${kill[$depth]}
           depth=$(( $depth + 1 ))
-          . $toolsBin/killtree.sh "$child" "$depth" "$kill" >/dev/null
+          . $0 "$child" "$depth" "$kill" >/dev/null
           depth=$(( $depth - 1 ))
        done
        if [ $DEBUG -eq 1 ]; then
