@@ -33,7 +33,7 @@ wlst = True
 DATname='CUSTOM/com.bea.wli.monitoring.pipeline.alert'
 
 def dump_osb_alerts(count=1, interval=0):
-
+    initial_count = count
     startAt = calendar.timegm(pytime.gmtime()) - interval
     while count >0:
         #
@@ -48,10 +48,12 @@ def dump_osb_alerts(count=1, interval=0):
         timeISO=datetime.fromtimestamp(endAt).isoformat().split('T')[1]
         #
         print "Exporting to " + dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml"
-        print "  server       : " + server_name
-        print "  current time : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(current_timestmap))
-        print "  from         : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(startAt))
-        print "  to           : " + str(endAt * 1000L) + ", " + str(datetime.fromtimestamp(endAt))
+        print "  server          : " + server_name
+        print "  current time    : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(current_timestmap))
+        print "  from            : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(startAt))
+        print "  to              : " + str(endAt * 1000L) + ", " + str(datetime.fromtimestamp(endAt))
+        print "  collection no.  : " + str(count)
+        print "  max. collections: " + str(initial_count)
         #
         export_start = calendar.timegm(pytime.gmtime())
         if wlst:

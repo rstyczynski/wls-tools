@@ -72,7 +72,7 @@ start)
     ;;
 
 stop)
-    pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid)
+    pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
     if [ ! -z "$pid_files" ]; then
         kill $(cat ~/.x-ray/pid/osb_alerts_dump_*.pid)
         rm -rf ~/.x-ray/pid/osb_alerts_dump_*.pid
@@ -85,7 +85,7 @@ stop)
 
 status)
 
-    pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid)
+    pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
     if [ ! -z "$pid_files" ]; then
         echo "Runnning at: $(cat ~/.x-ray/pid/osb_alerts_dump_*.pid)"
         for log in $(ls ~/.x-ray/stdout/osb_alerts_dump_*.out); do
