@@ -9,32 +9,38 @@ Alerts for each day are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE dire
 EOF
 }
 
+function get_domain_config() {
+    #prepare config.xml
+    cat $DOMAIN_HOME/config/config.xml |
+        xmllint --format - |
+        sed -e 's/xmlns=".*"//g' | # remove namespace definitions
+        sed -E 's/\w+://g' |       # remove namespace use TODO: must be fixed, as not removes all words suffixed by :
+        sed -E 's/nil="\w+"//g' |  # remove nil="true"
+        perl -pe 's/xsi:type="[\w:-]*"//g' |  # remove xsi:type="
+        perl -pe 's/xsi:nil="[\w:-]*"//g' |  # remove nxsi:nil=
+        perl -pe 's/<\w+://g' |  # remove nxsi:nil=
+        perl -pe 's/<\/\w+://g' |  # remove nxsi:nil=
+        cat | xmllint --exc-c14n - 
+}
+
 function export_day() {
     to_date=$1; shift
 
-    for srvNo in ${!wls_managed[@]}; do
-        pid=$(getWLSjvmAttr ${wls_managed[$srvNo]} os_pid)
-        lsof -p $pid | grep 'lib/apps/sbresource.war' > /dev/null
-        if [ $? -eq 0 ]; then
-            echo "OSB: ${wls_managed[$srvNo]}"
+    for osb_server in $OSB_SERVERS; do
+        echo "OSB: $osb_server"
 
-            MW_HOME=$(getWLSjvmAttr ${wls_managed[$srvNo]} mw_home)
-            DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
-            DOMAIN_NAME=$(getWLSjvmAttr ${wls_managed[$srvNo]} domain_name)
+        mkdir -p ~/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date
 
-            mkdir -p ~/x-ray/diag/wls/alert/$DOMAIN_NAME/${wls_managed[$srvNo]}/$to_date
+        cd $DOMAIN_HOME
+        
+        $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_export.wlst \
+        --url "t3://$( getWLSjvmAttr $osb_server admin_host_name):$( getWLSjvmAttr $osb_server admin_host_port)" \
+        --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date \
+        --osb $osb_server \
+        --to_day $to_date \
+        $@
 
-            cd $DOMAIN_HOME
-            
-            $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_export.wlst \
-            --url "t3://$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_name):$( getWLSjvmAttr ${wls_managed[$srvNo]} admin_host_port)" \
-            --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/${wls_managed[$srvNo]}/$to_date \
-            --osb ${wls_managed[$srvNo]} \
-            --to_day $to_date \
-            $@
-
-            cd - >/dev/null
-        fi
+        cd - >/dev/null
     done
 }
 
@@ -42,6 +48,20 @@ cmd=$1; shift
 
 source ~/wls-tools/bin/discover_processes.sh 
 discoverWLS
+
+if [ -z "${wls_admin[0]}" ]; then
+    echo "Error. No admin server found. Cannot continue."
+    exit 1
+fi
+
+MW_HOME=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
+DOMAIN_HOME=$(getWLSjvmAttr ${wls_admin[0]} -Ddomain.home)
+DOMAIN_NAME=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
+
+# take OSB cluster, and osb servers
+OSB_CLUSTER=$(get_domain_config | xmllint --xpath "/domain/app-deployment/name[text()='Service Bus Message Reporting Purger']/../target/text()" -)
+OSB_SERVERS=$(get_domain_config | xmllint --xpath "/domain/server/cluster[text()='$OSB_CLUSTER']/../name" - | sed 's|</*name>|;|g' | tr ';' '\n' | grep -v '^$')
+
 
 case $cmd in
 today)
