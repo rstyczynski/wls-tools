@@ -31,7 +31,7 @@ start)
 
     pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
     if [ ! -z "$pid_files" ]; then
-        echo "Process already running, or finished. Use stop command before next start. Use status to discover what's up."
+        echo "Process already running. Use stop command before next start. Use status to discover what's up."
         exit 1
     fi
 
@@ -74,7 +74,7 @@ start)
         rm -rf ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid
         rm -rf ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
         ) &
-        
+
         echo $! > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid            
 
         cd - >/dev/null
@@ -105,6 +105,9 @@ status)
     else
         echo "Not running."
     fi
+    ;;
+install_cron)
+    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' '1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start'
     ;;
 *)
     usage

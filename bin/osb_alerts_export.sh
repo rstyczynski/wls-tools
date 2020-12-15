@@ -83,6 +83,9 @@ previous)
         export_day $that_day
     done
     ;;
+install_cron)
+    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_export 'osb alert export' '2 0 * * * $HOME/wls-tools/bin/osb_alerts_export.sh yesterday'
+    ;;
 *)
     usage
     ;;
