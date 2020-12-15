@@ -66,6 +66,7 @@ start)
 
         cd $DOMAIN_HOME
 
+
         (
             echo $$ > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid  
             nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
