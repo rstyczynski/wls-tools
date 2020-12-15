@@ -2,7 +2,7 @@
 
 function usage() {
     cat <<EOF
-Usage: osb_alerts_export.sh today|[previous no_of_days]
+Usage: osb_alerts_export.sh today|yesterday|[previous no_of_days]
 
 Alerts for each day are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE directory.
 
@@ -47,7 +47,7 @@ case $cmd in
 today)
     export_day $(date -I)
     ;;
-yestarday)
+yesterday)
     export_day $(date --date="1 days ago" -I)
     ;;
 previous)
