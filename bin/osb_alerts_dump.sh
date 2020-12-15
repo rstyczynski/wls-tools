@@ -31,7 +31,7 @@ start)
 
     pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
     if [ ! -z "$pid_files" ]; then
-        echo "Process already running, or finished. Use stop command before next start."
+        echo "Process already running, or finished. Use stop command before next start. Use status to discover what's up."
         exit 1
     fi
 
@@ -66,11 +66,15 @@ start)
 
         cd $DOMAIN_HOME
 
-        nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
+        (nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
         --url $ADMIN_URL \
         --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I) \
         --osb $osb_server \
-        $@  > ~/.x-ray/stdout/osb_alerts_dump.out > ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out &
+        $@  > ~/.x-ray/stdout/osb_alerts_dump.out > ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
+        rm -rf ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid
+        rm -rf ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
+        ) &
+        
         echo $! > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid            
 
         cd - >/dev/null
