@@ -109,6 +109,16 @@ status)
 install_cron)
     ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' '1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start'
     ;;
+
+install_x-ray_sync)
+    for osb_server in $OSB_SERVERS; do
+        echo "OSB: $osb_server"
+
+        export domain_name=$DOMAIN_NAME
+        export wls_server=$osb_server
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-osb_alerts.yaml > ~/.x-ray/diagnose-osb_alerts-${domain_name}_${osb_server}.yaml
+    done
+    ;;
 *)
     usage
     ;;
