@@ -66,9 +66,7 @@ start)
 
         cd $DOMAIN_HOME
 
-
-        (
-            echo $$ > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid  
+        ( 
             nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
             --url $ADMIN_URL \
             --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I) \
@@ -77,6 +75,7 @@ start)
             rm -rf ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid
             rm -rf ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
         ) &
+        echo $! > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid 
 
         cd - >/dev/null
     done
