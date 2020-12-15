@@ -4,7 +4,7 @@ function usage() {
     cat <<EOF
 Usage: osb_alerts_dump.sh [start [--count] [--interval]] | stop | status
 
-Alerts are stored in ~/x-ray/diag/wls/alert/$DOMAIN/$SERVER/$DATE directory.
+Alerts are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE directory.
 
 EOF
 }
