@@ -29,6 +29,12 @@ shift
 case $cmd in
 start)
 
+    pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
+    if [ ! -z "$pid_files" ]; then
+        echo "Process already running, or finished. Use stop command before next start."
+        exit 1
+    fi
+
     source ~/wls-tools/bin/discover_processes.sh 
     discoverWLS
 
