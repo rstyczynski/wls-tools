@@ -63,18 +63,22 @@ start)
         nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
         --url $ADMIN_URL \
         --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I) \
-        --osb ${wls_managed[$srvNo]} \
-        $@  > ~/.x-ray/stdout/osb_alerts_dump.out > ~/.x-ray/stdout/osb_alerts_dump_${wls_managed[$srvNo]}.out &
-        echo $! > ~/.x-ray/pid/osb_alerts_dump_${wls_managed[$srvNo]}.pid            
+        --osb $osb_server \
+        $@  > ~/.x-ray/stdout/osb_alerts_dump.out > ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out &
+        echo $! > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid            
 
         cd - >/dev/null
     done
     ;;
 
 stop)
-    kill $(cat ~/.x-ray/pid/osb_alerts_dump_*.pid)
-    rm -rf ~/.x-ray/pid/osb_alerts_dump_*.pid
-    rm -rf ~/.x-ray/stdout/osb_alerts_dump_*.out
+    if [ -f ~/.x-ray/pid/osb_alerts_dump_*.pid ]; then
+        kill $(cat ~/.x-ray/pid/osb_alerts_dump_*.pid)
+        rm -rf ~/.x-ray/pid/osb_alerts_dump_*.pid
+        rm -rf ~/.x-ray/stdout/osb_alerts_dump_*.out
+    else
+        echo "Not running."
+    fi
     ;;
 
 status)
