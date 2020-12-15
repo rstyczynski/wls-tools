@@ -37,13 +37,18 @@ start)
         exit 1
     fi
 
-    MW_HOME=$(getWLSjvmAttr ${wls_admin[0]} mw_home)
-    DOMAIN_HOME=$(getWLSjvmAttr ${wls_admin[0]} -Ddomain.home)
-    DOMAIN_NAME=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
+    ADMIN_NAME=${wls_admin[0]}
+    MW_HOME=$(getWLSjvmAttr $ADMIN_NAME mw_home)
+    DOMAIN_HOME=$(getWLSjvmAttr $ADMIN_NAME -Ddomain.home)
+    DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
 
     # take OSB cluster, and osb servers
     OSB_CLUSTER=$(get_domain_config | xmllint --xpath "/domain/app-deployment/name[text()='Service Bus Message Reporting Purger']/../target/text()" -)
     OSB_SERVERS=$(get_domain_config | xmllint --xpath "/domain/server/cluster[text()='$OSB_CLUSTER']/../name" - | sed 's|</*name>|;|g' | tr ';' '\n' | grep -v '^$')
+
+    ADMIN_PORT=$(get_domain_config | xmllint --xpath "/domain/server/name[text()='$ADMIN_NAME']/../listen-port" - | sed 's|</*listen-port>||g')
+    ADMIN_ADDRESS=$(get_domain_config | xmllint --xpath "/domain/server/name[text()='$ADMIN_NAME']/../listen-address" - | sed 's|</*listen-address>||g')
+    ADMIN_URL="t3://$ADMIN_ADDRESS:$ADMIN_PORT"
 
     mkdir -p ~/.x-ray/stdout
     mkdir -p ~/.x-ray/pid
@@ -56,7 +61,7 @@ start)
         cd $DOMAIN_HOME
 
         nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
-        --url "t3://$(getWLSjvmAttr $osb_server admin_host_name):$(getWLSjvmAttr $osb_server admin_host_port)" \
+        --url $ADMIN_URL \
         --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I) \
         --osb ${wls_managed[$srvNo]} \
         $@  > ~/.x-ray/stdout/osb_alerts_dump.out > ~/.x-ray/stdout/osb_alerts_dump_${wls_managed[$srvNo]}.out &
