@@ -39,7 +39,7 @@ function export_day() {
         --osb $osb_server \
         --to_day $to_date \
         $@ | tee $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
-        if [ $? -eq 0 ]; then
+        if [ ${PIPESTATUS[0]} -eq 0 ]; then
             rm -f $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
             echo OK
         else
