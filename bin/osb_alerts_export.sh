@@ -38,7 +38,7 @@ function export_day() {
         --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date \
         --osb $osb_server \
         --to_day $to_date \
-        $@ > $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
+        $@ | tee $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
         if [ $? -eq 0 ]; then
             rm -f $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
         fi
