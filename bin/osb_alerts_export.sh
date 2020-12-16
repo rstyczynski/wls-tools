@@ -27,7 +27,7 @@ function export_day() {
     to_date=$1; shift
 
     for osb_server in $OSB_SERVERS; do
-        echo "OSB: $osb_server"
+        echo -n "OSB: $osb_server..."
 
         mkdir -p ~/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date
 
@@ -41,6 +41,9 @@ function export_day() {
         $@ | tee $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
         if [ $? -eq 0 ]; then
             rm -f $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
+            echo OK
+        else
+            echo Error. Details: $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$to_date/osb_alerts_export.log
         fi
 
         cd - >/dev/null
