@@ -67,6 +67,10 @@ ADMIN_PORT=$(get_domain_config | xmllint --xpath "/domain/server/name[text()='$A
 ADMIN_ADDRESS=$(get_domain_config | xmllint --xpath "/domain/server/name[text()='$ADMIN_NAME']/../listen-address" - | sed 's|</*listen-address>||g')
 ADMIN_URL="t3://$ADMIN_ADDRESS:$ADMIN_PORT"
 
+if [ -z "$DOMAIN_HOME" ]; then
+    echo "Error. No WebLogic domain found. Cannot continue."
+    exit 1
+fi
 
 case $cmd in
 today)

@@ -57,6 +57,11 @@ start)
     ADMIN_ADDRESS=$(get_domain_config | xmllint --xpath "/domain/server/name[text()='$ADMIN_NAME']/../listen-address" - | sed 's|</*listen-address>||g')
     ADMIN_URL="t3://$ADMIN_ADDRESS:$ADMIN_PORT"
 
+    if [ -z "$DOMAIN_HOME" ]; then
+        echo "Error. No WebLogic domain found. Cannot continue."
+        exit 1
+    fi
+
     mkdir -p ~/.x-ray/stdout
     mkdir -p ~/.x-ray/pid
 
@@ -132,7 +137,7 @@ install_x-ray_sync)
         echo "Error. No admin server found. Cannot continue."
         exit 1
     fi
-    
+
     for osb_server in $OSB_SERVERS; do
         echo "OSB: $osb_server"
 
