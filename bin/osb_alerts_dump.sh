@@ -23,6 +23,12 @@ function get_domain_config() {
         cat | xmllint --exc-c14n - 
 }
 
+function get_domain_param(){
+    xpath=$1
+
+    echo "xpath $xpath" | xmllint --shell <(get_domain_config) | grep content | cut -d= -f2
+}
+
 cmd=$1
 shift
 
@@ -50,12 +56,13 @@ start)
     DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
 
     # take OSB cluster, and osb servers
-    OSB_CLUSTER=$(get_domain_config | xmllint --xpath "/domain/app-deployment/name[text()='Service Bus Message Reporting Purger']/../target/text()" -)
-    OSB_SERVERS=$(get_domain_config | xmllint --xpath "/domain/server/cluster[text()='$OSB_CLUSTER']/../name" - | sed 's|</*name>|;|g' | tr ';' '\n' | grep -v '^$')
+    OSB_CLUSTER=$(get_domain_param "/domain/app-deployment/name[text()='Service Bus Message Reporting Purger']/../target/text()")
+    OSB_SERVERS=$(get_domain_param "/domain/server/cluster[text()='$OSB_CLUSTER']/../name/text()")
 
-    ADMIN_PORT=$(get_domain_config | xmllint --xpath "/domain/server/name[text()='$ADMIN_NAME']/../listen-port" - | sed 's|</*listen-port>||g')
-    ADMIN_ADDRESS=$(get_domain_config | xmllint --xpath "/domain/server/name[text()='$ADMIN_NAME']/../listen-address" - | sed 's|</*listen-address>||g')
+    ADMIN_PORT=$(get_domain_param "/domain/server/name[text()='$ADMIN_NAME']/../listen-port/text()")
+    ADMIN_ADDRESS=$(get_domain_param "/domain/server/name[text()='$ADMIN_NAME']/../listen-address/text()")
     ADMIN_URL="t3://$ADMIN_ADDRESS:$ADMIN_PORT"
+
 
     if [ -z "$DOMAIN_HOME" ]; then
         echo "Error. No WebLogic domain found. Cannot continue."
