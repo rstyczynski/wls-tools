@@ -45,7 +45,7 @@ def export_osb_alerts(fromDate, toDate):
             beginTimestamp=PyLong(startAt * 1000L), endTimestamp= PyLong(endAt * 1000L))
         except Exception, e:
             print e
-            exit(1)
+            sys.exit(1)
     else:
         time.sleep(6)
 
