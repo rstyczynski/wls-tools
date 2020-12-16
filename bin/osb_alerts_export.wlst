@@ -38,10 +38,14 @@ def export_osb_alerts(fromDate, toDate):
     print "  to           : " + str(endAt) + ", " + str(datetime.fromtimestamp(endAt))
     #
     if wlst:
-        exportDiagnosticDataFromServer(logicalName=DATname, 
-        exportFileName=dst_dir + "/osb_alerts.xml", 
-        server=server_name, 
-        beginTimestamp=PyLong(startAt * 1000L), endTimestamp= PyLong(endAt * 1000L))
+        try:
+            exportDiagnosticDataFromServer(logicalName=DATname, 
+            exportFileName=dst_dir + "/osb_alerts.xml", 
+            server=server_name, 
+            beginTimestamp=PyLong(startAt * 1000L), endTimestamp= PyLong(endAt * 1000L))
+        except Exception, e:
+            print e
+            exit(1)
     else:
         time.sleep(6)
 
