@@ -43,6 +43,7 @@ start)
         exit 1
     fi
 
+
     ADMIN_NAME=${wls_admin[0]}
     MW_HOME=$(getWLSjvmAttr $ADMIN_NAME mw_home)
     DOMAIN_HOME=$(getWLSjvmAttr $ADMIN_NAME -Ddomain.home)
@@ -110,10 +111,28 @@ status)
     fi
     ;;
 install_cron)
+
+    source ~/wls-tools/bin/discover_processes.sh 
+    discoverWLS
+
+    if [ -z "${wls_admin[0]}" ]; then
+        echo "Error. No admin server found. Cannot continue."
+        exit 1
+    fi
+
     ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' '1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start'
     ;;
 
 install_x-ray_sync)
+
+    source ~/wls-tools/bin/discover_processes.sh 
+    discoverWLS
+
+    if [ -z "${wls_admin[0]}" ]; then
+        echo "Error. No admin server found. Cannot continue."
+        exit 1
+    fi
+    
     for osb_server in $OSB_SERVERS; do
         echo "OSB: $osb_server"
 

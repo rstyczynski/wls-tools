@@ -84,10 +84,12 @@ previous)
     done
     ;;
 install_cron)
+
     ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_export "osb alert export" "2 0 * * * $HOME/wls-tools/bin/osb_alerts_export.sh yesterday"
     ;;
 
 install_x-ray_sync)
+
     for osb_server in $OSB_SERVERS; do
         echo "OSB: $osb_server"
 
