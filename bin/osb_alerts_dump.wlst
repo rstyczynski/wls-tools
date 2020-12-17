@@ -60,7 +60,7 @@ def dump_osb_alerts(count=1, interval=0):
             exportDiagnosticDataFromServer(logicalName=DATname, 
             exportFileName=dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml", 
             server=server_name, 
-            beginTimestamp=PyLong(startAt), endTimestamp= PyLong(endAt))
+            beginTimestamp=PyLong(startAt * 1000L), endTimestamp= PyLong(endAt * 1000L))
         else:
             time.sleep(6)
         #
