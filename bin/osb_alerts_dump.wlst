@@ -49,9 +49,9 @@ def dump_osb_alerts(count=1, interval=0):
         #
         print "Exporting to " + dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml"
         print "  server          : " + server_name
-        print "  current time    : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(current_timestmap))
-        print "  from            : " + str(startAt * 1000L) + ", " + str(datetime.fromtimestamp(startAt))
-        print "  to              : " + str(endAt * 1000L) + ", " + str(datetime.fromtimestamp(endAt))
+        print "  current time    : " + str(startAt) + ", " + str(datetime.fromtimestamp(current_timestmap))
+        print "  from            : " + str(startAt) + ", " + str(datetime.fromtimestamp(startAt))
+        print "  to              : " + str(endAt) + ", " + str(datetime.fromtimestamp(endAt))
         print "  collection no.  : " + str(count)
         print "  max. collections: " + str(initial_count)
         #
