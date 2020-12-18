@@ -76,7 +76,10 @@ DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
 
 # take OSB cluster, and osb servers
 OSB_CLUSTER=$(get_domain_param "/domain/app-deployment/name[text()='Service Bus Message Reporting Purger']/../target/text()")
-OSB_SERVERS=$(get_domain_param "/domain/server/cluster[text()='$OSB_CLUSTER']/../name/text()")
+
+# xmlint return multiple rows as one - new line problem
+#OSB_SERVERS=$(get_domain_param "/domain/server/cluster[text()='$OSB_CLUSTER']/../name/text()")
+OSB_SERVERS=$(get_domain_param "/domain/server/cluster[text()='$OSB_CLUSTER']/../name" | sed 's|</*name>|;|g' | tr ';' '\n' | grep -v '^$')
 
 ADMIN_PORT=$(get_domain_param "/domain/server/name[text()='$ADMIN_NAME']/../listen-port/text()")
 ADMIN_ADDRESS=$(get_domain_param "/domain/server/name[text()='$ADMIN_NAME']/../listen-address/text()")
