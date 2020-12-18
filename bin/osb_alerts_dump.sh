@@ -87,7 +87,7 @@ start)
             --url $ADMIN_URL \
             --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I) \
             --osb $osb_server \
-            $@  > ~/.x-ray/stdout/osb_alerts_dump.out > ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
+            $@  > ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
             rm -rf ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid
             rm -rf ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
         ) &
