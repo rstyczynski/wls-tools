@@ -26,7 +26,10 @@ function get_domain_config() {
 function get_domain_param(){
     xpath=$1
 
-    echo "xpath $xpath" | xmllint --shell <(get_domain_config) | grep content | cut -d= -f2
+    # truncates text nodes!!!
+    #echo "xpath $xpath" | xmllint --shell <(get_domain_config) | grep content | cut -d= -f2
+
+    get_domain_config | ~/tools/bin/xmllint --xpath "$xpath" -
 }
 
 cmd=$1
