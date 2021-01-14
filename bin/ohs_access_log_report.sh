@@ -125,22 +125,15 @@ function accesslog_report() {
 
         service_calls=$(cat $log_dir/$date/access_log* 2>/dev/null  | grep "$day/$month/$year" | egrep -v "$tech_ULR" | egrep -v 404 | cut -d' ' -f7-8  | wc -l)
         sayatcell -n -f $service_calls 15
-
-        # echo "======"
-        # echo "Unique service calls:"
-        # uniqiue_svc_calls=$(cat $log_dir/$date/access_log* | grep "$day/$month/$year" | grep '/soa-infra/services' | cut -d' ' -f7-8  | cut -d' ' -f2 | cut -d'/' -f4-5 | sort -u)
-        # if [ -z "$uniqiue_svc_calls" ]; then
-        #     echo "(none)"
-        # else
-        #     for service_call in $uniqiue_svc_calls; do
-        #         cnt=$(cat $log_dir/$date/access_log* | grep "$day/$month/$year" | grep "/soa-infra/services/$service_call" | wc -l)
-        #         echo "$service_call: $cnt"
-        #     done
-        # fi
-        # echo "======"
     done
 
     say
+
+    say Legend
+    say " - tech calls     - all calls prefixed with any of: $tech_ULR"
+    say " - security scans - all non tech calls ended with http 404 error code"
+    say " - service calls  - all non tech calls, and non http 404 calls"
+
     say Done.
 }
 
