@@ -189,13 +189,17 @@ function servicecalls_report() {
 cmd=$1; shift
 
 case cmd in
-    access)
-        accesslog_report $1
-        ;;
-    service)
-        servicecalls_report $1
-        ;;
-    both)
-        accesslog_report $1
-        servicecalls_report $1
+access)
+    accesslog_report $1
+    ;;
+service)
+    servicecalls_report $1
+    ;;
+both)
+    accesslog_report $1
+    servicecalls_report $1
+    ;;
+*)
+    say "Usage: ohs_access_log_report.sh acess|servicce|both path"
+    ;;
 esac
