@@ -188,7 +188,7 @@ function servicecalls_report() {
 
 cmd=$1; shift
 
-case cmd in
+case $cmd in
 access)
     accesslog_report $1
     ;;
