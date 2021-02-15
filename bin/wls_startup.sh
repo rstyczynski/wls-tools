@@ -72,7 +72,18 @@ function stop() {
     esac
 }
 
-function register_inetd() {
+fucntion status_initd() {
+    echo "not implemented"
+}
+
+
+fucntion status_systemd() {
+    sudo systemctl status $wls_component
+}
+
+
+
+function register_initd() {
     cat >/tmp/$wls_component <<EOF
 #!/bin/bash
 #
@@ -96,7 +107,7 @@ sudo service $wls_component stop
 EOF
 }
 
-function unregister_inetd() {
+function unregister_initd() {
 
     stop
     sudo chkconfig --del $wls_component
@@ -222,7 +233,18 @@ stop)
     stop
     ;;
 status)
-    echo "not implemented"
+    case $os_release in
+    6)
+        status_initd
+        ;;
+    7)
+        status_systemd
+        ;;
+    *)
+        echo Error. Unsupported OS release.
+        exit 1
+        ;;
+    esac
     ;;
 restart)
     stop
@@ -244,7 +266,7 @@ register)
 
     case $os_release in
     6)
-        register_inetd
+        register_initd
         ;;
     7)
         register_systemd
@@ -254,7 +276,7 @@ register)
 unregister)
     case $os_release in
     6)
-        unregister_inetd
+        unregister_initd
         ;;
     7)
         unregister_systemd
