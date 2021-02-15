@@ -214,6 +214,14 @@ fi
 #
 # run
 #
+
+cat <<EOF
+Running for WebLogic:
+1. DOMAIN_HOME: $DOMAIN_HOME
+2. DOMAIN_OWNER: $DOMAIN_OWNER
+
+EOF
+
 case $operation in
 start)
     start
