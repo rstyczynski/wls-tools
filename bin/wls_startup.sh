@@ -168,24 +168,12 @@ function unregister_systemd() {
 source $script_dir/config.sh 
 if [ -z "$DOMAIN_HOME" ]; then
     DOMAIN_HOME=$(getcfg $domain_code DOMAIN_HOME 2>/dev/null)
-    if [ -z "$DOMAIN_HOME" ]; then
-        echo "DOMAIN_HOME not set. Exiting."
-        exit 1
-    else 
-        setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
-    fi
 else 
     setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
 fi
 
 if [ -z "$DOMAIN_OWNER" ]; then
     DOMAIN_OWNER=$(getcfg $domain_code DOMAIN_OWNER 2>/dev/null)
-    if [ -z "$DOMAIN_OWNER" ]; then
-        echo "DOMAIN_OWNER not set. Exiting."
-        exit 1
-    else 
-        setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-    fi
 else 
     setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
 fi
@@ -215,6 +203,17 @@ fi
 
 export DOMAIN_OWNER
 export DOMAIN_HOME
+
+
+if [ -z "$DOMAIN_HOME" ]; then
+    echo "DOMAIN_HOME not set. Exiting."
+    exit 1
+fi
+
+if [ -z "$DOMAIN_OWNER" ]; then
+    echo "DOMAIN_OWNER not set. Exiting."
+    exit 1
+fi
 
 #
 # run
