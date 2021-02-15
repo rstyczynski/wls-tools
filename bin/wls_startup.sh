@@ -168,16 +168,11 @@ function unregister_systemd() {
 source $script_dir/config.sh 
 if [ -z "$DOMAIN_HOME" ]; then
     DOMAIN_HOME=$(getcfg $domain_code DOMAIN_HOME 2>/dev/null)
-else 
-    setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
 fi
 
 if [ -z "$DOMAIN_OWNER" ]; then
     DOMAIN_OWNER=$(getcfg $domain_code DOMAIN_OWNER 2>/dev/null)
-else 
-    setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
 fi
-
 
 if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
     #
@@ -199,11 +194,12 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         test -z "$DOMAIN_OWNER" && read -p "Enter WebLogic domain owner name:" DOMAIN_OWNER
         test -z "$DOMAIN_HOME" && export DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
     fi
+    setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+    setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
 fi
 
 export DOMAIN_OWNER
 export DOMAIN_HOME
-
 
 if [ -z "$DOMAIN_HOME" ]; then
     echo "DOMAIN_HOME not set. Exiting."
