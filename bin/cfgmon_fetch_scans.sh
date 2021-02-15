@@ -178,3 +178,4 @@ cd $cfgmon_root/servers
 git add --all >/dev/null 2>&1
 git commit -am "system fetch" >/dev/null 2>&1
 cd - >/dev/null
+

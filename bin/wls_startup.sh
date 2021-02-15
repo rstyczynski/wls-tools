@@ -1,0 +1,243 @@
+#!/bin/bash
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+service_name=$(basename "$0" | cut -d. -f1)
+
+max_int=2147483647
+
+function usage() {
+    cat <<EOF
+Usage: $service_name svc_def [start|stop|status|restart|register|unregister] 
+EOF
+}
+
+case $1 in
+start | stop | status | restart | register | unregister)
+    operation=$1
+    shift
+    
+    wls_component=$1
+    shift
+
+    domain_code=$1
+    shift
+    domain_code=${domain_code:-wls1}
+    ;;
+*)
+    usage
+    exit 1
+    ;;
+esac
+
+os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
+if [ $os_release -eq 6 ]; then
+    source /etc/init.d/functions
+fi
+
+
+function y2j() {
+    python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
+}
+
+#
+# custom
+#
+
+
+
+function start() {
+    #TODO
+
+    case $service_name in
+    wls_nodemanager)
+        $DOMAIN_HOME/bin/startNodeManager.sh >> $DOMAIN_HOME/servers/$service_name.out
+        ;;
+    wls_adminserver)
+        $DOMAIN_HOME/bin/startWebLogic.sh >> $DOMAIN_HOME/servers/$service_name.out
+        ;;
+    esac
+
+}
+
+function stop() {
+
+    case $service_name in
+    wls_nodemanager)
+        $DOMAIN_HOME/bin/stopNodeManager.sh >> $DOMAIN_HOME/servers/$service_name.out
+        ;;
+    wls_adminserver)
+        $DOMAIN_HOME/bin/stopWebLogic.sh >> $DOMAIN_HOME/servers/$service_name.out
+        ;;
+    esac
+}
+
+function register_inetd() {
+    cat >/tmp/$wls_component <<EOF
+#!/bin/bash
+#
+# chkconfig:   12345 01 99
+# description: WebLogic startup service for $wls_component
+#
+
+sudo su - $DOMAIN_OWNER /etc/init.d/$wls_component \$1
+EOF
+
+    chmod +x /tmp/$wls_component
+    sudo mv /tmp/$wls_component /etc/init.d/$wls_component
+
+    sudo chkconfig --add $wls_component
+
+    echo echo "Service registered. Start the service:"
+    cat <<EOF
+sudo service $service_name start
+sudo service $service_name status
+sudo service $service_name stop
+EOF
+}
+
+function unregister_inetd() {
+
+    stop
+    sudo chkconfig --del $wls_component
+    sudo rm -f /etc/init.d/$wls_component
+
+    echo "Service unregistered."
+}
+
+function register_systemd() {
+
+    cat >/tmp/$wls_component <<EOF
+[Unit]
+Description=WebLogic start script - $wls_component
+
+[Service]
+Type=simple
+
+User=$DOMAIN_OWNER
+TimeoutStartSec=600
+
+ExecStart=$start_service
+ExecStop=$stop_service
+
+LimitNOFILE=65535
+RemainAfterExit=no
+KillMode=process
+Restart=always
+  
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo mv /tmp/$wls_component /etc/systemd/system/$wls_component.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable $wls_component.service
+
+    echo "Service registered. Start the service:"
+    cat <<EOF
+sudo systemctl start $wls_component
+sudo systemctl status $wls_component
+sudo systemctl restart $wls_component
+sudo systemctl stop $wls_component
+sudo cat /var/log/messages
+EOF
+
+}
+
+function unregister_systemd() {
+
+    stop
+    sudo systemctl disable $wls_component.service
+    sudo rm -f /etc/systemd/system/$wls_component.service
+
+    sudo systemctl daemon-reload
+
+    echo "Service unregistered."
+}
+
+#
+# get / set domain home
+#
+source ~/oci-tools/bin/config.sh 
+if [ -z "$DOMAIN_HOME" ]; then
+    DOMAIN_HOME=$(getcfg $domain_code DOMAIN_HOME 2>/dev/null)
+    if [ -z "$DOMAIN_HOME" ]; then
+        echo "DOMAIN_HOME not set. Exiting."
+        exit 1
+    else 
+        setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+    fi
+else 
+    setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+fi
+
+if [ -z "$DOMAIN_OWNER" ]; then
+    DOMAIN_OWNER=$(getcfg $domain_code DOMAIN_OWNER 2>/dev/null)
+    if [ -z "$DOMAIN_OWNER" ]; then
+        echo "DOMAIN_OWNER not set. Exiting."
+        exit 1
+    else 
+        setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+    fi
+else 
+    setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+fi
+
+#
+# run
+#
+case $operation in
+start)
+    start
+    ;;
+stop)
+    stop
+    ;;
+status)
+    echo "not implemented"
+    ;;
+restart)
+    stop
+    sleep 1
+    start
+    ;;
+register)
+
+    case $wls_component in
+    wls_nodemanager)
+        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
+        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
+        ;;
+    wls_adminserver)
+        start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
+        stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+        ;;
+    esac
+
+    case $os_release in
+    6)
+        register_inetd
+        ;;
+    7)
+        register_systemd
+        ;;
+    esac
+    ;;
+unregister)
+    case $os_release in
+    6)
+        unregister_inetd
+        ;;
+    7)
+        unregister_systemd
+        ;;
+    *)
+        echo Error. Unsupported OS release.
+        exit 1
+        ;;
+    esac
+    ;;
+*)
+    exit 1
+    ;;
+esac
