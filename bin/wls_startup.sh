@@ -2,13 +2,13 @@
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-service_name=$(basename "$0" | cut -d. -f1)
+wls_component=$(basename "$0" | cut -d. -f1)
 
 max_int=2147483647
 
 function usage() {
     cat <<EOF
-Usage: $service_name svc_def [start|stop|status|restart|register|unregister] 
+Usage: $script_name svc_def [start|stop|status|restart|register|unregister] 
 EOF
 }
 
@@ -49,12 +49,12 @@ function y2j() {
 function start() {
     #TODO
 
-    case $service_name in
+    case $wls_component in
     wls_nodemanager)
-        $DOMAIN_HOME/bin/startNodeManager.sh >> $DOMAIN_HOME/servers/$service_name.out
+        $DOMAIN_HOME/bin/startNodeManager.sh >> $DOMAIN_HOME/servers/$wls_component.out
         ;;
     wls_adminserver)
-        $DOMAIN_HOME/bin/startWebLogic.sh >> $DOMAIN_HOME/servers/$service_name.out
+        $DOMAIN_HOME/bin/startWebLogic.sh >> $DOMAIN_HOME/servers/$wls_component.out
         ;;
     esac
 
@@ -62,12 +62,12 @@ function start() {
 
 function stop() {
 
-    case $service_name in
+    case $wls_component in
     wls_nodemanager)
-        $DOMAIN_HOME/bin/stopNodeManager.sh >> $DOMAIN_HOME/servers/$service_name.out
+        $DOMAIN_HOME/bin/stopNodeManager.sh >> $DOMAIN_HOME/servers/$wls_component.out
         ;;
     wls_adminserver)
-        $DOMAIN_HOME/bin/stopWebLogic.sh >> $DOMAIN_HOME/servers/$service_name.out
+        $DOMAIN_HOME/bin/stopWebLogic.sh >> $DOMAIN_HOME/servers/$wls_component.out
         ;;
     esac
 }
@@ -90,9 +90,9 @@ EOF
 
     echo echo "Service registered. Start the service:"
     cat <<EOF
-sudo service $service_name start
-sudo service $service_name status
-sudo service $service_name stop
+sudo service $wls_component start
+sudo service $wls_component status
+sudo service $wls_component stop
 EOF
 }
 
@@ -133,13 +133,15 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl enable $wls_component.service
 
-    echo "Service registered. Start the service:"
+    echo "Service registered. Start and manage the service:"
     cat <<EOF
 sudo systemctl start $wls_component
 sudo systemctl status $wls_component
 sudo systemctl restart $wls_component
 sudo systemctl stop $wls_component
-sudo cat /var/log/messages
+
+sudo journalctl -u $wls_component
+sudo journalctl -u $wls_component -f
 EOF
 
 }
