@@ -72,15 +72,9 @@ function stop() {
     esac
 }
 
-fucntion status_initd() {
+function status() {
     echo "not implemented"
 }
-
-
-fucntion status_systemd() {
-    sudo systemctl status $wls_component
-}
-
 
 
 function register_initd() {
@@ -233,18 +227,7 @@ stop)
     stop
     ;;
 status)
-    case $os_release in
-    6)
-        status_initd
-        ;;
-    7)
-        status_systemd
-        ;;
-    *)
-        echo Error. Unsupported OS release.
-        exit 1
-        ;;
-    esac
+    status
     ;;
 restart)
     stop
