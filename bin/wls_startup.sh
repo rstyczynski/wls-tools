@@ -158,7 +158,7 @@ function unregister_systemd() {
 #
 # get / set domain home
 #
-source ~/oci-tools/bin/config.sh 
+source $script_dir/config.sh 
 if [ -z "$DOMAIN_HOME" ]; then
     DOMAIN_HOME=$(getcfg $domain_code DOMAIN_HOME 2>/dev/null)
     if [ -z "$DOMAIN_HOME" ]; then
@@ -182,6 +182,32 @@ if [ -z "$DOMAIN_OWNER" ]; then
 else 
     setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
 fi
+
+
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    #
+    # WebLogic discovery
+    #
+    echo -n "WLS discovery..."
+    source $script_dir/discover_processes.sh 
+    discoverWLS
+    DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+    : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
+    DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
+    : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+        echo "Running WebLogic processes not found."
+
+        #
+        # Weblogic manual parametrisation
+        #
+        test -z "$DOMAIN_OWNER" && read -p "Enter WebLogic domain owner name:" DOMAIN_OWNER
+        test -z "$DOMAIN_HOME" && export DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
+    fi
+fi
+
+export DOMAIN_OWNER
+export DOMAIN_HOME
 
 #
 # run
