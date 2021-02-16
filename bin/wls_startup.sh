@@ -195,7 +195,10 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
     fi
 
-
+    if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ]; then
+        setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+        setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+    fi
 fi
 
 export DOMAIN_OWNER
