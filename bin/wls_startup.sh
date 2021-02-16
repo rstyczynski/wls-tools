@@ -217,13 +217,17 @@ fi
 export DOMAIN_OWNER
 export DOMAIN_HOME
 
+# final test of DOMAIN_HOME 
+DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo \$(ls $DOMAIN_HOME/bin/startNodeManager.sh)")
+test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+
 if [ -z "$DOMAIN_HOME" ]; then
-    echo "DOMAIN_HOME not set. Exiting."
+    echo "DOMAIN_HOME not set or wrong. Exiting."
     exit 1
 fi
 
 if [ -z "$DOMAIN_OWNER" ]; then
-    echo "DOMAIN_OWNER not set. Exiting."
+    echo "DOMAIN_OWNER not set or wrong. Exiting."
     exit 1
 fi
 
