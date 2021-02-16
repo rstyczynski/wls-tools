@@ -191,18 +191,19 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         #
         # Weblogic manual parametrisation
         #
+
+        # ask for username and test
         test -z "$DOMAIN_OWNER" && read -p "Enter WebLogic domain owner name:" DOMAIN_OWNER
 
-        # test user
         DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami)' | tail -1)
         test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
 
-        # get domain home
+        # get domain home from users's env, ask for, and test
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
-
+        
         test -z "$DOMAIN_HOME" && read -p "Enter WebLogic domain home directory:" DOMAIN_HOME
 
-        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo $(ls $DOMAIN_HOME)")
+        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo $(ls $DOMAIN_HOME/bin/startNodeManager.sh)")
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
 
     fi
