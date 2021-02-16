@@ -195,7 +195,7 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
 
         # test user
         DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami)' | tail -1)
-        test -z "DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
+        test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
 
         # get domain home
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
