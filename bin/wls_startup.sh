@@ -194,8 +194,11 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         test -z "$DOMAIN_OWNER" && read -p "Enter WebLogic domain owner name:" DOMAIN_OWNER
         test -z "$DOMAIN_HOME" && export DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
     fi
-    setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-    setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+
+    if [ ! -z "$DOMAIN_OWNER ] && [ ! -z "$DOMAIN_HOME ]; then
+        setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+        setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+    fi
 fi
 
 export DOMAIN_OWNER
