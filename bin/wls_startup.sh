@@ -201,6 +201,10 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
 
         test -z "$DOMAIN_HOME" && read -p "Enter WebLogic domain home directory:" DOMAIN_HOME
+
+        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo $(ls $DOMAIN_HOME)")
+        test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+
     fi
 
     if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ]; then
