@@ -192,7 +192,7 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         # Weblogic manual parametrisation
         #
         test -z "$DOMAIN_OWNER" && read -p "Enter WebLogic domain owner name:" DOMAIN_OWNER
-        test -z "$DOMAIN_HOME" && export DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
+        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
     fi
 
     if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ]; then
