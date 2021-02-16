@@ -203,7 +203,7 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         
         test -z "$DOMAIN_HOME" && read -p "Enter WebLogic domain home directory:" DOMAIN_HOME
 
-        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo $(ls $DOMAIN_HOME/bin/startNodeManager.sh)")
+        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo \$(ls $DOMAIN_HOME/bin/startNodeManager.sh)")
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
 
     fi
