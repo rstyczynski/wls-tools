@@ -93,7 +93,7 @@ start)
             $@  >> ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out 2>&1
             rm -rf ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid
             # do not delete out files
-            rm -rf ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
+            # rm -rf ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
         ) &
         echo $! > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid 
 
@@ -111,7 +111,7 @@ stop)
             echo "Stopped"
         done
         # do not delete out files
-        rm -rf ~/.x-ray/stdout/osb_alerts_dump_*.out
+        # rm -rf ~/.x-ray/stdout/osb_alerts_dump_*.out
     else
         echo "Not running."
     fi
