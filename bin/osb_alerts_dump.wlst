@@ -4,7 +4,7 @@ def usage():
     sys.stdout.write("""Usage: wlst.sh osb_alert_dump.wlst [--admin= --port=]|--url= --help --count= --interval= --dir= osb= --safety-lag=
 
 , where
-    --count.........number of dumps. dafult 288 to cover 24 with 5 minutes interval
+    --count.........number of dumps. dafault 288 to cover 24 with 5 minutes interval
     --interval......interval between dumps. default 300 seconds i.e. 5 minutes
     --safety-lag....distance from current time to avid race conditions. default 5 seconds
 
@@ -36,60 +36,66 @@ def dump_osb_alerts(count=1, interval=0):
     initial_count = count
     startAt = calendar.timegm(pytime.gmtime()) - interval
     while count >0:
-        #
-        if wlst:
-            connect(url=admin_url, adminServerName=admin_name)
-        #
-        #
-        current_timestmap = calendar.timegm(pytime.gmtime())
-        endAt = current_timestmap - safety_lag
-        #
-        dateISO=datetime.fromtimestamp(endAt).isoformat().split('T')[0]
-        timeISO=datetime.fromtimestamp(endAt).isoformat().split('T')[1]
-        #
-        print "Exporting to " + dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml"
-        print "  server          : " + server_name
-        print "  current time    : " + str(startAt) + ", " + str(datetime.fromtimestamp(current_timestmap))
-        print "  from            : " + str(startAt) + ", " + str(datetime.fromtimestamp(startAt))
-        print "  to              : " + str(endAt) + ", " + str(datetime.fromtimestamp(endAt))
-        print "  collection no.  : " + str(count)
-        print "  max. collections: " + str(initial_count)
-        #
-        export_start = calendar.timegm(pytime.gmtime())
-        if wlst:
-            exportDiagnosticDataFromServer(logicalName=DATname, 
-            exportFileName=dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml", 
-            server=server_name, 
-            beginTimestamp=PyLong(startAt * 1000L), endTimestamp= PyLong(endAt * 1000L))
-        else:
-            time.sleep(6)
-        #
-        export_stop = calendar.timegm(pytime.gmtime())
-        #
-        export_delay = export_stop - export_start
-        #
-        print "---"
-        print "Export delay   : " + str(export_delay)
-        print "---"
+        try:
+            #
+            if wlst:
+                connect(url=admin_url, adminServerName=admin_name)
+            #
+            #
+            current_timestmap = calendar.timegm(pytime.gmtime())
+            endAt = current_timestmap - safety_lag
+            #
+            dateISO=datetime.fromtimestamp(endAt).isoformat().split('T')[0]
+            timeISO=datetime.fromtimestamp(endAt).isoformat().split('T')[1]
+            #
+            print "Exporting to " + dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml"
+            print "  server          : " + server_name
+            print "  safety lag      : " + safety_lag        
+            print "  current time    : " + str(current_timestmap) + ", " + str(datetime.fromtimestamp(current_timestmap))
+            print "  from            : " + str(startAt) + ", " + str(datetime.fromtimestamp(startAt))
+            print "  to              : " + str(endAt) + ", " + str(datetime.fromtimestamp(endAt))
+            print "  collection no.  : " + str(initial_count - count)
+            print "  max. collections: " + str(initial_count)
+            #
+            export_start = calendar.timegm(pytime.gmtime())
 
-        wait_tme = interval - export_delay
-        if wait_tme < 0:
-            wait_tme = 0
+            if wlst:
+                exportDiagnosticDataFromServer(logicalName=DATname, 
+                exportFileName=dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml", 
+                server=server_name, 
+                beginTimestamp=PyLong(startAt * 1000L), endTimestamp= PyLong(endAt * 1000L))
+            else:
+                time.sleep(6)
+            #
+            export_stop = calendar.timegm(pytime.gmtime())
+            #
+            export_delay = export_stop - export_start
+            #
+            print "---"
+            print "Export delay   : " + str(export_delay)
+            print "---"
 
-        print "Waiting " + str(wait_tme) + " seconds ..."
-        #
-        if wlst:
-            java.lang.Thread.sleep(wait_tme * 1000)
-        else:
-            time.sleep(wait_tme)
-        #
-        startAt = endAt + 1
-        #
-        count = count - 1
-        #
-        if wlst:
-            disconnect()
-
+            wait_time = interval - export_delay
+            if wait_time < 0:
+                wait_time = 0
+            #
+            print "Waiting " + str(wait_time) + " seconds ..."
+            #
+            if wlst:
+                java.lang.Thread.sleep(wait_time * 1000)
+            else:
+                time.sleep(wait_time)
+            #
+            startAt = endAt - safety_lag
+            #
+            count = count - 1
+            #
+            if wlst:
+                disconnect()
+        except Exception as e:
+            print "ERROR. Error running alert export. Cause:" + str(e)
+            print "Sleeping for 60 seconds, and will try again."
+            time.sleep(60)
 
 dst_dir='/tmp'
 server_name='osb_server1'
