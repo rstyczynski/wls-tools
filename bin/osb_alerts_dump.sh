@@ -90,8 +90,9 @@ start)
             --url $ADMIN_URL \
             --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I) \
             --osb $osb_server \
-            $@  > ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
+            $@  >> ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out 2>&1
             rm -rf ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid
+            # do not delete out files
             rm -rf ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out
         ) &
         echo $! > ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid 
@@ -109,6 +110,7 @@ stop)
             rm -rf $pid_file
             echo "Stopped"
         done
+        # do not delete out files
         rm -rf ~/.x-ray/stdout/osb_alerts_dump_*.out
     else
         echo "Not running."
