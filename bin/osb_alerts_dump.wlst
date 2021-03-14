@@ -43,7 +43,7 @@ def dump_osb_alerts(count=1, interval=0):
             #
             #
             current_timestmap = calendar.timegm(pytime.gmtime())
-            endAt = current_timestmap - safety_lag
+            endAt = current_timestmap
             #
             dateISO=datetime.fromtimestamp(endAt).isoformat().split('T')[0]
             timeISO=datetime.fromtimestamp(endAt).isoformat().split('T')[1]
