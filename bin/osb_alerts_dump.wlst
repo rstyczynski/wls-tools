@@ -50,7 +50,7 @@ def dump_osb_alerts(count=1, interval=0):
             #
             print "Exporting to " + dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml"
             print "  server          : " + server_name
-            print "  safety lag      : " + safety_lag        
+            print "  safety lag      : " + str(safety_lag)      
             print "  current time    : " + str(current_timestmap) + ", " + str(datetime.fromtimestamp(current_timestmap))
             print "  from            : " + str(startAt) + ", " + str(datetime.fromtimestamp(startAt))
             print "  to              : " + str(endAt) + ", " + str(datetime.fromtimestamp(endAt))
