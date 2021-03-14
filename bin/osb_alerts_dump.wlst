@@ -95,7 +95,8 @@ def dump_osb_alerts(count=1, interval=0):
         except Exception, e:
             print "ERROR. Error running alert export. Cause:" + str(e)
             print "Sleeping for 60 seconds, and will try again."
-            time.sleep(60)
+            if wlst:
+                java.lang.Thread.sleep(60 * 1000)
 
 dst_dir='/tmp'
 server_name='osb_server1'
@@ -106,7 +107,6 @@ safety_lag = 5  # program takes older messages to avoid message loosing or overl
 
 count = 288 # 24 hours with 
 interval = 300 # 5 miutes interval
-
 
 try:
     opts, args = getopt.getopt( sys.argv[1:], 'a:p:u:hc:i:d:o:s:', ['admin=','port=','url=', 'help', 'count=', 'interval=', 'dir=', 'osb=', 'safety_lag=' ] )
