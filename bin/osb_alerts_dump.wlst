@@ -92,7 +92,7 @@ def dump_osb_alerts(count=1, interval=0):
             #
             if wlst:
                 disconnect()
-        except Exception as e:
+        except Exception, e:
             print "ERROR. Error running alert export. Cause:" + str(e)
             print "Sleeping for 60 seconds, and will try again."
             time.sleep(60)
