@@ -59,6 +59,10 @@ def dump_osb_alerts(count=1, interval=0):
             #
             export_start = calendar.timegm(pytime.gmtime())
 
+            # create dst dir if does not exist
+            if not os.path.exists(dst_dir):
+                os.mkdir(dst_dir, 0755)
+
             if wlst:
                 exportDiagnosticDataFromServer(logicalName=DATname, 
                 exportFileName=dst_dir + "/osb_alert." + dateISO + "T" + timeISO + ".xml", 
