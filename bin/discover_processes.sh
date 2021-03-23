@@ -120,7 +120,7 @@ function collectAttrGroup() {
             done
         fi
 
-        rm $tmp/skiplines.$$
+        \rm $tmp/skiplines.$$
     fi
 }
 
