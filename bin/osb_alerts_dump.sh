@@ -2,9 +2,9 @@
 
 function usage() {
     cat <<EOF
-Usage: osb_alerts_dump.sh [start [--count] [--interval]] | stop | status
+Usage: osb_alerts_dump.sh start [--dir] [--count] [--interval] | stop | status
 
-Alerts are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE directory.
+When dir not specified, alerts are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE directory.
 
 EOF
 }
@@ -37,6 +37,26 @@ shift
 
 case $cmd in
 start)
+
+    option=$1; shift
+    while [ ! -z $option ]; do
+        case $option in
+        --dir)
+            alert_dir=$1; shift
+            ;;
+        --count)
+            count=$1; shift
+            ;;
+        --interval)
+            interval=$1; shift
+            ;;
+        esac
+        option=$1; shift
+    done
+
+    : ${alert_dir:=$HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I)}
+    : ${count:=288}
+    : ${interval:=300}
 
     pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
     if [ ! -z "$pid_files" ]; then
@@ -88,8 +108,10 @@ start)
         ( 
             nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
             --url $ADMIN_URL \
-            --dir $HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I) \
+            --dir $alert_dir \
             --osb $osb_server \
+            --count $count \
+            --interval $interval \
             $@  >> ~/.x-ray/stdout/osb_alerts_dump_$osb_server.out 2>&1
             rm -rf ~/.x-ray/pid/osb_alerts_dump_$osb_server.pid
             # do not delete out files
