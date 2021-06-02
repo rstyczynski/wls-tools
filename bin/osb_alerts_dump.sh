@@ -4,7 +4,7 @@ function usage() {
     cat <<EOF
 Usage: osb_alerts_dump.sh start [--dir] [--count] [--interval] | stop | status
 
-When dir not specified, alerts are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE directory.
+When dir is not specified, alerts are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE directory.
 
 EOF
 }
@@ -42,7 +42,8 @@ start)
     while [ ! -z $option ]; do
         case $option in
         --dir)
-            alert_dir=$1; shift
+            alert_path_vars=$1; shift
+            alert_path_vars=$(echo $alert_path_vars_given | tr % $)
             ;;
         --count)
             count=$1; shift
@@ -54,7 +55,9 @@ start)
         option=$1; shift
     done
 
-    : ${alert_dir:=$HOME/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I)}
+    export todayiso8601="\$(date -I)"
+
+    : ${alert_path_vars:=\$HOME/x-ray/diag/wls/alert/\$DOMAIN_NAME/\$osb_server/\$todayiso8601}
     : ${count:=288}
     : ${interval:=300}
 
@@ -101,14 +104,22 @@ start)
     for osb_server in $OSB_SERVERS; do
         echo "OSB: $osb_server"
 
-        mkdir -p ~/x-ray/diag/wls/alert/$DOMAIN_NAME/$osb_server/$(date -I)
+        export todayiso8601=$(date -I)
+        echo $alert_path_vars >~/tmp/alert_path_vars.$$
+        alert_path=$(
+            ~/oci-tools/bin/tpl2data.sh ~/tmp/alert_path_vars.$$
+            rm ~/tmp/alert_path_vars.$$
+        )
+        echo "Alert dir used for this run: $alert_path"
+
+        mkdir -p $alert_path
 
         cd $DOMAIN_HOME
 
         ( 
             nohup $MW_HOME/oracle_common/common/bin/wlst.sh ~/wls-tools/bin/osb_alerts_dump.wlst \
             --url $ADMIN_URL \
-            --dir $alert_dir \
+            --dir $alert_path \
             --osb $osb_server \
             --count $count \
             --interval $interval \
@@ -162,7 +173,15 @@ install_cron)
         exit 1
     fi
 
-    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' '1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start'
+    
+    echo $alert_path_vars >~/tmp/alert_path_vars.$$
+    alert_path_vardate=$(
+        ~/oci-tools/bin/tpl2data.sh ~/tmp/alert_path_vars.$$
+        rm ~/tmp/alert_path_vars.$$
+    )
+    echo "Alert path used for cron: $alert_path_vardate"
+
+    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' '1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vardate --count $count --interval $interval'
     ;;
 
 install_x-ray_sync)
