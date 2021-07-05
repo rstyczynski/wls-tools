@@ -60,7 +60,7 @@ function export_day() {
 }
 
 cmd=$1; shift
-export_day=$2; shift
+on_day=$1; shift
 
 source ~/wls-tools/bin/discover_processes.sh 
 discoverWLS
@@ -99,7 +99,7 @@ yesterday)
     export_day $(date --date="1 days ago" -I)
     ;;
 day)
-    export_day $export_day
+    export_day $on_day
     ;;
 previous)
     days=$1; shift
