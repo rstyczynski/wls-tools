@@ -2,7 +2,7 @@
 
 function usage() {
     cat <<EOF
-Usage: osb_alerts_export.sh today|yesterday|[previous no_of_days]
+Usage: osb_alerts_export.sh today|yesterday|[previous no_of_days]|day YYYY-MM-DD
 
 Alerts for each day are stored in ~/x-ray/diag/wls/alert/DOMAIN/SERVER/DATE directory.
 
@@ -60,6 +60,7 @@ function export_day() {
 }
 
 cmd=$1; shift
+export_day=$2; shift
 
 source ~/wls-tools/bin/discover_processes.sh 
 discoverWLS
@@ -96,6 +97,9 @@ today)
     ;;
 yesterday)
     export_day $(date --date="1 days ago" -I)
+    ;;
+day)
+    export_day $export_day
     ;;
 previous)
     days=$1; shift
