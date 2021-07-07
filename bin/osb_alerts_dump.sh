@@ -87,7 +87,7 @@ start)
     ADMIN_NAME=${wls_admin[0]}
     MW_HOME=$(getWLSjvmAttr $ADMIN_NAME mw_home)
     DOMAIN_HOME=$(getWLSjvmAttr $ADMIN_NAME -Ddomain.home)
-    DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
+    export DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
 
     # take OSB cluster, and osb servers
     OSB_CLUSTER=$(get_domain_param "/domain/app-deployment/name[text()='Service Bus Message Reporting Purger']/../target/text()")
@@ -109,12 +109,12 @@ start)
     mkdir -p ~/.x-ray/stdout
     mkdir -p ~/.x-ray/pid
 
-    for osb_server in $OSB_SERVERS; do
-        echo "OSB: $osb_server"
+    export todayiso8601=$(date -I)
+    export osb_server
+    for osb_server_name in $OSB_SERVERS; do
 
-        export DOMAIN_NAME
-        export osb_server
-        export todayiso8601=$(date -I)
+        osb_server=$osb_server_name
+        echo "OSB: $osb_server"
         echo $alert_path_vars >~/tmp/alert_path_vars.$$
         alert_path=$(
             ~/oci-tools/bin/tpl2data.sh ~/tmp/alert_path_vars.$$
