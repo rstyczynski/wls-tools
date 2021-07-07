@@ -175,7 +175,8 @@ status)
     ;;
 install_cron)
 
-    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' "1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vars --count $count --interval $interval"
+    alert_path_vars_esc=$(echo $alert_path_vars_esc | tr $ %)
+    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' "1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vars_esc --count $count --interval $interval"
     ;;
 
 install_x-ray_sync)
