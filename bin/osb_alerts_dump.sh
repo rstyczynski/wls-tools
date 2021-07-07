@@ -58,6 +58,14 @@ export todayiso8601="\$(date -I)"
 : ${count:=288}
 : ${interval:=300}
 
+cat <<EOF_params
+Started with:
+1. alert_path_vars: $alert_path_vars
+2. count:           $count
+3. interval:        $interval
+===
+EOF_params
+
 case $cmd in
 start)
 
@@ -182,6 +190,11 @@ install_cron)
         rm ~/tmp/alert_path_vars.$$
     )
     echo "Alert path used for cron: $alert_path_vardate"
+
+    if [ -z "$alert_path_vardate" ]; then
+        echo "Error setting path! Cront not configured Exiting."
+        exit 1
+    fi
 
     ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' "1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vardate --count $count --interval $interval"
     ;;
