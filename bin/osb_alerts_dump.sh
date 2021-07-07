@@ -42,7 +42,7 @@ start)
     while [ ! -z $option ]; do
         case $option in
         --dir)
-            alert_path_vars=$1; shift
+            alert_path_vars_given=$1; shift
             alert_path_vars=$(echo $alert_path_vars_given | tr % $)
             ;;
         --count)
@@ -104,6 +104,8 @@ start)
     for osb_server in $OSB_SERVERS; do
         echo "OSB: $osb_server"
 
+        export DOMAIN_HOME
+        export osb_server
         export todayiso8601=$(date -I)
         echo $alert_path_vars >~/tmp/alert_path_vars.$$
         alert_path=$(
@@ -181,7 +183,7 @@ install_cron)
     )
     echo "Alert path used for cron: $alert_path_vardate"
 
-    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' '1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vardate --count $count --interval $interval'
+    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' "1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vardate --count $count --interval $interval"
     ;;
 
 install_x-ray_sync)
