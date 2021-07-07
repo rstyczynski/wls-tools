@@ -175,28 +175,7 @@ status)
     ;;
 install_cron)
 
-    source ~/wls-tools/bin/discover_processes.sh 
-    discoverWLS
-
-    if [ -z "${wls_admin[0]}" ]; then
-        echo "Error. No admin server found. Cannot continue."
-        exit 1
-    fi
-
-    
-    echo $alert_path_vars >~/tmp/alert_path_vars.$$
-    alert_path_vardate=$(
-        ~/oci-tools/bin/tpl2data.sh ~/tmp/alert_path_vars.$$
-        rm ~/tmp/alert_path_vars.$$
-    )
-    echo "Alert path used for cron: $alert_path_vardate"
-
-    if [ -z "$alert_path_vardate" ]; then
-        echo "Error setting path! Cront not configured Exiting."
-        exit 1
-    fi
-
-    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' "1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vardate --count $count --interval $interval"
+    ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' "1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vars --count $count --interval $interval"
     ;;
 
 install_x-ray_sync)
