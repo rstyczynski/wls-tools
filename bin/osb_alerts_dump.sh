@@ -35,31 +35,31 @@ function get_domain_param(){
 cmd=$1
 shift
 
+option=$1; shift
+while [ ! -z $option ]; do
+    case $option in
+    --dir)
+        alert_path_vars_given=$1; shift
+        alert_path_vars=$(echo $alert_path_vars_given | tr % $)
+        ;;
+    --count)
+        count=$1; shift
+        ;;
+    --interval)
+        interval=$1; shift
+        ;;
+    esac
+    option=$1; shift
+done
+
+export todayiso8601="\$(date -I)"
+
+: ${alert_path_vars:=\$HOME/x-ray/diag/wls/alert/\$DOMAIN_NAME/\$osb_server/\$todayiso8601}
+: ${count:=288}
+: ${interval:=300}
+
 case $cmd in
 start)
-
-    option=$1; shift
-    while [ ! -z $option ]; do
-        case $option in
-        --dir)
-            alert_path_vars_given=$1; shift
-            alert_path_vars=$(echo $alert_path_vars_given | tr % $)
-            ;;
-        --count)
-            count=$1; shift
-            ;;
-        --interval)
-            interval=$1; shift
-            ;;
-        esac
-        option=$1; shift
-    done
-
-    export todayiso8601="\$(date -I)"
-
-    : ${alert_path_vars:=\$HOME/x-ray/diag/wls/alert/\$DOMAIN_NAME/\$osb_server/\$todayiso8601}
-    : ${count:=288}
-    : ${interval:=300}
 
     pid_files=$(ls ~/.x-ray/pid/osb_alerts_dump_*.pid 2>/dev/null)
     if [ ! -z "$pid_files" ]; then
