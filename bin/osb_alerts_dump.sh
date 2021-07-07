@@ -104,7 +104,7 @@ start)
     for osb_server in $OSB_SERVERS; do
         echo "OSB: $osb_server"
 
-        export DOMAIN_HOME
+        export DOMAIN_NAME
         export osb_server
         export todayiso8601=$(date -I)
         echo $alert_path_vars >~/tmp/alert_path_vars.$$
