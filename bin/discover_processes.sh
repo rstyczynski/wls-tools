@@ -324,9 +324,9 @@ function getDomainHome() {
 function getDomainName() {
 
     # NOADMIN-OK
-    local domain_home=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
-    if [ -z "$domain_home" ]; then
-        domain_home=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
+    local domain_name=$(getWLSjvmAttr ${wls_admin[0]} domain_name)
+    if [ -z "$domain_name" ]; then
+        domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
     fi
     echo $domain_name
 }
