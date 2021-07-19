@@ -40,7 +40,7 @@ while [ ! -z $option ]; do
     case $option in
     --dir)
         alert_path_vars_given=$1; shift
-        alert_path_vars=$(echo $alert_path_vars_given | tr % $)
+        alert_path_vars=$(echo $alert_path_vars_given | tr '%' '$')
         ;;
     --count)
         count=$1; shift
@@ -175,7 +175,7 @@ status)
     ;;
 install_cron)
 
-    alert_path_vars_esc=$(echo $alert_path_vars | tr $ %)
+    alert_path_vars_esc=$(echo $alert_path_vars | sed "s/\\$/\\\%/g")
     ~/oci-tools/bin/install_cron_entry.sh add osb_alerts_dump 'OSB alert dump' "1 0 * * * $HOME/wls-tools/bin/osb_alerts_dump.sh stop >>$HOME/osb_alert_cron.log; $HOME/wls-tools/bin/osb_alerts_dump.sh start --dir $alert_path_vars_esc --count $count --interval $interval >>$HOME/osb_alert_cron.log"
     ;;
 
