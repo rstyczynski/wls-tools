@@ -113,7 +113,7 @@ Java top v0.1 by Ryszard Styczynski
 EOF_intro
 
 
-java_pid=$(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f2 -d' ')
+java_pid=$(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh | tr -s ' ' | cut -f2 -d' ')
 if [ -z "$java_pid" ]; then
     quit 1 "Java process not found."
 fi
