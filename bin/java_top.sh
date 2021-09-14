@@ -128,12 +128,12 @@ java_home=$(dirname $(ps aux | grep $process_identifier | grep -v grep | tr -s '
 rm -f /tmp/jstack.$$
 jstack_mode=regular
 jstack_run=regular
-timeout 1 sleep 5 #5 $java_home/jstack $java_pid > /tmp/jstack.$$ 2>/dev/null
+timeout 1 sleep 5 #5 $java_home/jstack $java_pid > /tmp/jstack.$$ 
 result=$?
 case $result in
 126)
   jstack_run="sudo regular"
-  sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 2>/dev/null
+  sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 
   if [ $? -ne 0 ]; then
     quit 3 "Not able to connect to JVM (sudo)."
   fi
@@ -141,12 +141,12 @@ case $result in
 124)
   jstack_mode=forced
   jstack_run=forced
-  timeout 15 $java_home/jstack -F $java_pid > /tmp/jstack.$$ 2>/dev/null
+  timeout 15 $java_home/jstack -F $java_pid > /tmp/jstack.$$ 
   resultF=$?
   case $resultF in
   126)
     jstack_run="sudo forced"
-    sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 2>/dev/null
+    sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 
     if [ $? -ne 0 ]; then
       quit 3 "Not able to connect to JVM (sudo forced)."
     fi
