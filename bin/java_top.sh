@@ -130,43 +130,27 @@ java_owner=$(ps aux | grep $process_identifier | grep -v grep | grep -v java_top
 java_bin=$(dirname $(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh| tr -s ' '  | cut -f11 -d' '))
 
 rm -f /tmp/jstack.$$
+
 jstack_mode=regular
 jstack_run=regular
+echo $jstack_run $jstack_mode
 timeout 1 sleep 5 #5 $java_bin/jstack $java_pid > /tmp/jstack.$$ 
-result=$?
-case $result in
-126)
+if [ $? -ne 0 ]; then
   jstack_run="sudo regular"
-  sudo su - $java_owner -c "timeout 5 $java_bin/jstack $java_pid" > /tmp/jstack.$$ 
+  echo $jstack_run $jstack_mode
+  sudo su - $java_owner -c "timeout 1 sleep 5" #5 $java_bin/jstack $java_pid" > /tmp/jstack.$$ 
   if [ $? -ne 0 ]; then
-    quit 3 "Not able to connect to JVM (sudo)."
-  fi
-  ;;
-124)
-  jstack_mode=forced
-  jstack_run="forced"
-  timeout 15 $java_bin/jstack -F $java_pid > /tmp/jstack.$$ 
-  resultF=$?
-  case $resultF in
-  126)
-    jstack_run="sudo forced"
-    sudo su - $java_owner -c "timeout 5 $java_bin/jstack -F $java_pid" > /tmp/jstack.$$ 
+    jstack_mode=forced
+    jstack_run="forced"
+    echo $jstack_run $jstack_mode
+    timeout 60 $java_bin/jstack -F $java_pid > /tmp/jstack.$$ 
     if [ $? -ne 0 ]; then
-      quit 3 "Not able to connect to JVM (sudo forced)."
+      jstack_run="sudo forced"
+      echo $jstack_run $jstack_mode
+      sudo su - $java_owner -c "timeout 60 $java_bin/jstack -F $java_pid" > /tmp/jstack.$$ 
     fi
-    ;;
-  124)
-    quit 3 "Not able to connect to JVM (forced timeout)."
-    ;;
-  *)
-    echo "Not handled jstack exit code: $result"
-    ;;
-  esac
-  ;;
-*)
-  echo jstack exit code: $result
-  ;;
-esac
+  fi
+fi
 
 if [ $(cat /tmp/jstack.$$ | wc -l) -eq 0 ]; then
    rm -f /tmp/jstack.$$
