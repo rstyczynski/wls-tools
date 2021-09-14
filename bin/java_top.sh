@@ -190,34 +190,58 @@ cat <<EOF1b
 EOF1b
 
 ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > ~/tmp/ps.$$
+top -H -b -n 1  > ~/tmp/top.$$
 
 #
 # ps headers discovery
 pid_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " PID$" | cut -f1 -d' ')
 lwp_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " LWP$" | cut -f1 -d' ')
-cpu_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
+#cpu_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
 mem_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %MEM$" | cut -f1 -d' ')
 start_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " START$" | cut -f1 -d' ')
 time_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " TIME$" | cut -f1 -d' ')
 
 pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col; echo $start_col; echo $time_col) | sort -n | tr '\n' ',' | sed 's/,$//')
 
+#
+# top header discovery
+top_cpu_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
+
+topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//')
+
+
 # 
 #
 # look by ps
 #
 
+  #
+  # header
+  #
+
+  # linux ps part
   for header in $(ps aux -L | head -1 | tr -s ' ' | cut -d' ' -f$pscols); do
     sayatcell -n $header 7
   done
+  # linux top part
+  for header in $(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | tr -s ' ' | cut -d' ' -f$topcols); do
+    sayatcell -n $
+  # jstack part
   sayatcell thread 10
 
+
+  # data
   error=0
   for pid in $(cat ~/tmp/ps.$$ | head -$top_threads | tr -s ' ' | cut -f$lwp_col -d' ' ); do
     hexpid=$(printf '%x\n' $pid)
 
-    # linux part
+    # linux ps part
     for ps_data in $(echo $(cat ~/tmp/ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
+        sayatcell -n $ps_data 7
+    done
+
+    # linux top part
+    for ps_data in $(echo $(cat ~/tmp/top.$$ | grep -P "$pid") | cut -d' ' -f$topcols| tr '\n' ' '); do
         sayatcell -n $ps_data 7
     done
 
