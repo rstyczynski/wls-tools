@@ -208,7 +208,7 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col; echo $star
 #
 
   for header in $(ps aux -L | head -1 | tr -s ' ' | cut -d' ' -f$pscols); do
-    sayatcell -n $header 10
+    sayatcell -n $header 7
   done
   sayatcell thread 10
 
@@ -218,7 +218,7 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col; echo $star
 
     # linux part
     for ps_data in $(echo $(cat ~/tmp/ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
-        sayatcell -n $ps_data 10
+        sayatcell -n $ps_data 7
     done
 
     # java part
