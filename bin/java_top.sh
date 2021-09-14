@@ -144,13 +144,13 @@ case $result in
   ;;
 124)
   jstack_mode=forced
-  jstack_run=forced
+  jstack_run="forced"
   timeout 15 $java_bin/jstack -F $java_pid > /tmp/jstack.$$ 
   resultF=$?
   case $resultF in
   126)
     jstack_run="sudo forced"
-    sudo su - $java_owner -c "timeout 5 $java_bin/jstack $java_pid" > /tmp/jstack.$$ 
+    sudo su - $java_owner -c "timeout 5 $java_bin/jstack -F $java_pid" > /tmp/jstack.$$ 
     if [ $? -ne 0 ]; then
       quit 3 "Not able to connect to JVM (sudo forced)."
     fi
@@ -233,8 +233,8 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
     if [ $jstack_mode = regular ]; then
         java_thread=$(cat /tmp/jstack.$$ | grep "nid=0x$hexpid")
     else
-        #java_thread=$(cat /tmp/jstack.$$ | grep "Thread $pid")
-        java_thread=$(cat /tmp/jstack.$$ | grep "nid=0x$hexpid")
+        java_thread=$(cat /tmp/jstack.$$ | grep "Thread $pid")
+        #java_thread=$(cat /tmp/jstack.$$ | grep "nid=0x$hexpid")
     fi
     if [ $? -ne 0 ]; then
       quit 4 "Thread $pid / 0x$hexpid NOT FOUND in Java thread dump."
@@ -242,8 +242,8 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
       if [ $jstack_mode = regular ]; then
           cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       else
-          #cat /tmp/jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
-          cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
+          cat /tmp/jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
+          #cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       fi
     fi
   done
