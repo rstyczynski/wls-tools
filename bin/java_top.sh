@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 function say() {
     nl=yes
@@ -79,7 +79,12 @@ function quit() {
     rm -f /tmp/ps.$$
     rm -f /tmp/jstack.$$
 
-    exit $@
+    cat <<EOF_quit
+$2
+######################################
+EOF_quit
+
+    exit $1
 }
 
 trap quit SIGINT EXIT
@@ -99,38 +104,7 @@ cat <<EOF_intro
 Java top v0.1 by Ryszard Styczynski
 EOF_intro
 
-java_pid=$(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f2 -d' ')
-if [ -z "$java_pid" ]; then
-    echo "Java process not found."
-    quit 1
-fi
-
-if [ $(echo $java_pid | tr ' ' '\n' | wc -l) -gt 1 ]; then
-    echo "Multiple java processes found. Make identifier more precise"
-    quit 2
-fi
-
-java_owner=$(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f1 -d' ')
-java_home=$(dirname $(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f11 -d' '))
-
-rm -f /tmp/jstack.$$
-jstack_mode=regular
-timeout 5 $java_home/jstack $java_pid > /tmp/jstack.$$
-if [ $? -eq 124 ]; then
-   timeout 15 $java_home/jstack -F $java_pid > /tmp/jstack.$$
-   jstack_mode=forced
-fi
-
-if [ $(cat /tmp/jstack.$$ | wc -l) -eq 0 ]; then
-   rm -f /tmp/jstack.$$
-fi
-
-if [ ! -f /tmp/jstack.$$ ]; then
-   echo Not able to connect to JVM.
-   quit 3
-fi
-
-cat <<EOF1
+cat <<EOF1a
 ######################################
 ##### host................:$(hostname)
 ##### operator............:$(logname)
@@ -139,15 +113,61 @@ cat <<EOF1
 ##### process_identifier..:$process_identifier
 ##### top threads.........:$top_threads
 ##### thread stack lines..:$thread_lines
+EOF1a
+
+java_pid=$(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f2 -d' ')
+if [ -z "$java_pid" ]; then
+    quit 1 "Java process not found."
+fi
+
+if [ $(echo $java_pid | tr ' ' '\n' | wc -l) -gt 1 ]; then
+    quit 2 "Multiple java processes found. Make identifier more precise"
+fi
+
+java_owner=$(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f1 -d' ')
+java_home=$(dirname $(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f11 -d' '))
+
+rm -f /tmp/jstack.$$
+jstack_mode=regular
+timeout 5 $java_home/jstack $java_pid > /tmp/jstack.$$
+result=$?
+case $result in
+124)
+  jstack_mode=forced
+  timeout 15 $java_home/jstack -F $java_pid > /tmp/jstack.$$
+  resultF=$?
+  case $resultF in
+  124)
+    quit 3 "Not able to connect to JVM."
+    ;;
+  *)
+    echo jstack exit code: $result
+    ;;
+  esac
+  ;;
+*)
+  echo jstack exit code: $result
+  ;;
+esac
+
+if [ $(cat /tmp/jstack.$$ | wc -l) -eq 0 ]; then
+   rm -f /tmp/jstack.$$
+fi
+
+if [ ! -f /tmp/jstack.$$ ]; then
+    quit 3 "Not able to connect to JVM."
+fi
+
+
+cat <<EOF1b
 ###################
-##### top_threads.........:$top_threads
 ##### java_pid............:$java_pid
 ##### java_owner..........:$java_owner
 ##### java_home...........:$java_home
 ##### thread dump mode....:$jstack_mode
 ######################################
 
-EOF1
+EOF1b
 
 ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > /tmp/ps.$$
 
