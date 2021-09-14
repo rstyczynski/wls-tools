@@ -190,7 +190,7 @@ cat <<EOF1b
 EOF1b
 
 ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > ~/tmp/ps.$$
-top -H -b -n 1  > ~/tmp/top.$$
+top -H -b -n 1  | sed 's/^\s+//' > ~/tmp/top.$$
 cat ~/tmp/top.$$ | sort -rnk9,9  > ~/tmp/top_sorted.$$
 
 #
@@ -226,7 +226,7 @@ topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,
   done
   
   # linux top part
-  for header in $(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | sed 's/^\s+//' | tr -s ' ' | cut -d' ' -f$topcols); do
+  for header in $(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | tr -s ' ' | cut -d' ' -f$topcols); do
     sayatcell -n $header 7
   done
 
