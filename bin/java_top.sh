@@ -220,16 +220,14 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
         java_thread=$(cat /tmp/jstack.$$ | grep "nid=0x$hexpid")
     else
         java_thread=$(cat /tmp/jstack.$$ | grep "Thread $pid")
-        #java_thread=$(cat /tmp/jstack.$$ | grep "nid=0x$hexpid")
     fi
     if [ $? -ne 0 ]; then
-      quit 4 "Thread $pid / 0x$hexpid NOT FOUND in Java thread dump."
+      echo "Thread $pid / 0x$hexpid NOT FOUND in Java thread dump."
     else
       if [ $jstack_mode = regular ]; then
           cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       else
           cat /tmp/jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
-          #cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       fi
     fi
   done
