@@ -81,10 +81,11 @@ function quit() {
     : ${exit_code:=0}
 
     if [ $exit_code -eq 0 ]; then
-      rm -f /tmp/ps.$$_
-      rm -f /tmp/jstack.$$_
+      rm -f ~/tmp/ps.$$_
+      rm -f ~/tmp/jstack.$$_
+      rm -f 2>~/tmp/jstack_err.$$_
     else
-      echo "Temp files left for analysis: /tmp/ps.$$, /tmp/jstack.$$"
+      echo "Temp files left for analysis: $(ls ~/tmp/*.$$)."
     fi
 
     cat <<EOF_quit
@@ -111,6 +112,8 @@ thread_lines=$3
 : ${top_threads:=5}
 : ${thread_lines:=0}
 
+mkdir -p ~/tmp
+
 cat <<EOF_intro
 ######################################
 Java top v0.1 by Ryszard Styczynski
@@ -131,34 +134,34 @@ fi
 java_owner=$(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh | tr -s ' ' | cut -f1 -d' ')
 java_bin=$(dirname $(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh| tr -s ' '  | cut -f11 -d' '))
 
-rm -f /tmp/jstack.$$
+rm -f ~/tmp/jstack.$$
 
 jstack_mode=regular
 jstack_run=regular
-echo $jstack_run $jstack_mode
-timeout 1 sleep 5 #5 $java_bin/jstack $java_pid > /tmp/jstack.$$ 
+echo "Startinh jstack as $jstack_run in $jstack_mode mode."
+timeout 1 sleep 5 #5 $java_bin/jstack $java_pid > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
 if [ $? -ne 0 ]; then
-  jstack_run="sudo regular"
-  echo $jstack_run $jstack_mode
-  sudo su - $java_owner -c "timeout 1 sleep 5" #5 $java_bin/jstack $java_pid" > /tmp/jstack.$$ 
+  jstack_run="sudo"
+  echo "Startinh jstack as $jstack_run in $jstack_mode mode."
+  sudo su - $java_owner -c "timeout 1 sleep 5" #5 $java_bin/jstack $java_pid" > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
   if [ $? -ne 0 ]; then
     jstack_mode=forced
-    jstack_run="forced"
-    echo $jstack_run $jstack_mode
-    timeout 60 $java_bin/jstack -F $java_pid > /tmp/jstack.$$ 
+    jstack_run="regular"
+    echo "Startinh jstack as $jstack_run in $jstack_mode mode."
+    timeout 60 $java_bin/jstack -F $java_pid > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
     if [ $? -ne 0 ]; then
-      jstack_run="sudo forced"
-      echo $jstack_run $jstack_mode
-      sudo su - $java_owner -c "timeout 60 $java_bin/jstack -F $java_pid" > /tmp/jstack.$$ 
+      jstack_run="sudo"
+      echo "Startinh jstack as $jstack_run in $jstack_mode mode."
+      sudo su - $java_owner -c "timeout 60 $java_bin/jstack -F $java_pid" > ~/tmp/jstack.$$  2>~/tmp/jstack_err.$$
     fi
   fi
 fi
 
-if [ $(cat /tmp/jstack.$$ | wc -l) -eq 0 ]; then
-   rm -f /tmp/jstack.$$
+if [ $(cat ~/tmp/jstack.$$ | wc -l) -eq 0 ]; then
+   rm -f ~/tmp/jstack.$$
 fi
 
-if [ ! -f /tmp/jstack.$$ ]; then
+if [ ! -f ~/tmp/jstack.$$ ]; then
     quit 3 "Not able to connect to JVM."
 fi
 
@@ -186,7 +189,7 @@ cat <<EOF1b
 
 EOF1b
 
-ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > /tmp/ps.$$
+ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > ~/tmp/ps.$$
 
 #
 # ps headers discovery
@@ -206,34 +209,34 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
   done
   sayatcell thread 10
 
-
-  for pid in $(cat /tmp/ps.$$ | head -$top_threads | tr -s ' ' | cut -f$lwp_col -d' ' ); do
+  error=0
+  for pid in $(cat ~/tmp/ps.$$ | head -$top_threads | tr -s ' ' | cut -f$lwp_col -d' ' ); do
     hexpid=$(printf '%x\n' $pid)
 
     # linux part
-    for ps_data in $(echo $(cat /tmp/ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
+    for ps_data in $(echo $(cat ~/tmp/ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
         sayatcell -n $ps_data 5
     done
 
     # java part
     if [ $jstack_mode = regular ]; then
-        java_thread=$(cat /tmp/jstack.$$ | grep "nid=0x$hexpid")
+        java_thread=$(cat ~/tmp/jstack.$$ | grep "nid=0x$hexpid")
     else
-        java_thread=$(cat /tmp/jstack.$$ | grep "Thread $pid")
+        java_thread=$(cat ~/tmp/jstack.$$ | grep "Thread $pid")
     fi
     if [ $? -ne 0 ]; then
-      echo "Thread $pid / 0x$hexpid NOT FOUND in Java thread dump."
+      echo "Warning: thread $pid / 0x$hexpid NOT FOUND in Java thread dump. Possible in forced mode for JVM internal threads."
+      error=101
     else
       if [ $jstack_mode = regular ]; then
-          cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
+          cat ~/tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       else
-          cat /tmp/jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
+          cat ~/tmp/jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
       fi
     fi
   done
 
 }
 
-#set -x
 java_top $@
-quit 0
+quit $error
