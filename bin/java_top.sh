@@ -1,5 +1,10 @@
 #!/bin/bash
 
+tool_name="java top"
+tool_author=ryszard.styczynski@oracle.com
+tool_version=0.1
+
+
 function say() {
     nl=yes
     if [ "$1" == '-n' ]; then
@@ -97,26 +102,50 @@ EOF_quit
 }
 
 function quit_int() {
-  quit 100 "Operation interrupted by operator."
+  quit 101 "Operation interrupted by operator."
 }
 
 trap quit_int SIGINT
+
+function usage() {
+
+cat <<EOF_usage
+Usage: java_top.sh process_identifier top_threads stack_lines
+
+, where:
+- process_identifier - unique text to selet exactly one line from list of all processes
+- top_threads - shows top CPU consumigm threds. Defaults to 5
+- stack_lines - shows requsted number f stack trace for each displayed thread. Defults to 0
+
+Utility uses jstack to connect to pointed JVM in both reglar and forced mode. Should be used by owner of JVM or user with sude rights. OS level information is taken from ps and top tools. CPU utilisation is as for now - repoted by top.
+
+######################################
+$tool_name v$tool_version by $tool_author
+EOF_usage
+
+}
 
 function java_top() {
 
 process_identifier=$1 
 top_threads=$2
-thread_lines=$3
+stack_lines=$3
 
-: ${process_identifier:=java}
+if [ -z "$process_identifier" ]; then
+  usage()
+  quit 100
+fi
+
+
 : ${top_threads:=5}
-: ${thread_lines:=0}
+: ${stack_lines:=0}
 
 mkdir -p ~/tmp/java_top
 
 cat <<EOF_intro
 ######################################
-Java top v0.1 by ryszard.styczynski@oracle.com
+$tool_name v$tool_version by $tool_author
+
 EOF_intro
 
 
@@ -176,7 +205,7 @@ cat <<EOF1a
 ###################
 ##### process_identifier..:$process_identifier
 ##### top threads.........:$top_threads
-##### thread stack lines..:$thread_lines
+##### thread stack lines..:$stack_lines
 EOF1a
 
 cat <<EOF1b
@@ -263,9 +292,9 @@ topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,
       error=101
     else
       if [ $jstack_mode = regular ]; then
-          cat ~/tmp/java_top_jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
+          cat ~/tmp/java_top_jstack.$$ | grep -A$stack_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       else
-          cat ~/tmp/java_top_jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
+          cat ~/tmp/java_top_jstack.$$ | grep -A$stack_lines "Thread $pid" | sed -n '1, /^$/p'
       fi
     fi
   done
