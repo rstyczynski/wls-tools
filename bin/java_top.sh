@@ -197,7 +197,10 @@ pid_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\
 lwp_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " LWP$" | cut -f1 -d' ')
 cpu_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
 mem_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %MEM$" | cut -f1 -d' ')
-pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n | tr '\n' ',' | sed 's/,$//')
+start_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " START$" | cut -f1 -d' ')
+time_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " TIME$" | cut -f1 -d' ')
+
+pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col; echo $start_col; echo $time_col) | sort -n | tr '\n' ',' | sed 's/,$//')
 
 # 
 #
