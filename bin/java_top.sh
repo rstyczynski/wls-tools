@@ -83,7 +83,9 @@ function quit() {
     if [ $exit_code -eq 0 ]; then
       rm -f ~/tmp/java_top*.$$
     else
-      echo "Temp files left for analysis: $(ls ~/tmp/java_top_*.$$)."
+      if [ $(ls ~/tmp/java_top_*.$$ | wc -l) -gt 0 ]; then
+        echo "Temp files left for analysis: $(ls ~/tmp/java_top_*.$$)."
+      fi
     fi
 
     cat <<EOF_quit
