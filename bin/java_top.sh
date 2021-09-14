@@ -223,9 +223,12 @@ topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//')
   for header in $(ps aux -L | head -1 | tr -s ' ' | cut -d' ' -f$pscols); do
     sayatcell -n $header 7
   done
+  
   # linux top part
   for header in $(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | tr -s ' ' | cut -d' ' -f$topcols); do
     sayatcell -n $
+  done
+
   # jstack part
   sayatcell thread 10
 
