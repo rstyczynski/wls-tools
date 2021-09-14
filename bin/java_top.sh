@@ -76,8 +76,13 @@ function sayatcell() {
 #
 
 function quit() {
-    rm -f /tmp/ps.$$
-    rm -f /tmp/jstack.$$
+
+    if [ $1 -eq 0 ]; then
+      rm -f /tmp/ps.$$
+      rm -f /tmp/jstack.$$
+    else
+      echo "Temp files left for analysis: /tmp/ps.$$, /tmp/jstack.$$"
+    fi
 
     cat <<EOF_quit
 $2
@@ -104,16 +109,6 @@ cat <<EOF_intro
 Java top v0.1 by Ryszard Styczynski
 EOF_intro
 
-cat <<EOF1a
-######################################
-##### host................:$(hostname)
-##### operator............:$(logname)
-##### date................:$(date)
-###################
-##### process_identifier..:$process_identifier
-##### top threads.........:$top_threads
-##### thread stack lines..:$thread_lines
-EOF1a
 
 java_pid=$(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f2 -d' ')
 if [ -z "$java_pid" ]; then
@@ -129,19 +124,35 @@ java_home=$(dirname $(ps aux | grep $process_identifier | grep -v grep | tr -s '
 
 rm -f /tmp/jstack.$$
 jstack_mode=regular
-timeout 5 $java_home/jstack $java_pid > /tmp/jstack.$$
+jstack_run=regular
+timeout 1 sleep 5 #5 $java_home/jstack $java_pid > /tmp/jstack.$$ 2>/dev/null
 result=$?
 case $result in
+126)
+  jstack_run="sudo regular"
+  sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 2>/dev/null
+  if [ $? -ne 0 ]; then
+    quit 3 "Not able to connect to JVM (sudo)."
+  fi
+  ;;
 124)
   jstack_mode=forced
-  timeout 15 $java_home/jstack -F $java_pid > /tmp/jstack.$$
+  jstack_run=forced
+  timeout 15 $java_home/jstack -F $java_pid > /tmp/jstack.$$ 2>/dev/null
   resultF=$?
   case $resultF in
+  126)
+    jstack_run="sudo forced"
+    sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 2>/dev/null
+    if [ $? -ne 0 ]; then
+      quit 3 "Not able to connect to JVM (sudo forced)."
+    fi
+    ;;
   124)
-    quit 3 "Not able to connect to JVM."
+    quit 3 "Not able to connect to JVM (forced timeout)."
     ;;
   *)
-    echo jstack exit code: $result
+    echo "Not handled jstack exit code: $result"
     ;;
   esac
   ;;
@@ -158,6 +169,19 @@ if [ ! -f /tmp/jstack.$$ ]; then
     quit 3 "Not able to connect to JVM."
 fi
 
+
+cat <<EOF1a
+######################################
+##### host................:$(hostname)
+##### operator............:$(logname)
+##### date................:$(date)
+###################
+##### jstack run mode.....:$jstack_run
+###################
+##### process_identifier..:$process_identifier
+##### top threads.........:$top_threads
+##### thread stack lines..:$thread_lines
+EOF1a
 
 cat <<EOF1b
 ###################
@@ -193,17 +217,21 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
   for pid in $(cat /tmp/ps.$$ | head -$top_threads | tr -s ' ' | cut -f$lwp_col -d' ' ); do
     hexpid=$(printf '%x\n' $pid)
 
+    # linux part
+    for ps_data in $(echo $(cat /tmp/ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
+        sayatcell -n $ps_data 5
+    done
+
+    # java part
     if [ $jstack_mode = regular ]; then
         java_thread=$(cat /tmp/jstack.$$ | grep "nid=0x$hexpid")
     else
         java_thread=$(cat /tmp/jstack.$$ | grep "Thread $pid")
     fi
     if [ $? -ne 0 ]; then
-      echo "Thread $pid / 0x$hexpid NOT FOUND in Java thread dump."
+      quit 4 "Thread $pid / 0x$hexpid NOT FOUND in Java thread dump."
+      
     else
-      for ps_data in $(echo $(cat /tmp/ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
-          sayatcell -n $ps_data 5
-      done
       if [ $jstack_mode = regular ]; then
           cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       else
@@ -214,6 +242,6 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
 
 }
 
-java_top $@
-quit 0
+#java_top $@
+#quit 0
 
