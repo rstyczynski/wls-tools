@@ -138,20 +138,20 @@ rm -f ~/tmp/jstack.$$
 
 jstack_mode=regular
 jstack_run=regular
-echo "Startinh jstack as $jstack_run in $jstack_mode mode."
-timeout 1 sleep 5 #5 $java_bin/jstack $java_pid > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
+echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
+timeout 30 $java_bin/jstack $java_pid > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
 if [ $? -ne 0 ]; then
   jstack_run="sudo"
-  echo "Startinh jstack as $jstack_run in $jstack_mode mode."
-  sudo su - $java_owner -c "timeout 1 sleep 5" #5 $java_bin/jstack $java_pid" > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
+  echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
+  sudo su - $java_owner -c "timeout 30 $java_bin/jstack $java_pid" > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
   if [ $? -ne 0 ]; then
     jstack_mode=forced
     jstack_run="regular"
-    echo "Startinh jstack as $jstack_run in $jstack_mode mode."
+    echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
     timeout 60 $java_bin/jstack -F $java_pid > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
     if [ $? -ne 0 ]; then
       jstack_run="sudo"
-      echo "Startinh jstack as $jstack_run in $jstack_mode mode."
+      echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
       sudo su - $java_owner -c "timeout 60 $java_bin/jstack -F $java_pid" > ~/tmp/jstack.$$  2>~/tmp/jstack_err.$$
     fi
   fi
