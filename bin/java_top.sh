@@ -236,7 +236,7 @@ topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,
 
   # data
   error=0
-  for pid in $(~/tmp/top_sorted.$$ | head -$top_threads | tr -s ' ' | cut -f$top_pid_col -d' ' ); do
+  for pid in $(cat ~/tmp/top_sorted.$$ | head -$top_threads | tr -s ' ' | cut -f$top_pid_col -d' ' ); do
     hexpid=$(printf '%x\n' $pid)
 
     # linux ps part
