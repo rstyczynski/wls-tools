@@ -76,8 +76,11 @@ function sayatcell() {
 #
 
 function quit() {
+    exit_code=$1
+    exit_msg=$2
+    : ${exit_code:=0}
 
-    if [ $1 -eq 0 ]; then
+    if [ $exit_code -eq 0 ]; then
       rm -f /tmp/ps.$$
       rm -f /tmp/jstack.$$
     else
@@ -85,7 +88,7 @@ function quit() {
     fi
 
     cat <<EOF_quit
-$2
+$exit_msg
 ######################################
 EOF_quit
 
