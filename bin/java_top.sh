@@ -132,7 +132,7 @@ top_threads=$2
 stack_lines=$3
 
 if [ -z "$process_identifier" ]; then
-  usage()
+  usage
   quit 100
 fi
 
