@@ -81,11 +81,9 @@ function quit() {
     : ${exit_code:=0}
 
     if [ $exit_code -eq 0 ]; then
-      rm -f ~/tmp/ps.$$_
-      rm -f ~/tmp/jstack.$$_
-      rm -f 2>~/tmp/jstack_err.$$_
+      rm -f ~/tmp/java_top*.$$
     else
-      echo "Temp files left for analysis: $(ls ~/tmp/*.$$)."
+      echo "Temp files left for analysis: $(ls ~/tmp/java_top_*.$$)."
     fi
 
     cat <<EOF_quit
@@ -112,7 +110,7 @@ thread_lines=$3
 : ${top_threads:=5}
 : ${thread_lines:=0}
 
-mkdir -p ~/tmp
+mkdir -p ~/tmp/java_top
 
 cat <<EOF_intro
 ######################################
@@ -134,34 +132,34 @@ fi
 java_owner=$(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh | tr -s ' ' | cut -f1 -d' ')
 java_bin=$(dirname $(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh| tr -s ' '  | cut -f11 -d' '))
 
-rm -f ~/tmp/jstack.$$
+rm -f ~/tmp/java_top_jstack.$$
 
 jstack_mode=regular
 jstack_run=regular
 echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
-timeout 30 $java_bin/jstack $java_pid > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
+timeout 30 $java_bin/jstack $java_pid > ~/tmp/java_top_jstack.$$ 2>~/tmp/java_top_jstack_err.$$
 if [ $? -ne 0 ]; then
   jstack_run="sudo"
   echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
-  sudo su - $java_owner -c "timeout 30 $java_bin/jstack $java_pid" > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
+  sudo su - $java_owner -c "timeout 30 $java_bin/jstack $java_pid" > ~/tmp/java_top_jstack.$$ 2>~/tmp/java_top_jstack_err.$$
   if [ $? -ne 0 ]; then
     jstack_mode=forced
     jstack_run="regular"
     echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
-    timeout 60 $java_bin/jstack -F $java_pid > ~/tmp/jstack.$$ 2>~/tmp/jstack_err.$$
+    timeout 60 $java_bin/jstack -F $java_pid > ~/tmp/java_top_jstack.$$ 2>~/tmp/java_top_jstack_err.$$
     if [ $? -ne 0 ]; then
       jstack_run="sudo"
       echo "Trying to start jstack as $jstack_run in $jstack_mode mode."
-      sudo su - $java_owner -c "timeout 60 $java_bin/jstack -F $java_pid" > ~/tmp/jstack.$$  2>~/tmp/jstack_err.$$
+      sudo su - $java_owner -c "timeout 60 $java_bin/jstack -F $java_pid" > ~/tmp/java_top_jstack.$$  2>~/tmp/java_top_jstack_err.$$
     fi
   fi
 fi
 
-if [ $(cat ~/tmp/jstack.$$ | wc -l) -eq 0 ]; then
-   rm -f ~/tmp/jstack.$$
+if [ $(cat ~/tmp/java_top_jstack.$$ | wc -l) -eq 0 ]; then
+   rm -f ~/tmp/java_top_jstack.$$
 fi
 
-if [ ! -f ~/tmp/jstack.$$ ]; then
+if [ ! -f ~/tmp/java_top_jstack.$$ ]; then
     quit 3 "Not able to connect to JVM."
 fi
 
@@ -189,12 +187,10 @@ cat <<EOF1b
 
 EOF1b
 
-ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > ~/tmp/ps.$$
-top -H -b -n 1  | sed 's/^\s+//' > ~/tmp/top.$$
-cat ~/tmp/top.$$ | sort -rnk9,9  > ~/tmp/top_sorted.$$
-
 #
 # ps headers discovery
+ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > ~/tmp/java_top_ps.$$
+
 pid_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " PID$" | cut -f1 -d' ')
 lwp_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " LWP$" | cut -f1 -d' ')
 #cpu_col=$(ps aux -L | head -1 | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
@@ -206,10 +202,15 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $mem_col; echo $start_col; echo $ti
 
 #
 # top header discovery
-top_pid_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
-top_cpu_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
+cat ~/tmp/java_top_ps.$$  | tr -s ' ' | cut -f$lwp_col -d' ' | sed 's/^/^/g' | sed 's/$/ /' >~/tmp/java_top_ps_lwp.$$
 
-topcols=$((echo $top_pid_col; echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
+top -H -b -n 1  | sed 's/^\s*//' > ~/tmp/java_top_top.$$
+cat ~/tmp/java_top_top.$$ | grep -f ~/tmp/java_top_ps_lwp.$$  | sort -rnk9,9  > ~/tmp/java_top_top_sorted.$$
+
+top_pid_col=$(cat ~/tmp/java_top_top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep -P "\s*PID$" | cut -f1 -d' ')
+top_cpu_col=$(cat ~/tmp/java_top_top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
+
+topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
 
 # 
 #
@@ -226,7 +227,7 @@ topcols=$((echo $top_pid_col; echo $top_cpu_col) | sort -n | tr '\n' ',' | sed '
   done
   
   # linux top part
-  for header in $(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | tr -s ' ' | cut -d' ' -f$topcols); do
+  for header in $(cat ~/tmp/java_top_top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | tr -s ' ' | cut -d' ' -f$topcols); do
     sayatcell -n $header 7
   done
 
@@ -236,33 +237,33 @@ topcols=$((echo $top_pid_col; echo $top_cpu_col) | sort -n | tr '\n' ',' | sed '
 
   # data
   error=0
-  for pid in $(cat ~/tmp/top_sorted.$$ | head -$top_threads | tr -s ' ' | cut -f$top_pid_col -d' ' ); do
+  for pid in $(cat ~/tmp/java_top_top_sorted.$$ | head -$top_threads | tr -s ' ' | cut -f$top_pid_col -d' ' ); do
     hexpid=$(printf '%x\n' $pid)
 
     # linux ps part
-    for ps_data in $(echo $(cat ~/tmp/ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
+    for ps_data in $(echo $(cat ~/tmp/java_top_ps.$$ | grep -P "$java_owner\s+$java_pid\s+$pid") | cut -d' ' -f$pscols| tr '\n' ' '); do
         sayatcell -n $ps_data 7
     done
 
     # linux top part
-    for top_data in $(echo $(cat ~/tmp/top.$$ | grep -P "^\s*$pid\s+") | cut -d' ' -f$topcols | tr '\n' ' '); do
+    for top_data in $(echo $(cat ~/tmp/java_top_top.$$ | grep -P "^\s*$pid\s+") | cut -d' ' -f$topcols | tr '\n' ' '); do
         sayatcell -n $top_data 7
     done
 
     # java part
     if [ $jstack_mode = regular ]; then
-        java_thread=$(cat ~/tmp/jstack.$$ | grep "nid=0x$hexpid")
+        java_thread=$(cat ~/tmp/java_top_jstack.$$ | grep "nid=0x$hexpid")
     else
-        java_thread=$(cat ~/tmp/jstack.$$ | grep "Thread $pid")
+        java_thread=$(cat ~/tmp/java_top_jstack.$$ | grep "Thread $pid")
     fi
     if [ $? -ne 0 ]; then
       echo "Warning: thread $pid / 0x$hexpid NOT FOUND in Java thread dump. Possible in forced mode for JVM internal threads."
       error=101
     else
       if [ $jstack_mode = regular ]; then
-          cat ~/tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
+          cat ~/tmp/java_top_jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
       else
-          cat ~/tmp/jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
+          cat ~/tmp/java_top_jstack.$$ | grep -A$thread_lines "Thread $pid" | sed -n '1, /^$/p'
       fi
     fi
   done
