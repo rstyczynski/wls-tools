@@ -122,18 +122,18 @@ if [ $(echo $java_pid | tr ' ' '\n' | wc -l) -gt 1 ]; then
     quit 2 "Multiple java processes found. Make identifier more precise"
 fi
 
-java_owner=$(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f1 -d' ')
-java_home=$(dirname $(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | cut -f11 -d' '))
+java_owner=$(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh | tr -s ' ' | cut -f1 -d' ')
+java_bin=$(dirname $(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | grep -v java_top.sh | cut -f11 -d' '))
 
 rm -f /tmp/jstack.$$
 jstack_mode=regular
 jstack_run=regular
-timeout 1 sleep 5 #5 $java_home/jstack $java_pid > /tmp/jstack.$$ 
+timeout 1 sleep 5 #5 $java_bin/jstack $java_pid > /tmp/jstack.$$ 
 result=$?
 case $result in
 126)
   jstack_run="sudo regular"
-  sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 
+  sudo su - $java_owner -c "timeout 5 $java_bin/jstack $java_pid" > /tmp/jstack.$$ 
   if [ $? -ne 0 ]; then
     quit 3 "Not able to connect to JVM (sudo)."
   fi
@@ -141,12 +141,12 @@ case $result in
 124)
   jstack_mode=forced
   jstack_run=forced
-  timeout 15 $java_home/jstack -F $java_pid > /tmp/jstack.$$ 
+  timeout 15 $java_bin/jstack -F $java_pid > /tmp/jstack.$$ 
   resultF=$?
   case $resultF in
   126)
     jstack_run="sudo forced"
-    sudo su - $java_owner -c "timeout 5 $java_home/jstack $java_pid" > /tmp/jstack.$$ 
+    sudo su - $java_owner -c "timeout 5 $java_bin/jstack $java_pid" > /tmp/jstack.$$ 
     if [ $? -ne 0 ]; then
       quit 3 "Not able to connect to JVM (sudo forced)."
     fi
@@ -190,7 +190,7 @@ cat <<EOF1b
 ###################
 ##### java_pid............:$java_pid
 ##### java_owner..........:$java_owner
-##### java_home...........:$java_home
+##### java_bin...........:$java_bin
 ##### thread dump mode....:$jstack_mode
 ######################################
 
