@@ -123,7 +123,7 @@ if [ $(echo $java_pid | tr ' ' '\n' | wc -l) -gt 1 ]; then
 fi
 
 java_owner=$(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh | tr -s ' ' | cut -f1 -d' ')
-java_bin=$(dirname $(ps aux | grep $process_identifier | grep -v grep | tr -s ' ' | grep -v java_top.sh | cut -f11 -d' '))
+java_bin=$(dirname $(ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh| tr -s ' '  | cut -f11 -d' '))
 
 rm -f /tmp/jstack.$$
 jstack_mode=regular
