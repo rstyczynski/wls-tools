@@ -209,7 +209,7 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $mem_col; echo $start_col; echo $ti
 top_pid_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
 top_cpu_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
 
-topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
+topcols=$((echo $top_pid_col; echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
 
 # 
 #
