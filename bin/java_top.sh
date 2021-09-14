@@ -209,6 +209,9 @@ top_cpu_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' 
 
 topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
 
+echo 'XXXX'
+echo $topcols
+echo $pscols
 
 # 
 #
@@ -268,6 +271,6 @@ topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,
 
 }
 
-#set -x
+set -x
 java_top $@
 quit $error
