@@ -244,8 +244,8 @@ topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//')
     done
 
     # linux top part
-    for ps_data in $(echo $(cat ~/tmp/top.$$ | grep -P "$pid") | cut -d' ' -f$topcols| tr '\n' ' '); do
-        sayatcell -n $ps_data 7
+    for top_data in $(echo $(cat ~/tmp/top.$$ | grep -P "^\s*$pid\s+") | cut -d' ' -f$topcols | tr '\n' ' '); do
+        sayatcell -n $top_data 7
     done
 
     # java part
@@ -268,5 +268,6 @@ topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//')
 
 }
 
+set -x
 java_top $@
 quit $error
