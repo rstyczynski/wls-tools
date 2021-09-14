@@ -95,7 +95,11 @@ EOF_quit
     exit $1
 }
 
-trap quit SIGINT EXIT
+function quit_int() {
+  quit 100 "Operation interrupted by operator."
+}
+
+trap quit_int SIGINT
 
 function java_top() {
 
@@ -234,7 +238,6 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
     fi
     if [ $? -ne 0 ]; then
       quit 4 "Thread $pid / 0x$hexpid NOT FOUND in Java thread dump."
-      
     else
       if [ $jstack_mode = regular ]; then
           cat /tmp/jstack.$$ | grep -A$thread_lines "nid=0x$hexpid" | sed -n '1, /^$/p'
