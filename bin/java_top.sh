@@ -81,8 +81,8 @@ function quit() {
     : ${exit_code:=0}
 
     if [ $exit_code -eq 0 ]; then
-      rm -f /tmp/ps.$$
-      rm -f /tmp/jstack.$$
+      #rm -f /tmp/ps.$$
+      #rm -f /tmp/jstack.$$
     else
       echo "Temp files left for analysis: /tmp/ps.$$, /tmp/jstack.$$"
     fi
