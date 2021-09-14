@@ -191,6 +191,7 @@ EOF1b
 
 ps aux -L | grep -P  "$java_owner\s+$java_pid" | grep -v grep | sort -rnk4,4  > ~/tmp/ps.$$
 top -H -b -n 1  > ~/tmp/top.$$
+cat ~/tmp/top.$$ | sort -rnk9,9  > ~/tmp/top_sorted.$$
 
 #
 # ps headers discovery
@@ -205,13 +206,10 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $mem_col; echo $start_col; echo $ti
 
 #
 # top header discovery
+top_pid_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
 top_cpu_col=$(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | tr -s ' ' | tr ' ' '\n' | nl | tr -s ' ' | tr '\t' ' ' | cut -d' ' -f2,3 | grep " %CPU$" | cut -f1 -d' ')
 
 topcols=$((echo $top_cpu_col) | sort -n | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
-
-echo 'XXXX'
-echo $topcols
-echo $pscols
 
 # 
 #
@@ -228,7 +226,7 @@ echo $pscols
   done
   
   # linux top part
-  for header in $(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | tr -s ' ' | cut -d' ' -f$topcols); do
+  for header in $(cat ~/tmp/top.$$ | grep PID | grep USER | grep '%CPU' | head -1 | sed 's/^\s+//' | tr -s ' ' | cut -d' ' -f$topcols); do
     sayatcell -n $header 7
   done
 
@@ -238,7 +236,7 @@ echo $pscols
 
   # data
   error=0
-  for pid in $(cat ~/tmp/ps.$$ | head -$top_threads | tr -s ' ' | cut -f$lwp_col -d' ' ); do
+  for pid in $(~/tmp/top_sorted.$$ | head -$top_threads | tr -s ' ' | cut -f$top_pid_col -d' ' ); do
     hexpid=$(printf '%x\n' $pid)
 
     # linux ps part
