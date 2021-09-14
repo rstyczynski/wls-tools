@@ -245,5 +245,6 @@ pscols=$((echo $pid_col; echo $lwp_col; echo $cpu_col; echo $mem_col) | sort -n 
 
 }
 
+set -x
 java_top $@
 quit 0
