@@ -114,7 +114,7 @@ mkdir -p ~/tmp/java_top
 
 cat <<EOF_intro
 ######################################
-Java top v0.1 by Ryszard Styczynski
+Java top v0.1 by ryszard.styczynski@oracle.com
 EOF_intro
 
 
