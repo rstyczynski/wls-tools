@@ -123,6 +123,8 @@ if [ -z "$java_pid" ]; then
 fi
 
 if [ $(echo $java_pid | tr ' ' '\n' | wc -l) -gt 1 ]; then
+    ps aux | grep $process_identifier | grep -v grep | grep -v java_top.sh
+
     quit 2 "Multiple java processes found. Make identifier more precise"
 fi
 
