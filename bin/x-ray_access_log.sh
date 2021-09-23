@@ -344,6 +344,7 @@ echo OSB
 services=$(grep -P "$date_txt\s+$time_slot:" ./osb*/$date_txt/access* | tr '?' '\t' | cut -f11 | sort | uniq )
 
   sayatcell -n -f service 60
+  sayatcell -n -f "calls" 10
   sayatcell -n -f "min" 10
   sayatcell -n -f "max" 10
   sayatcell -n -f "avg" 10
@@ -352,6 +353,7 @@ services=$(grep -P "$date_txt\s+$time_slot:" ./osb*/$date_txt/access* | tr '?' '
   sayatcell -f alert  30
 
   sayatcell -n -f " " 60
+  sayatcell -n -f " " 10
   sayatcell -n -f "[ms]" 10
   sayatcell -n -f "[ms]" 10
   sayatcell -n -f "[ms]" 10
@@ -364,11 +366,12 @@ services=$(grep -P "$date_txt\s+$time_slot:" ./osb*/$date_txt/access* | tr '?' '
   sayatcell -n -f '------' 10
   sayatcell -n -f '------' 10
   sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
   sayatcell -n -f '-----------' 30
   sayatcell -f '-----------' 30
 
 for service in $services; do
-  invocations=$(grep -P "$date_txt\s+$time_slot:" ./osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f11 | uniq -c)
+  invocations=$(grep -P "$date_txt\s+$time_slot:" ./osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f11 | wc -l)
   timings=$(grep -P "$date_txt\s+$time_slot:" ./osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f7)
   avg=$(echo $timings | tr ' ' '\n' | awk '{ total += $1 } END { printf "%d", total/NR*1000 }')
   stdev=$(echo $timings | tr ' ' '\n'  | awk '{for(i=1;i<=NF;i++) {sum[i] += $i; sumsq[i] += ($i)^2}} 
@@ -379,6 +382,7 @@ for service in $services; do
 
 
   sayatcell -n -f "$service                                               " 60
+  sayatcell -n -f $invocations 10
   sayatcell -n -f $min 10
   sayatcell -n -f $max 10
   sayatcell -n -f $avg 10
