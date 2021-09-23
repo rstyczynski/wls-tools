@@ -133,7 +133,7 @@ env=$1
 service=$2
 date_txt=$3
 
-if [ -z "$env" ]; then
+if [ -z "$env" ] || [ -z "$service" ]; then
   echo "Usage: check_call_distribution env service [date]"
   return 1
 fi
@@ -195,8 +195,8 @@ date_txt=$2
 hour=$3
 topn=$4
 
-if [ -z "$env" ]; then
-  echo "Usage: get_top_services env date time [top N]"
+if [ -z "$env" ] || [ -z "$date_txt" ]; then
+  echo "Usage: get_top_services env date [hour] [top N]"
   return 1
 fi
 
@@ -244,11 +244,19 @@ date_txt_ohs=$date_d/${months[$date_m_int]}/$date_y
         ohs_hour=0$ohs_hour
       fi
 
-      sayatcell -n "$date_txt" 10
-      sayatcell -n "$hour" 6
-      sayatcell -n "$(grep -P "$date_txt_ohs:$ohs_hour:" ./ohs*/$date_txt/access* | tr '?' '\t' | cut -f8 -d' '  | sort | uniq -c | sort -nr | head -$topn | tr ' ' '_'| tr '\n' '_')" 50
-      sayatcell -n "$(grep -P "$date_txt\s+$hour:" ./soa*/$date_txt/access* | tr '?' '\t' | cut -f6 | sort | uniq -c | sort -nr | head -$topn  | tr ' ' '_'| tr '\n' '_')" 50
-      sayatcell "$(grep -P "$date_txt\s+$hour:" ./osb*/$date_txt/access* | tr '?' '\t' | cut -f11 | sort | uniq -c | sort -nr | head -$topn | tr ' ' '_'| tr '\n' '_')" 50
+      # sayatcell -n "$date_txt" 10
+      # sayatcell -n "$hour" 6
+      # sayatcell -n "$(grep -P "$date_txt_ohs:$ohs_hour:" ./ohs*/$date_txt/access* | tr '?' '\t' | cut -f8 -d' '  | sort | uniq -c | sort -nr | head -$topn | tr ' ' '_'| tr '\n' '_')" 50
+      # sayatcell -n "$(grep -P "$date_txt\s+$hour:" ./soa*/$date_txt/access* | tr '?' '\t' | cut -f6 | sort | uniq -c | sort -nr | head -$topn  | tr ' ' '_'| tr '\n' '_')" 50
+      # sayatcell "$(grep -P "$date_txt\s+$hour:" ./osb*/$date_txt/access* | tr '?' '\t' | cut -f11 | sort | uniq -c | sort -nr | head -$topn | tr ' ' '_'| tr '\n' '_')" 50
+
+      echo "$date_txt $hour:00:00 - $hour:59:59"
+      echo OHS:
+      grep -P "$date_txt_ohs:$ohs_hour:" ./ohs*/$date_txt/access* | tr '?' '\t' | cut -f8 -d' '  | sort | uniq -c | sort -nr | head -$topn
+      echo SOA:
+      grep -P "$date_txt\s+$hour:" ./soa*/$date_txt/access* | tr '?' '\t' | cut -f6 | sort | uniq -c | sort -nr | head -$topn
+      echo OSB:
+      grep -P "$date_txt\s+$hour:" ./osb*/$date_txt/access* | tr '?' '\t' | cut -f11 | sort | uniq -c | sort -nr | head -$topn
 
     done
   else
