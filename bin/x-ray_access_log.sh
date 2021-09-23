@@ -286,6 +286,8 @@ function get_response_time() {
 env=$1
 date=$2
 time=$3
+
+: ${time:=$(date +"%H:%M")}
 date_time="$date $time"
 
 if [ -z "$env" ]; then
@@ -389,11 +391,11 @@ for service in $services; do
   fi
   
   if [ $stdev -gt $avg ]; then
-      alert="stdev > avg"
+      warning="stdev > avg"
   fi
 
-  if [ $avg -gt 30000 ]; then
-      alert="avg > 30 seconds"
+  if [ $avg -gt 10000 ]; then
+      alert="avg > 10 seconds"
   fi
 
   sayatcell -n -f "$warning" 30
