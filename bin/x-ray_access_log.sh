@@ -360,7 +360,10 @@ echo "(no data in access log)"
 
 echo OSB
 
-services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | tr '?' '\t' | cut -f11 | sort | uniq )
+: ${osb_access_pos_url:=11}
+: ${osb_access_pos_timetaken:=7}
+
+services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | tr '?' '\t' | cut -f$osb_access_pos_url | sort | uniq )
 
   sayatcell -n -f service 60
   sayatcell -n -f "calls" 10
@@ -390,8 +393,8 @@ services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | tr '
   sayatcell -f '-----------' 30
 
 for service in $services; do
-  invocations=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f11 | wc -l)
-  timings=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f7)
+  invocations=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f$osb_access_pos_url | wc -l)
+  timings=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f$osb_access_pos_timetaken)
   avg=$(echo $timings | tr ' ' '\n' | awk '{ total += $1 } END { printf "%d", total/NR*1000 }')
   stdev=$(echo $timings | tr ' ' '\n'  | awk '{for(i=1;i<=NF;i++) {sum[i] += $i; sumsq[i] += ($i)^2}} 
           END {for (i=1;i<=NF;i++) { printf "%d", sqrt((sumsq[i]-sum[i]^2/NR)/NR)*1000} }')
@@ -610,10 +613,13 @@ date_txt_ohs=$date_d/${months[$date_m_int]}/$date_y
   sayatcell -n -f '-----------' 30
   sayatcell -f '-----------' 30
 
-services=$(grep -P "$date_txt_ohs:$time_slot\s+" ./*/ohs*/$date_txt/access* | tr '?' ' ' | cut -f8 -d' ' | egrep "$service_pattern" | cut -f1-$url_depth -d '/' | sort | uniq )
+: ${ohs_access_pos_url:=8}
+: ${ohs_access_pos_code:=10}
+
+services=$(grep -P "$date_txt_ohs:$time_slot\s+" ./*/ohs*/$date_txt/access* | tr '?' ' ' | cut -f$ohs_access_pos_url -d' ' | egrep "$service_pattern" | cut -f1-$url_depth -d '/' | sort | uniq )
 for service in $services; do
   calls=$(grep -P "$date_txt_ohs:$time_slot\s+" ./*/ohs*/$date_txt/access* | grep $service | wc -l)
-  code_count=$(grep -P "$date_txt_ohs:$time_slot\s+" ./*/ohs*/$date_txt/access* | grep $service | cut -f10 -d' ' | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
+  code_count=$(grep -P "$date_txt_ohs:$time_slot\s+" ./*/ohs*/$date_txt/access* | grep $service | cut -f$ohs_access_pos_code -d' ' | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
 
   c1xx=$(echo $code_count | tr ' ' '\n' | grep "1xx" | cut -f1 -d';')
   : ${c1xx:=0}
@@ -659,10 +665,13 @@ done
   sayatcell -n -f '-----------' 30
   sayatcell -f '-----------' 30
 
-services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/soa*/$date_txt/access* | tr '?' '\t' | cut -f6 | egrep "$service_pattern" | cut -f1-$url_depth -d '/' | sort | uniq )
+: ${soa_access_pos_url:=6}
+: ${soa_access_pos_code:=7}
+
+services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/soa*/$date_txt/access* | tr '?' '\t' | cut -f$soa_access_pos_url | egrep "$service_pattern" | cut -f1-$url_depth -d '/' | sort | uniq )
 for service in $services; do
   calls=$(grep -P "$date_txt\s+$time_slot\s+" ./*/soa*/$date_txt/access* | grep $service  | wc -l)
-  code_count=$(grep -P "$date_txt\s+$time_slot\s+" ./*/soa*/$date_txt/access* | grep $service | cut -f7 | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
+  code_count=$(grep -P "$date_txt\s+$time_slot\s+" ./*/soa*/$date_txt/access* | grep $service | cut -f$soa_access_pos_code | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
 
   c1xx=$(echo $code_count | tr ' ' '\n' | grep "1xx" | cut -f1 -d';')
   : ${c1xx:=0}
@@ -709,10 +718,13 @@ done
   sayatcell -n -f '-----------' 30
   sayatcell -f '-----------' 30
 
-services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | tr '?' '\t' | cut -f11 | egrep "$service_pattern" | cut -f1-$url_depth -d '/'| sort | uniq )
+: ${osb_access_pos_url:=11}
+: ${osb_access_pos_code:=12}
+
+services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | tr '?' '\t' | cut -f$osb_access_pos_url | egrep "$service_pattern" | cut -f1-$url_depth -d '/'| sort | uniq )
 for service in $services; do
   cals=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep $service | wc -l)
-  code_count=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep $service | cut -f12 | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
+  code_count=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep $service | cut -f$osb_access_pos_code | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
   
   c1xx=$(echo $code_count | tr ' ' '\n' | grep "1xx" | cut -f1 -d';')
   : ${c1xx:=0}
