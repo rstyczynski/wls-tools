@@ -93,6 +93,8 @@ cat <<EOF
 ### 
 ### Work distribution at $env 
 ###
+### Report generated for $date_txt
+###
 EOF
 
 sayatcell -n date 10
@@ -155,7 +157,10 @@ date_txt_ohs=$date_d/${months[$date_m_int]}/$date_y
 cat <<EOF
 ### 
 ### Work distribution
+### 
 ### $service at $env 
+###
+### Report generated for $date_txt
 ###
 EOF
 
@@ -205,7 +210,9 @@ fi
 cat <<EOF
 ### 
 ### top used serices
-### $service at $env 
+### at $env 
+###
+### Report generated for $date_txt
 ###
 EOF
 
@@ -307,8 +314,9 @@ time_slot="$time_slot\d"
 
 cat <<EOF
 ### 
-### time used by serices
-### $date_slot $time_slot
+### time used by services
+###
+### Report generated for $date_slot $time_slot
 ###
 EOF
 
@@ -401,6 +409,289 @@ for service in $services; do
   if [ $avg -gt 10000 ]; then
       alert="avg > 10 seconds"
   fi
+
+  sayatcell -n -f "$warning" 30
+  sayatcell -f "$alert" 30
+
+done
+
+}
+
+
+
+
+
+
+function prep_time_slot() {
+  time=$1
+
+  if [ -z "$time" ]; then
+    time_slot="\d\d:\d\d:\d\d" 
+  else
+    # 
+    # time slot
+    time_mask=$(echo $time | tr '[0-9]' 9)
+    case $time_mask in
+    99:99:99)
+      time_slot=$(echo $time | cut -b1-8) 
+      ;;
+    99:99:9)
+      time_slot=$(echo $time  | cut -b1-7)
+      time_slot="$time_slot\d"
+      ;;
+    99:99:)
+      time_slot=$(echo $time  | cut -b1-5)
+      time_slot="$time_slot:\d\d" 
+      ;;
+    99:99)
+      time_slot=$(echo $time  | cut -b1-5)
+      time_slot="$time_slot:\d\d" 
+      ;;
+    99:9)
+      time_slot=$(echo $time  | cut -b1-4)
+      time_slot="$time_slot\d:\d\d" 
+      ;;
+    99:)
+      time_slot=$(echo $time  | cut -b1-2)
+      time_slot="$time_slot:\d\d:\d\d" 
+      ;;
+    99)
+      time_slot=$(echo $time  | cut -b1-2)
+      time_slot="$time_slot:\d\d:\d\d" 
+      ;;
+    9)
+      time_slot=$(echo $time  | cut -b1)
+      time_slot="0$time_slot:\d\d:\d\d" 
+      ;;
+    esac
+  fi
+
+  echo $time_slot
+}
+
+
+function get_response_codes() {
+env=$1
+date=$2
+time=$3
+
+if [ -z "$env" ]; then
+  echo "Usage: get_response_time env [date] [time]"
+  return 1
+fi
+
+service_pattern='SVC|Rabbit'
+url_depth=10
+
+
+: ${date:=$(date +"%Y-%m-%d")}
+
+date_slot=$date
+
+if [ -z "$time" ]; then
+
+  if [ $date == $(date +"%Y-%m-%d") ]; then
+    # now
+    #
+    time=$(date +"%H:%M" | cut -b1-4)
+    time_slot=$(prep_time_slot $time)
+  else
+    #
+    # full day
+    time_slot="\d\d:\d\d:\d\d"
+  fi
+else
+  time_slot=$(prep_time_slot $time)
+fi
+
+
+cat <<EOF
+### 
+### HTTP response code distribution per service
+###
+### Report generated for $date_slot $time_slot
+###
+EOF
+
+months=(none Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
+
+cd /mwlogs/x-ray/$(echo $env | tr [A-Z] [a-z])/soa/diag/wls/log/soa_domain
+
+
+date_txt=$date_slot
+
+months=(none Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
+
+cd /mwlogs/x-ray/$(echo $env | tr [A-Z] [a-z])/soa/diag/wls/log/soa_domain
+
+date_y=$(echo $date_txt | cut -b1-4)
+date_m=$(echo $date_txt | cut -b6-7)
+date_m_int=$(echo $date_m | tr -d 0)
+date_d=$(echo $date_txt | cut -b9-10)
+
+date_txt_ohs=$date_d/${months[$date_m_int]}/$date_y
+
+#
+# header
+#
+  sayatcell -n -f service 60
+  sayatcell -n -f "1xx" 10
+  sayatcell -n -f "2xx" 10
+  sayatcell -n -f "3xx" 10
+  sayatcell -n -f "4xx" 10
+  sayatcell -n -f "5xx" 10
+  sayatcell -n -f warning 30
+  sayatcell -f alert  30
+
+  sayatcell -n -f " " 60
+  sayatcell -n -f " " 10
+  sayatcell -n -f " " 10
+  sayatcell -n -f " " 10
+  sayatcell -n -f " " 10
+  sayatcell -n -f " " 10
+  sayatcell -n -f " " 30
+  sayatcell -f " "  30
+
+  sayatcell -n -f '-----------' 60
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '-----------' 30
+  sayatcell -f '-----------' 30
+
+
+#
+# ohs
+#
+
+  sayatcell -n -f 'OHS' 60
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '-----------' 30
+  sayatcell -f '-----------' 30
+
+services=$(grep -P "$date_txt_ohs:$time_slot\s+" ./ohs*/$date_txt/access* | tr '?' ' ' | cut -f8 -d' ' | egrep "$service_pattern" | cut -f1-$url_depth -d '/' | sort | uniq )
+for service in $services; do
+  code_count=$(grep -P "$date_txt_ohs:$time_slot\s+" ./ohs*/$date_txt/access* | grep $service | cut -f10 -d' ' | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
+
+  c1xx=$(echo $code_count | tr ' ' '\n' | grep "1xx" | cut -f1 -d';')
+  : ${c1xx:=0}
+  c2xx=$(echo $code_count | tr ' ' '\n' | grep "2xx" | cut -f1 -d';')
+  : ${c2xx:=0}
+  c3xx=$(echo $code_count | tr ' ' '\n' | grep "3xx" | cut -f1 -d';')
+  : ${c3xx:=0}
+  c4xx=$(echo $code_count | tr ' ' '\n' | grep "4xx" | cut -f1 -d';')
+  : ${c4xx:=0}
+  c5xx=$(echo $code_count | tr ' ' '\n' | grep "5xx" | cut -f1 -d';')
+  : ${c5xx:=0}
+
+
+  sayatcell -n -f "$service                                                                           " 60
+  sayatcell -n -f $c1xx 10
+  sayatcell -n -f $c2xx 10
+  sayatcell -n -f $c3xx 10
+  sayatcell -n -f $c4xx 10
+  sayatcell -n -f $c5xx 10
+
+  warning=''
+  alert=''
+
+
+  sayatcell -n -f "$warning" 30
+  sayatcell -f "$alert" 30
+
+done
+
+#
+# soa
+#
+
+  sayatcell -n -f 'SOA' 60
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '-----------' 30
+  sayatcell -f '-----------' 30
+
+services=$(grep -P "$date_txt\s+$time_slot\s+" ./soa*/$date_txt/access* | tr '?' '\t' | cut -f6 | egrep "$service_pattern" | cut -f1-$url_depth -d '/' | sort | uniq )
+for service in $services; do
+  code_count=$(grep -P "$date_txt\s+$time_slot\s+" ./soa*/$date_txt/access* | grep $service | cut -f7 | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
+
+  c1xx=$(echo $code_count | tr ' ' '\n' | grep "1xx" | cut -f1 -d';')
+  : ${c1xx:=0}
+  c2xx=$(echo $code_count | tr ' ' '\n' | grep "2xx" | cut -f1 -d';')
+  : ${c2xx:=0}
+  c3xx=$(echo $code_count | tr ' ' '\n' | grep "3xx" | cut -f1 -d';')
+  : ${c3xx:=0}
+  c4xx=$(echo $code_count | tr ' ' '\n' | grep "4xx" | cut -f1 -d';')
+  : ${c4xx:=0}
+  c5xx=$(echo $code_count | tr ' ' '\n' | grep "5xx" | cut -f1 -d';')
+  : ${c5xx:=0}
+
+
+  sayatcell -n -f "$service                                               " 60
+  sayatcell -n -f $c1xx 10
+  sayatcell -n -f $c2xx 10
+  sayatcell -n -f $c3xx 10
+  sayatcell -n -f $c4xx 10
+  sayatcell -n -f $c5xx 10
+
+  warning=''
+  alert=''
+
+
+  sayatcell -n -f "$warning" 30
+  sayatcell -f "$alert" 30
+
+done
+
+
+#
+# OSB
+#
+
+  sayatcell -n -f 'OSB' 60
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '------' 10
+  sayatcell -n -f '-----------' 30
+  sayatcell -f '-----------' 30
+
+services=$(grep -P "$date_txt\s+$time_slot\s+" ./osb*/$date_txt/access* | tr '?' '\t' | cut -f11 | egrep "$service_pattern" | cut -f1-$url_depth -d '/'| sort | uniq )
+for service in $services; do
+  code_count=$(grep -P "$date_txt\s+$time_slot\s+" ./osb*/$date_txt/access* | grep $service | cut -f12 | sort | cut -b1 | grep -P '\d' | uniq -c | sed 's/$/xx/g' | sed 's/^\s*//g' | tr ' ' ';')
+  
+  c1xx=$(echo $code_count | tr ' ' '\n' | grep "1xx" | cut -f1 -d';')
+  : ${c1xx:=0}
+  c2xx=$(echo $code_count | tr ' ' '\n' | grep "2xx" | cut -f1 -d';')
+  : ${c2xx:=0}
+  c3xx=$(echo $code_count | tr ' ' '\n' | grep "3xx" | cut -f1 -d';')
+  : ${c3xx:=0}
+  c4xx=$(echo $code_count | tr ' ' '\n' | grep "4xx" | cut -f1 -d';')
+  : ${c4xx:=0}
+  c5xx=$(echo $code_count | tr ' ' '\n' | grep "5xx" | cut -f1 -d';')
+  : ${c5xx:=0}
+
+
+  sayatcell -n -f "$service                                               " 60
+  sayatcell -n -f $c1xx 10
+  sayatcell -n -f $c2xx 10
+  sayatcell -n -f $c3xx 10
+  sayatcell -n -f $c4xx 10
+  sayatcell -n -f $c5xx 10
+
+  warning=''
+  alert=''
+
 
   sayatcell -n -f "$warning" 30
   sayatcell -f "$alert" 30
