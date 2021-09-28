@@ -50,7 +50,7 @@ function wls_top() {
     fi
     
     java_bin=$(dirname $(ps -o command ax -q $os_pid | grep -v 'COMMAND' | cut -f1 -d' '))
-    $java_bin/jstack $os_pid | t0 | grep -z RUNNABLE | f0 >$tmp/tdump
+    timeout 30 $java_bin/jstack $os_pid | t0 | grep -z RUNNABLE | f0 >$tmp/tdump
     if [ $? -ne 0 ]; then
         echo "Error starting jstack. Dumping regular top instead."
         top -b -n 1

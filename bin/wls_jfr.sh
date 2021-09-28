@@ -16,7 +16,7 @@ function jcmd_error_handler() {
         echo "Error conecting to JVM. JFR interaction not possible. Writing thread dump instead."
 
         file_name=$(hostname)_$wls_server\_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jtop
-        $wls_tools_bin/wls_top.sh $wls_server > $dump_location/$file_name
+        $wls_tools_bin/java_top.sh $wls_server > $dump_location/$file_name
 
         echo "JVM thread dump written to $dump_location/$file_name."
 }
