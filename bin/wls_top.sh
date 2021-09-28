@@ -51,21 +51,25 @@ function wls_top() {
     
     java_bin=$(dirname $(ps -o command ax -q $os_pid | grep -v 'COMMAND' | cut -f1 -d' '))
     $java_bin/jstack $os_pid | t0 | grep -z RUNNABLE | f0 >$tmp/tdump
+    if [ $? -ne 0 ]; then
+        echo "Error starting jstack. Dumping regular top instead."
+        top -b -n 1
+    else
+        rm -f $tmp/modules
 
-    rm -f $tmp/modules
+        _threadGetOwner 'java.lang.Thread.run' >> $tmp/modules
+        _threadGetOwner 'weblogic.kernel.ExecuteThread.execute' >> $tmp/modules
+        _threadGetOwner 'weblogic.server.channels.ServerListenThread.selectFrom' >> $tmp/modules
+        _threadGetOwner 'weblogic.nodemanager.NMService$[0-9]+.run' >> $tmp/modules
+        _threadGetOwner 'oracle.integration.platform.blocks.executor.WorkManagerExecutor$[0-9][0-9]*.run' >> $tmp/modules
 
-    _threadGetOwner 'java.lang.Thread.run' >> $tmp/modules
-    _threadGetOwner 'weblogic.kernel.ExecuteThread.execute' >> $tmp/modules
-    _threadGetOwner 'weblogic.server.channels.ServerListenThread.selectFrom' >> $tmp/modules
-    _threadGetOwner 'weblogic.nodemanager.NMService$[0-9]+.run' >> $tmp/modules
-    _threadGetOwner 'oracle.integration.platform.blocks.executor.WorkManagerExecutor$[0-9][0-9]*.run' >> $tmp/modules
-
-    IFS=$'\n'
-    for module in $(cat $tmp/modules | sort -u); do
-        echo -n "$module: "
-        cat $tmp/tdump | grep "$module" | cut -f1 -d'(' | wc -l
-    done | sort -k3 -t':' -r -n 
-    unset IFS
+        IFS=$'\n'
+        for module in $(cat $tmp/modules | sort -u); do
+            echo -n "$module: "
+            cat $tmp/tdump | grep "$module" | cut -f1 -d'(' | wc -l
+        done | sort -k3 -t':' -r -n 
+        unset IFS
+    fi
 
     if [ ! "$opt" == debug ]; then
         rm -rf /tmp/$$
