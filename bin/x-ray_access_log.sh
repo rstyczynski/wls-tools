@@ -227,8 +227,6 @@ date_d=$(echo $date_txt | cut -b9-10)
 
 date_txt_ohs=$date_d/${months[$date_m_int]}/$date_y
 
-
-
   #ohs_tz=$(grep -P "$date_txt_ohs:$hour:" ./*/ohs*/$date_txt/access*  | cut -f5 -d" " | tr -d '[+\]]' | cut -b1-2 | uniq | tr -d '0')
   ohs_tz=0
 
@@ -395,6 +393,8 @@ services=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | tr '
 for service in $services; do
   invocations=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f$osb_access_pos_url | wc -l)
   timings=$(grep -P "$date_txt\s+$time_slot\s+" ./*/osb*/$date_txt/access* | grep "$service" | tr '?' '\t' | cut -f$osb_access_pos_timetaken)
+  
+  
   avg=$(echo $timings | tr ' ' '\n' | awk '{ total += $1 } END { printf "%d", total/NR*1000 }')
   stdev=$(echo $timings | tr ' ' '\n'  | awk '{for(i=1;i<=NF;i++) {sum[i] += $i; sumsq[i] += ($i)^2}} 
           END {for (i=1;i<=NF;i++) { printf "%d", sqrt((sumsq[i]-sum[i]^2/NR)/NR)*1000} }')
@@ -430,10 +430,6 @@ for service in $services; do
 done
 
 }
-
-
-
-
 
 
 function prep_time_slot() {
