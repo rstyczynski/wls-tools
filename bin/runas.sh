@@ -5,7 +5,7 @@ script_to_run_path=$2
 
 if [ -f "$script_to_run_path" ]; then
 
-    script_to_run=/tmp/$$.$(basename $1)
+    script_to_run=/tmp/$$.$(basename $script_to_run_path)
     shift
 
     cp $script_to_run_path $script_to_run
