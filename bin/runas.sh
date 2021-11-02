@@ -1,7 +1,7 @@
 #!/bin/bash
 
-runas_os_user=$1
-script_to_run_path=$2
+runas_os_user=$1; shift
+script_to_run_path=$1
 
 if [ -f "$script_to_run_path" ]; then
 
