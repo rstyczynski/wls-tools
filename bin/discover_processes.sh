@@ -271,6 +271,9 @@ function discoverWLSroles() {
             echo "Middleware home: $(echo $wls_home | sed 's|/wlserver/server$||')"
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=$(echo $wls_home | sed 's|/wlserver/server$||')
             wls_attributes[$wls_server$delim\mw_home]=$(echo $wls_home | sed 's|/wlserver/server$||')
+
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\wls_home]=$wls_home
+            wls_attributes[$wls_server$delim\wls_home]=$wls_home
         else
             echo "WebLogic home: unknown"
             echo "Middleware home: unknown"
