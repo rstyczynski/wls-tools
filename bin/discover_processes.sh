@@ -241,13 +241,36 @@ function discoverWLSroles() {
             wls_admin+=($wls_server)
         fi
 
-        wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=$(getWLSjvmAttr $wls_server -Dweblogic.home | sed 's|/wlserver/server$||')
-        wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=$(getWLSjvmAttr $wls_server -Ddomain.home)
-        wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=$(basename $(getWLSjvmAttr $wls_server -Ddomain.home))
-
-        wls_attributes[$wls_server$delim\mw_home]=$(getWLSjvmAttr $wls_server -Dweblogic.home | sed 's|/wlserver/server$||')
-        wls_attributes[$wls_server$delim\domain_home]=$(getWLSjvmAttr $wls_server -Ddomain.home)
-        wls_attributes[$wls_server$delim\domain_name]=$(basename $(getWLSjvmAttr $wls_server -Ddomain.home))
+        domain_home=$(getWLSjvmAttr $wls_server -Ddomain.home)
+        if [ -z "$domain_home" ]; then
+            echo "Notice. Domain home not found in xpected location. Trying to discover from process environment."
+            os_pid=$(getWLSjvmAttr $wls_server os_pid)
+            domain_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^DOMAIN_HOME" | head -1 | cut -d= -f2)
+        fi
+        if [ -f "$domain_home" ]; then
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=$(basename $domain_home)
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=$(basename $domain_home)
+            wls_attributes[$wls_server$delim\domain_home]=$(basename $domain_home)
+            wls_attributes[$wls_server$delim\domain_name]=$(basename $domain_home)
+        else
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=undefined
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=undefined
+            wls_attributes[$wls_server$delim\domain_home]=undefined
+            wls_attributes[$wls_server$delim\domain_name]=undefined
+        fi
+        wls_home=$(getWLSjvmAttr $wls_server -Dweblogic.home)
+        if [ -z "$wls_home" ]; then
+            echo "Notice. WebLogic home not found in xpected location. Trying to discover from process environment."
+            os_pid=$(getWLSjvmAttr $wls_server os_pid)
+            wls_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^WLS_HOME" | head -1 | cut -d= -f2)
+        fi
+        if [ -f "$wls_home" ]; then
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=$(echo $wls_home | sed 's|/wlserver/server$||')
+            wls_attributes[$wls_server$delim\mw_home]=$(echo $wls_home | sed 's|/wlserver/server$||')
+        else
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=undefined
+            wls_attributes[$wls_server$delim\mw_home]=undefined
+        fi
         echo "================================"
     done
 }
