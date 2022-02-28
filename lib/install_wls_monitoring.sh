@@ -1,43 +1,5 @@
 #!/bin/bash
 
-tools_src=$1; shift
-
-: ${tools_src:=git}
-
-# get libraries
-case $tools_src in
-git)
-    cd ~
-    test -d umc && (cd umc; git pull)
-    test -d umc || git clone https://github.com/rstyczynski/umc.git
-
-    test -d wls-tools && (cd wls-tools; git pull)
-    test -d wls-tools || git clone https://github.com/rstyczynski/wls-tools.git
-
-    test -d oci-tools && (cd oci-tools; git pull)
-    test -d oci-tools || git clone https://github.com/rstyczynski/oci-tools.git
-    ;;
-*)
-    if [ ! -d $tools_src/umc ]; then
-        echo "Error. umc not available at shared location. Put it there before proceeding"
-        exit 1
-    fi
-    cp -rf --preserve=mode,timestamps  $tools_src/umc ~/
-
-    if [ ! -d $tools_src/wls-tools ]; then
-        echo "Error. wls-tools not available at shared location. Put it there before proceeding"
-        exit 1
-    fi
-    cp -rf --preserve=mode,timestamps  $tools_src/wls-tools ~/
-    
-    if [ ! -d $tools_src/oci-tools ]; then
-        echo "Error. oci-tools not available at shared location. Put it there before proceeding"
-        exit 1
-    fi
-    cp -rf --preserve=mode,timestamps  $tools_src/oci-tools ~/
-    ;;
-esac
-
 # prepare cfg directory
 umc_cfg=~/.umc
 mkdir -p $umc_cfg
