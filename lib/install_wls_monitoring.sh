@@ -78,6 +78,11 @@ cron_section_stop="# STOP umc - $domain_name DMS"
 
 if [ -z "$admin_server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
     echo "Admin server, MW home, WLS home, or Domain home not found - delete DMS section from cron"
+    echo "admin_server: $admin_server"
+    echo "mw_home: $mw_home"
+    echo "wls_home: $wls_home"
+    echo "domain_home: $domain_home"
+    
     (crontab -l 2>/dev/null | 
     sed "/$cron_section_start/,/$cron_section_stop/d") | crontab -
 else
