@@ -248,35 +248,34 @@ function discoverWLSroles() {
             domain_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^DOMAIN_HOME" | head -1 | cut -d= -f2)
         fi
         if [ -d "$domain_home" ]; then
-            echo "Found."
             echo "Domain home: $domain_home"
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=$(basename $domain_home)
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=$(basename $domain_home)
             wls_attributes[$wls_server$delim\domain_home]=$(basename $domain_home)
             wls_attributes[$wls_server$delim\domain_name]=$(basename $domain_home)
         else
-            echo "Error. Not found."
-            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=undefined
-            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=undefined
-            wls_attributes[$wls_server$delim\domain_home]=undefined
-            wls_attributes[$wls_server$delim\domain_name]=undefined
+            echo "Domain home: unknown"
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=unknown
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=unknown
+            wls_attributes[$wls_server$delim\domain_home]=unknown
+            wls_attributes[$wls_server$delim\domain_name]=unknown
         fi
         wls_home=$(getWLSjvmAttr $wls_server -Dweblogic.home)
         if [ -z "$wls_home" ]; then
-            echo -n "Notice. WebLogic home not found in expected location. Trying to discover from process environment..."
+            echo -"Notice. WebLogic home not found in expected location. Trying to discover from process environment..."
             os_pid=$(getWLSjvmAttr $wls_server os_pid)
             wls_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^WLS_HOME" | head -1 | cut -d= -f2)
         fi
         if [ -d "$wls_home" ]; then
-            echo "Found."
             echo "WebLogic home: $wls_home"
             echo "Middleware home: $(echo $wls_home | sed 's|/wlserver/server$||')"
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=$(echo $wls_home | sed 's|/wlserver/server$||')
             wls_attributes[$wls_server$delim\mw_home]=$(echo $wls_home | sed 's|/wlserver/server$||')
         else
-            echo "Error. Not found."
-            wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=undefined
-            wls_attributes[$wls_server$delim\mw_home]=undefined
+            echo "WebLogic home: unknown"
+            echo "Middleware home: unknown"
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=unknown
+            wls_attributes[$wls_server$delim\mw_home]=unknown
         fi
         echo "================================"
     done
