@@ -250,8 +250,8 @@ function discoverWLSroles() {
         if [ -d "$domain_home" ]; then
             echo "Domain home: $domain_home"
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=$(basename $domain_home)
-            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=$(basename $domain_home)
-            wls_attributes[$wls_server$delim\domain_home]=$(basename $domain_home)
+            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=$domain_home
+            wls_attributes[$wls_server$delim\domain_home]=$domain_home)
             wls_attributes[$wls_server$delim\domain_name]=$(basename $domain_home)
         else
             echo "Domain home: unknown"

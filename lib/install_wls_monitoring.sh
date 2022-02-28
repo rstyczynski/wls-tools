@@ -76,8 +76,8 @@ fi
 mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
 soa_home=$(getWLSjvmAttr ${wls_managed[0]} -Dsoa.oracle.home)
 osb_home=$(getWLSjvmAttr ${wls_managed[0]} -Doracle.osb.home)
-wls_home=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.home)
-domain_home=$(getWLSjvmAttr ${wls_managed[0]} -Ddomain.home)
+wls_home=$(getWLSjvmAttr ${wls_managed[0]} wls_home)
+domain_home=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
 
 
 cat > ~/.umc/umc.conf <<EOF
