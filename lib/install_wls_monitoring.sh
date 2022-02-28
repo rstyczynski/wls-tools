@@ -74,11 +74,10 @@ fi
 # Configure middleware homes
 
 mw_home=$(getWLSjvmAttr ${wls_managed[0]} mw_home)
-soa_home=$(getWLSjvmAttr ${wls_managed[0]} -Dsoa.oracle.home)
-osb_home=$(getWLSjvmAttr ${wls_managed[0]} -Doracle.osb.home)
 wls_home=$(getWLSjvmAttr ${wls_managed[0]} wls_home)
 domain_home=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
-
+soa_home=$(getWLSjvmAttr ${wls_managed[0]} -Dsoa.oracle.home)
+osb_home=$(getWLSjvmAttr ${wls_managed[0]} -Doracle.osb.home)
 
 cat > ~/.umc/umc.conf <<EOF
 export FMW_HOME=$mw_home
@@ -91,6 +90,10 @@ EOF
 # Test WLS connectivity
 if [ -z "$admin_server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
     echo "Admin server not found. Test skipped."
+    echo "admin_server: $admin_server"
+    echo "mw_home: $mw_home"
+    echo "wls_home: $wls_home"
+    echo "domain_home: $domain_home"
 else
     url="t3://$adminURL_suffix" 
     source ~/umc/bin/umc.h
