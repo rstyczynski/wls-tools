@@ -243,7 +243,7 @@ function discoverWLSroles() {
 
         domain_home=$(getWLSjvmAttr $wls_server -Ddomain.home)
         if [ -z "$domain_home" ]; then
-            echo -n "Notice. Domain home not found in expected location. Trying to discover from process environment..."
+            echo "Notice. Domain home not found in expected location. Trying to discover from process environment..."
             os_pid=$(getWLSjvmAttr $wls_server os_pid)
             domain_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^DOMAIN_HOME" | head -1 | cut -d= -f2)
         fi
