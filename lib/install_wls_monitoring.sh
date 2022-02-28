@@ -58,15 +58,15 @@ admin_host_name=$(getWLSjvmAttr ${wls_managed[0]} admin_host_name)
 admin_host_port=$(getWLSjvmAttr ${wls_managed[0]} admin_host_port)
 
 adminURL_suffix=$admin_host_name:$admin_host_port
-admin_Server=${wls_admin[0]}
+admin_server=${wls_admin[0]}
 domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name) 
 
-if [ ! -z "$admin_Server" ]; then
+if [ ! -z "$admin_server" ]; then
     cat ~/umc/lib/wls-probe.yaml | 
     sed "s/soa_domain/$domain_name/" |
     sed "s/admin: oracle/admin: $os_user/" | 
     sed "s/url: t3:\/\/localhost:7001/url: t3:\/\/$adminURL_suffix/" |
-    sed "s/admin_server: AdminServer/admin_server: $admin_Server/" > ~/.umc/wls-probe.yaml
+    sed "s/admin_server: AdminServer/admin_server: $admin_server/" > ~/.umc/wls-probe.yaml
 else
   rm -rf ~/.umc/wls-probe.yaml
 fi
@@ -89,18 +89,18 @@ export DOMAIN_HOME=$domain_home
 EOF
 
 # Test WLS connectivity
-if [ -z "$admin_Server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
+if [ -z "$admin_server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
     echo "Admin server not found. Test skipped."
 else
     url="t3://$adminURL_suffix" 
     source ~/umc/bin/umc.h
-    umc wls collect 1 2 --subsystem=datasource --url=$url --server=$admin_Server
+    umc wls collect 1 2 --subsystem=datasource --url=$url --server=$admin_server
 fi
 
 
 # start OS collector
 
-if [ -z "$admin_Server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
+if [ -z "$admin_server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
         echo "Admin server not found. Service start skipped. Stoping service as sanity step."
     $HOME/umc/lib/wls-service.sh wls-probe.yaml stop
 else
@@ -111,7 +111,7 @@ fi
 cron_section_start="# START umc - $domain_name DMS"
 cron_section_stop="# STOP umc - $domain_name DMS"
 
-if [ -z "$admin_Server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
+if [ -z "$admin_server" ] || [ -z $mw_home ] || [ -z $wls_home ] || [ -z $domain_home ]; then
     echo "Admin server, MW home, WLS home, or Domain home not found - delete DMS section from cron"
     (crontab -l 2>/dev/null | 
     sed "/$cron_section_start/,/$cron_section_stop/d") | crontab -
