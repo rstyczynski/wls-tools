@@ -169,25 +169,38 @@ if [ -z "$DOMAIN_OWNER" ]; then
     DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 fi
 
-if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
 
-    #
-    # WebLogic discovery
-    #
-    echo -n "WLS discovery..."
-    source $script_dir/discover_processes.sh 
-    discoverWLS
+if [ -z "$DOMAIN_TYPE" ]; then
+    DOMAIN_TYPE=$(getcfg $config_id DOMAIN_TYPE 2>/dev/null)
+fi
 
-    DOMAIN_TYPE=Weblogic
 
-    DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
-    : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
-    DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
-    : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
 
-    # Weblogic not found try OHS
+case $DOMAIN_TYPE in
+wls)
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+
+        #
+        # WebLogic discovery
+        #
+        echo -n "WLS discovery..."
+        source $script_dir/discover_processes.sh 
+        discoverWLS
+
+        DOMAIN_TYPE=Weblogic
+
+        DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+        : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
+        DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
+        : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
+    fi
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo "WebLogic processes not found."
+    fi
+    ;;
+ohs)
+    # Weblogic not found try OHS
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo -n "OHS discovery..."
 
         NM_OHS=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)
@@ -197,36 +210,41 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         DOMAIN_HOME=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)
         NM_PID=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)
     fi
-
-    # Weblogic nor OHS not found. Ask operator for data.
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
-e       echo "OHS processes not found."
-        #
-        # Weblogic manual parametrisation
-        #
-
-        # ask for username and test
-        test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
-
-        DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami)' | tail -1)
-        test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
-
-        # get domain home from users's env, ask for, and test
-        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
-        
-        test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
-
-        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
-        test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
-
+        echo "OHS processes not found."
     fi
+    ;;
+esac
 
-    if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ]; then
-        setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-        setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
-        setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
-    fi
+# Weblogic nor OHS not found. Ask operator for data.
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    echo "Running processes processes not found. Manual configuration required."
+    #
+    # Weblogic manual parametrisation
+    #
+
+    # ask for username and test
+    test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
+
+    DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami)' | tail -1)
+    test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
+
+    # get domain home from users's env, ask for, and test
+    test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
+    
+    test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
+
+    DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+
 fi
+
+if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ]; then
+    setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+    setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
+    setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+fi
+
 
 export DOMAIN_OWNER
 export DOMAIN_TYPE
