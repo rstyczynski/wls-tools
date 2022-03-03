@@ -298,6 +298,7 @@ EOF
         stop_priority=60
         ;;
     esac
+    ;;
 ohs)
     cat <<EOF
 Running for OHS:
@@ -321,6 +322,7 @@ EOF
         stop_priority=60
         ;;
     esac
+    ;;
 esac
 
 
