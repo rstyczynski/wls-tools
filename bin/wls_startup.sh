@@ -272,12 +272,12 @@ ohs)
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo -n "OHS discovery..."
 
-        NM_OHS=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)
+        NM_OHS=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)
         test ! -z "$NM_OHS" && DOMAIN_TYPE=OHS
 
-        DOMAIN_OWNER=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)
-        DOMAIN_HOME=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)
-        NM_PID=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)
+        DOMAIN_OWNER=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)
+        DOMAIN_HOME=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)
+        NM_PID=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)
     fi
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo "OHS processes not found."
@@ -295,16 +295,27 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
     # ask for username and test
     test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
 
-    DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami)' | tail -1)
-    test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
+    if [ $(woami) != $DOMAIN_OWNER ]; then
+        DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami) | tail -1')
+        test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
+    fi
 
     # get domain home from users's env, ask for, and test
-    test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
-    
+    if [ $(woami) != $DOMAIN_OWNER ]; then
+        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
+    else
+        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME | tail -1)
+    fi
+
     test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
-    DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
-    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+    if [ $(woami) != $DOMAIN_OWNER ]; then
+        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+        test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+    else
+        DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
+        test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+    fi
 
 fi
 
@@ -320,8 +331,13 @@ export DOMAIN_TYPE
 export DOMAIN_HOME
 
 # final test of DOMAIN_HOME 
-DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
-test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+if [ $(woami) != $DOMAIN_OWNER ]; then
+    DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+else
+    DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
+    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+fi
 
 if [ -z "$DOMAIN_HOME" ]; then
     echo "DOMAIN_HOME not set or wrong. Exiting."
