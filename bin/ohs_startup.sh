@@ -240,6 +240,16 @@ export DOMAIN_OWNER
 export DOMAIN_HOME
 export OHS_INSTANCE
 
+if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ] && [ ! -z "$OHS_INSTANCE" ]; then
+    echo "OHS parameters are no valid:"
+    echo "- OHS instance: $OHS_INSTANCE"
+    echo "- OHS owner: $DOMAIN_OWNER"
+    echo "- Domain home: $DOMAIN_HOME"
+    echo 
+    echo  "Exiting."
+    exit 1
+fi
+
 # final test of DOMAIN_HOME 
 DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/config/fmwconfig/components/OHS/instances/$OHS_INSTANCE")
 if [ -z "$DOMAIN_HOME_TEST" ]; then
