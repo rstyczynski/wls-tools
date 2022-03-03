@@ -27,9 +27,11 @@ function status() {
         status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep weblogic.NodeManager")
         if [ -z "$status" ]; then
             echo "Node manager not running."
+            echo
         else
             echo "Node manager process:"
             sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep weblogic.NodeManager"
+            echo
         fi
         echo "Node manager properties:"
         sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
@@ -40,18 +42,22 @@ function status() {
             status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic")
             if [ -z "$status" ]; then
             echo "Weblogic not running."
+            echo 
             else
                 echo "Weblogic process:"
                 sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic"
+                echo 
             fi
             ;;
         ohs)
             status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep httpd")
             if [ -z "$status" ]; then
             echo "OHS not running."
+            echo 
             else
                 echo "OHS process:"
                 sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep httpd"
+                echo
             fi
             ;;
         esac
