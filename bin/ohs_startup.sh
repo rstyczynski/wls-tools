@@ -41,7 +41,7 @@ function register_initd() {
 #!/bin/bash
 #
 # chkconfig:   12345 01 99
-# description: WebLogic startup service for $ohs_component
+# description: OHA startup service for $ohs_component
 #
 
 sudo su - $DOMAIN_OWNER /etc/init.d/$ohs_component \$1
@@ -73,7 +73,7 @@ function register_systemd() {
 
     cat >/tmp/$ohs_component <<EOF
 [Unit]
-Description=WebLogic start script - $ohs_component
+Description=OHS start script - $ohs_component
 
 [Service]
 Type=simple
@@ -258,9 +258,9 @@ fi
 
 cat <<EOF
 Running for OHS:
-echo "- OHS instance: $OHS_INSTANCE"
-echo "- OHS owner:    $DOMAIN_OWNER"
-echo "- Domain home:  $DOMAIN_HOME"
+- OHS instance: $OHS_INSTANCE
+- OHS owner:    $DOMAIN_OWNER
+- Domain home:  $DOMAIN_HOME
 
 EOF
 
