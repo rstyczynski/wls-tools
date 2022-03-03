@@ -24,17 +24,35 @@ function stop() {
 function status() {
     case $WLS_INSTANCE in
     nodemanager)
-        sudo su - $DOMAIN_OWNER -c "ps ux | grep java | grep weblogic.NodeManager"
-        echo
+        status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep weblogic.NodeManager")
+        if [ -z "$status" ]; then
+            echo "Node manager not running."
+        else
+            echo "Node manager process:"
+            sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep weblogic.NodeManager"
+        fi
+        echo "Node manager properties:"
         sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
         ;;
     *)
         case $DOMAIN_TYPE in
         wls)
-            sudo su - $DOMAIN_OWNER -c "ps ux | grep java | grep -v  weblogic.NodeManager | grep weblogic"
+            status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic")
+            if [ -z "$status" ]; then
+            echo "Weblogic not running."
+            else
+                echo "Weblogic process:"
+                sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic"
+            fi
             ;;
         ohs)
-            sudo su - $DOMAIN_OWNER -c "ps ux | grep httpd"
+            status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep httpd")
+            if [ -z "$status" ]; then
+            echo "OHS not running."
+            else
+                echo "OHS process:"
+                sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep httpd"
+            fi
             ;;
         esac
         ;;
@@ -188,8 +206,6 @@ if [ -z "$DOMAIN_TYPE" ]; then
     DOMAIN_TYPE=$(getcfg $config_id DOMAIN_TYPE 2>/dev/null)
 fi
 
-
-
 case $DOMAIN_TYPE in
 wls)
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
@@ -295,6 +311,7 @@ Running for WebLogic:
 1. DOMAIN_HOME:  $DOMAIN_HOME
 2. DOMAIN_OWNER: $DOMAIN_OWNER
 3. INSTANCE:     $WLS_INSTANCE
+
 EOF
     case $WLS_INSTANCE in
     nodemanager)
@@ -319,6 +336,7 @@ Running for OHS:
 1. DOMAIN_HOME:  $DOMAIN_HOME
 2. DOMAIN_OWNER: $DOMAIN_OWNER
 3. INSTANCE:     $WLS_INSTANCE
+
 EOF
     case $WLS_INSTANCE in
     nodemanager)
