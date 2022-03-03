@@ -2,9 +2,6 @@
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-wls_component=$(basename "$0" | cut -d. -f1)
-
-max_int=2147483647
 
 function usage() {
     cat <<EOF
@@ -12,76 +9,34 @@ Usage: $script_name svc_def [start|stop|status|restart|register|unregister]
 EOF
 }
 
-case $1 in
-start | stop | status | restart | register | unregister)
-    operation=$1
-    shift
-    
-    wls_component=$1
-    shift
-
-    domain_code=$1
-    shift
-    domain_code=${domain_code:-wls1}
-    ;;
-*)
-    usage
-    exit 1
-    ;;
-esac
-
-os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
-if [ $os_release -eq 6 ]; then
-    source /etc/init.d/functions
-fi
-
-
-function y2j() {
-    python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
-}
-
 #
 # custom
 #
 
-
-
 function start() {
-    #TODO
-
-    case $wls_component in
-    wls_nodemanager)
-        $DOMAIN_HOME/bin/startNodeManager.sh >> $DOMAIN_HOME/servers/$wls_component.out
-        ;;
-    wls_adminserver)
-        $DOMAIN_HOME/bin/startWebLogic.sh >> $DOMAIN_HOME/servers/$wls_component.out
-        ;;
-    esac
-
+    $start_service >> $DOMAIN_HOME/servers/$wls_component.out
 }
 
 function stop() {
-
-    case $wls_component in
-    wls_nodemanager)
-        $DOMAIN_HOME/bin/stopNodeManager.sh >> $DOMAIN_HOME/servers/$wls_component.out
-        ;;
-    wls_adminserver)
-        $DOMAIN_HOME/bin/stopWebLogic.sh >> $DOMAIN_HOME/servers/$wls_component.out
-        ;;
-    esac
+    $stop_service >> $DOMAIN_HOME/servers/$wls_component.out
 }
 
 function status() {
     echo "not implemented"
 }
 
+#
+# init.d functions
+#
 
 function register_initd() {
+
+
+
     cat >/tmp/$wls_component <<EOF
 #!/bin/bash
 #
-# chkconfig:   12345 01 99
+# chkconfig:   2345 $start_priority $stop_priority
 # description: WebLogic startup service for $wls_component
 #
 
@@ -109,6 +64,10 @@ function unregister_initd() {
 
     echo "Service unregistered."
 }
+
+#
+# systemd functions
+# 
 
 function register_systemd() {
 
@@ -163,37 +122,91 @@ function unregister_systemd() {
 }
 
 #
+# main logic
+#
+
+case $1 in
+start | stop | status | restart | register | unregister)
+    operation=$1
+    shift
+
+    # wls_nodemanager
+    # wls_adminserver
+    # wls_managedserver1
+    # ohs_nodemanager
+    # ohs_ohs1
+    wls_component=$1
+    shift
+
+    DOMAIN_TYPE=$(echo $wls_component | cut -d_ -f1 | tr [A-Z] [a-z])
+    WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2 | tr [A-Z] [a-z])
+
+    config_id=$1
+    shift
+    config_id=${config_id:-wls1}
+
+    ;;
+*)
+    usage
+    exit 1
+    ;;
+esac
+
+os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
+if [ $os_release -eq 6 ]; then
+    source /etc/init.d/functions
+fi
+
+#
 # get / set domain home
 #
 source $script_dir/config.sh 
 if [ -z "$DOMAIN_HOME" ]; then
-    DOMAIN_HOME=$(getcfg $domain_code DOMAIN_HOME 2>/dev/null)
+    DOMAIN_HOME=$(getcfg $config_id DOMAIN_HOME 2>/dev/null)
 fi
 
 if [ -z "$DOMAIN_OWNER" ]; then
-    DOMAIN_OWNER=$(getcfg $domain_code DOMAIN_OWNER 2>/dev/null)
+    DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 fi
 
 if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+
     #
     # WebLogic discovery
     #
     echo -n "WLS discovery..."
     source $script_dir/discover_processes.sh 
     discoverWLS
+
+    DOMAIN_TYPE=Weblogic
+
     DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
     : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
     DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
     : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
-        echo "Running WebLogic processes not found."
 
+    # Weblogic not found try OHS
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+        echo "WebLogic processes not found."
+        echo -n "OHS discovery..."
+
+        NM_OHS=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)
+        test ! -z "$NM_OHS" && DOMAIN_TYPE=OHS
+
+        DOMAIN_OWNER=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)
+        DOMAIN_HOME=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)
+        NM_PID=$(ps aux | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)
+    fi
+
+    # Weblogic nor OHS not found. Ask operator for data.
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+e       echo "OHS processes not found."
         #
         # Weblogic manual parametrisation
         #
 
         # ask for username and test
-        test -z "$DOMAIN_OWNER" && read -p "Enter WebLogic domain owner name:" DOMAIN_OWNER
+        test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
 
         DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami)' | tail -1)
         test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
@@ -201,24 +214,26 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         # get domain home from users's env, ask for, and test
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c 'echo $DOMAIN_HOME' | tail -1)
         
-        test -z "$DOMAIN_HOME" && read -p "Enter WebLogic domain home directory:" DOMAIN_HOME
+        test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
-        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo \$(ls $DOMAIN_HOME/bin/startNodeManager.sh)")
+        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
 
     fi
 
     if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ]; then
-        setcfg $domain_code DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-        setcfg $domain_code DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+        setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+        setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
+        setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
     fi
 fi
 
 export DOMAIN_OWNER
+export DOMAIN_TYPE
 export DOMAIN_HOME
 
 # final test of DOMAIN_HOME 
-DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "echo \$(ls $DOMAIN_HOME/bin/startNodeManager.sh)")
+DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
 test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
 
 if [ -z "$DOMAIN_HOME" ]; then
@@ -231,16 +246,65 @@ if [ -z "$DOMAIN_OWNER" ]; then
     exit 1
 fi
 
+if [ -z "$DOMAIN_TYPE" ]; then
+    echo "DOMAIN_TYPE not set or wrong. Exiting."
+    exit 1
+fi
+
 #
 # run
 #
 
-cat <<EOF
-Running for WebLogic:
-1. DOMAIN_HOME: $DOMAIN_HOME
-2. DOMAIN_OWNER: $DOMAIN_OWNER
 
+case $DOMAIN_TYPE in
+wls)
+    cat <<EOF
+Running for WebLogic:
+1. DOMAIN_HOME:  $DOMAIN_HOME
+2. DOMAIN_OWNER: $DOMAIN_OWNER
+3. INSTANCE:     $WLS_INSTANCE
 EOF
+    case $WLS_INSTANCE in
+    nodemanager)
+        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
+        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
+
+        start_priority=60
+        stop_priority=90
+        ;;
+    adminserver)
+        start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
+        stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+
+        start_priority=90
+        stop_priority=60
+        ;;
+    esac
+ohs)
+    cat <<EOF
+Running for OHS:
+1. DOMAIN_HOME:  $DOMAIN_HOME
+2. DOMAIN_OWNER: $DOMAIN_OWNER
+3. INSTANCE:     $WLS_INSTANCE
+EOF
+    case $WLS_INSTANCE in
+    nodemanager)
+        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
+        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
+        
+        start_priority=60
+        stop_priority=90
+        ;;
+    *)
+        start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
+        stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
+
+        start_priority=90
+        stop_priority=60
+        ;;
+    esac
+esac
+
 
 case $operation in
 start)
@@ -258,18 +322,6 @@ restart)
     start
     ;;
 register)
-
-    case $wls_component in
-    wls_nodemanager)
-        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
-        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
-        ;;
-    wls_adminserver)
-        start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
-        stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
-        ;;
-    esac
-
     case $os_release in
     6)
         register_initd

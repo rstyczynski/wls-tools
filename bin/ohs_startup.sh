@@ -134,7 +134,8 @@ start | stop | status | restart | register | unregister)
     operation=$1
     shift
     
-    wls_component=ohs
+    wls_component=$1 
+    shift
 
     ohs_identifier=$1
     shift
