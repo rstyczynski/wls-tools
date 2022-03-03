@@ -16,10 +16,12 @@ EOF
 function start() {
     case $WLS_INSTANCE in
     nodemanager)
+        echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
         sudo su - $DOMAIN_OWNER -c "$start_service &"
         echo "Started in background."   
         ;;
     *)
+        echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
         sudo su - $DOMAIN_OWNER -c "$start_service"
         echo Started.    
         ;;
@@ -27,6 +29,7 @@ function start() {
 }
 
 function stop() {
+    echo "Executing: sudo su - $DOMAIN_OWNER -c \"$stop_service\""
     sudo su - $DOMAIN_OWNER -c "$stop_service"
 }
 
