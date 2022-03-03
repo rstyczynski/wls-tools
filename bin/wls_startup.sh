@@ -22,7 +22,23 @@ function stop() {
 }
 
 function status() {
-    echo "not implemented"
+    case $WLS_INSTANCE in
+    nodemanager)
+        sudo su - $DOMAIN_OWNER -c "ps ux | grep java | grep weblogic.NodeManager"
+        echo
+        sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
+        ;;
+    *)
+        case $DOMAIN_TYPE in
+        wls)
+            sudo su - $DOMAIN_OWNER -c "ps ux | grep java | grep -v  weblogic.NodeManager | grep weblogic"
+            ;;
+        ohs)
+            sudo su - $DOMAIN_OWNER -c "ps ux | grep httpd"
+            ;;
+        esac
+        ;;
+    esac
 }
 
 #
@@ -30,8 +46,6 @@ function status() {
 #
 
 function register_initd() {
-
-
 
     cat >/tmp/$wls_component <<EOF
 #!/bin/bash
