@@ -13,7 +13,7 @@ EOF
 
 function start() {
 
-    case $ohs_component in
+    case $wls_component in
     ohs)
         $DOMAIN_HOME/bin/startComponent.sh $OHS_INSTANCE >> $DOMAIN_HOME/config/fmwconfig/components/OHS/instances/$OHS_INSTANCE/$ohs_component.out
         ;;
@@ -24,7 +24,7 @@ function start() {
 
 function stop() {
 
-    case $ohs_component in
+    case $wls_component in
     ohs)
         $DOMAIN_HOME/bin/stopComponent.sh $OHS_INSTANCE >> $DOMAIN_HOME/config/fmwconfig/components/OHS/instances/$OHS_INSTANCE/$ohs_component.out
         ;;
@@ -134,6 +134,8 @@ start | stop | status | restart | register | unregister)
     operation=$1
     shift
     
+    wls_component=ohs
+
     ohs_identifier=$1
     shift
     ohs_identifier=${ohs_identifier:-ohs1}
@@ -147,7 +149,7 @@ start | stop | status | restart | register | unregister)
     DOMAIN_OWNER=$1
     shift
 
-    ohs_component=ohs_$ohs_identifier
+    ohs_component=$wls_component\_$ohs_identifier
     ;;
 *)
     usage
@@ -279,7 +281,7 @@ restart)
     ;;
 register)
 
-    case $ohs_component in
+    case $wls_component in
     ohs)
         start_service="$DOMAIN_HOME/bin/startComponent.sh $OHS_INSTANCE"
         stop_service="$DOMAIN_HOME/bin/stopComponent.sh $OHS_INSTANCE"
