@@ -247,26 +247,31 @@ function discoverWLSroles() {
             os_pid=$(getWLSjvmAttr $wls_server os_pid)
             domain_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^DOMAIN_HOME" | head -1 | cut -d= -f2)
         fi
-        if [ -d "$domain_home" ]; then
+
+        # do not do this. does not work w/o access to to this directory, what is true when you are not mw wner user
+        # if [ -d "$domain_home" ]; then
             echo "Domain home: $domain_home"
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=$(basename $domain_home)
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=$domain_home
             wls_attributes[$wls_server$delim\domain_home]=$domain_home
             wls_attributes[$wls_server$delim\domain_name]=$(basename $domain_home)
-        else
-            echo "Domain home: unknown"
-            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=unknown
-            wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=unknown
-            wls_attributes[$wls_server$delim\domain_home]=unknown
-            wls_attributes[$wls_server$delim\domain_name]=unknown
-        fi
+        # else
+        #     echo "Domain home: unknown"
+        #     wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_name]=unknown
+        #     wls_attributes_groups[$wls_server$delim$attrGroup$delim\domain_home]=unknown
+        #     wls_attributes[$wls_server$delim\domain_home]=unknown
+        #     wls_attributes[$wls_server$delim\domain_name]=unknown
+        # fi
+
         wls_home=$(getWLSjvmAttr $wls_server -Dweblogic.home)
         if [ -z "$wls_home" ]; then
             echo -"Notice. WebLogic home not found in expected location. Trying to discover from process environment..."
             os_pid=$(getWLSjvmAttr $wls_server os_pid)
             wls_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^WLS_HOME" | head -1 | cut -d= -f2)
         fi
-        if [ -d "$wls_home" ]; then
+
+        # do not do this. does not work w/o access to to this directory, what is true when you are not mw wner user
+        # if [ -d "$wls_home" ]; then
             echo "WebLogic home: $wls_home"
             echo "Middleware home: $(echo $wls_home | sed 's|/wlserver/server$||')"
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=$(echo $wls_home | sed 's|/wlserver/server$||')
@@ -274,12 +279,12 @@ function discoverWLSroles() {
 
             wls_attributes_groups[$wls_server$delim$attrGroup$delim\wls_home]=$wls_home
             wls_attributes[$wls_server$delim\wls_home]=$wls_home
-        else
-            echo "WebLogic home: unknown"
-            echo "Middleware home: unknown"
-            wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=unknown
-            wls_attributes[$wls_server$delim\mw_home]=unknown
-        fi
+        # else
+        #     echo "WebLogic home: unknown"
+        #     echo "Middleware home: unknown"
+        #     wls_attributes_groups[$wls_server$delim$attrGroup$delim\mw_home]=unknown
+        #     wls_attributes[$wls_server$delim\mw_home]=unknown
+        # fi
         echo "================================"
     done
 }

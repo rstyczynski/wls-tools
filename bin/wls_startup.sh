@@ -33,7 +33,7 @@ function start() {
             echo "Executing: $start_service"
             $start_service
         fi
-        echo Started.    
+        echo "Start requested."  
         ;;
     esac
 }
@@ -46,7 +46,7 @@ function stop() {
         echo "Executing: $stop_service"
         $stop_service
     fi
-    echo "Stopped."
+    echo "Stop requested."
 }
 
 function status() {
@@ -142,6 +142,7 @@ function unregister_initd() {
 
 function register_systemd() {
 
+    if [ xxx == 'nodemanager' ]; then
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
@@ -163,6 +164,29 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
+else
+    cat >/tmp/$wls_component <<EOF
+[Unit]
+Description=WebLogic start script - $wls_component
+
+[Service]
+Type=simple
+
+User=$DOMAIN_OWNER
+TimeoutStartSec=600
+
+ExecStart=$start_service
+ExecStop=$stop_service
+
+LimitNOFILE=65535
+RemainAfterExit=no
+KillMode=process
+Restart=always
+  
+[Install]
+WantedBy=multi-user.target
+EOF
+fi
 
     sudo mv /tmp/$wls_component /etc/systemd/system/$wls_component.service
     sudo systemctl daemon-reload
@@ -211,6 +235,10 @@ start | stop | status | restart | register | unregister)
 
     DOMAIN_TYPE=$(echo $wls_component | cut -d_ -f1 | tr [A-Z] [a-z])
     WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2 | tr [A-Z] [a-z])
+
+    if [ $WLS_INSTANCE == nodemanager ]; then
+        wls_component=fmw_nodemanager
+    fi
 
     config_id=$1
     shift
@@ -358,58 +386,49 @@ fi
 # run
 #
 
+case $WLS_INSTANCE in
+nodemanager)
+    start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
+    stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
 
-case $DOMAIN_TYPE in
-wls)
-    cat <<EOF
-Running for WebLogic:
-1. DOMAIN_HOME:  $DOMAIN_HOME
-2. DOMAIN_OWNER: $DOMAIN_OWNER
-3. INSTANCE:     $WLS_INSTANCE
+    start_priority=60
+    stop_priority=90
+    ;;
+*)
+    case $DOMAIN_TYPE in
+    wls)
+        cat <<EOF
+    Running for WebLogic:
+    1. DOMAIN_HOME:  $DOMAIN_HOME
+    2. DOMAIN_OWNER: $DOMAIN_OWNER
+    3. INSTANCE:     $WLS_INSTANCE
 
 EOF
-    case $WLS_INSTANCE in
-    nodemanager)
-        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
-        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
+        case $WLS_INSTANCE in
+        adminserver)
+            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
+            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
-        start_priority=60
-        stop_priority=90
+            start_priority=90
+            stop_priority=60
+            ;;
+        esac
         ;;
-    adminserver)
-        start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
-        stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
-
-        start_priority=90
-        stop_priority=60
-        ;;
-    esac
-    ;;
-ohs)
-    cat <<EOF
-Running for OHS:
-1. DOMAIN_HOME:  $DOMAIN_HOME
-2. DOMAIN_OWNER: $DOMAIN_OWNER
-3. INSTANCE:     $WLS_INSTANCE
+    ohs)
+        cat <<EOF
+    Running for OHS:
+    1. DOMAIN_HOME:  $DOMAIN_HOME
+    2. DOMAIN_OWNER: $DOMAIN_OWNER
+    3. INSTANCE:     $WLS_INSTANCE
 
 EOF
-    case $WLS_INSTANCE in
-    nodemanager)
-        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
-        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
-        
-        start_priority=60
-        stop_priority=90
-        ;;
-    *)
-        start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
-        stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
+    start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
+    stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
 
-        start_priority=90
-        stop_priority=60
-        ;;
-    esac
+    start_priority=90
+    stop_priority=60
     ;;
+    esac
 esac
 
 
