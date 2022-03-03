@@ -241,7 +241,7 @@ export DOMAIN_HOME
 export OHS_INSTANCE
 
 if [ -z "$DOMAIN_OWNER" ] || [ -z "$DOMAIN_HOME" ] || [ -z "$OHS_INSTANCE" ]; then
-    echo "OHS parameters are no valid:"
+    echo "OHS parameters are not valid:"
     echo "- OHS instance: $OHS_INSTANCE"
     echo "- OHS owner: $DOMAIN_OWNER"
     echo "- Domain home: $DOMAIN_HOME"
