@@ -16,7 +16,7 @@ EOF
 function start() {
     case $WLS_INSTANCE in
     nodemanager)
-        if [ $(woami) != $DOMAIN_OWNER ]; then
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
             sudo su - $DOMAIN_OWNER -c "$start_service &"
         else
@@ -26,7 +26,7 @@ function start() {
         echo "Started in background."   
         ;;
     *)
-        if [ $(woami) != $DOMAIN_OWNER ]; then
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
             sudo su - $DOMAIN_OWNER -c "$start_service"
         else
@@ -39,7 +39,7 @@ function start() {
 }
 
 function stop() {
-    if [ $(woami) != $DOMAIN_OWNER ]; then
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
         echo "Executing: sudo su - $DOMAIN_OWNER -c \"$stop_service\""
         sudo su - $DOMAIN_OWNER -c "$stop_service"
     else
@@ -62,7 +62,7 @@ function status() {
             echo
         fi
         echo "Node manager properties:"
-        if [ $(woami) != $DOMAIN_OWNER ]; then
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
             sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
         else
             cat $DOMAIN_HOME/nodemanager/nodemanager.properties
@@ -295,13 +295,13 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
     # ask for username and test
     test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
 
-    if [ $(woami) != $DOMAIN_OWNER ]; then
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
         DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami) | tail -1')
         test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
     fi
 
     # get domain home from users's env, ask for, and test
-    if [ $(woami) != $DOMAIN_OWNER ]; then
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
     else
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME | tail -1)
@@ -309,7 +309,7 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
 
     test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
-    if [ $(woami) != $DOMAIN_OWNER ]; then
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
         DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     else
@@ -331,7 +331,7 @@ export DOMAIN_TYPE
 export DOMAIN_HOME
 
 # final test of DOMAIN_HOME 
-if [ $(woami) != $DOMAIN_OWNER ]; then
+if [ $(whoami) != $DOMAIN_OWNER ]; then
     DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
     test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
 else
