@@ -16,59 +16,80 @@ EOF
 function start() {
     case $WLS_INSTANCE in
     nodemanager)
-        echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
-        sudo su - $DOMAIN_OWNER -c "$start_service &"
+        if [ $(woami) != $DOMAIN_OWNER ]; then
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
+            sudo su - $DOMAIN_OWNER -c "$start_service &"
+        else
+            echo "Executing: \"$start_service &\""
+            $start_service &
+        fi
         echo "Started in background."   
         ;;
     *)
-        echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
-        sudo su - $DOMAIN_OWNER -c "$start_service"
+        if [ $(woami) != $DOMAIN_OWNER ]; then
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
+            sudo su - $DOMAIN_OWNER -c "$start_service"
+        else
+            echo "Executing: $start_service"
+            $start_service
+        fi
         echo Started.    
         ;;
     esac
 }
 
 function stop() {
-    echo "Executing: sudo su - $DOMAIN_OWNER -c \"$stop_service\""
-    sudo su - $DOMAIN_OWNER -c "$stop_service"
+    if [ $(woami) != $DOMAIN_OWNER ]; then
+        echo "Executing: sudo su - $DOMAIN_OWNER -c \"$stop_service\""
+        sudo su - $DOMAIN_OWNER -c "$stop_service"
+    else
+        echo "Executing: $stop_service"
+        $stop_service
+    fi
+    echo "Stopped."
 }
 
 function status() {
     case $WLS_INSTANCE in
     nodemanager)
-        status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep weblogic.NodeManager")
+        status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
         if [ -z "$status" ]; then
             echo "Node manager not running."
             echo
         else
             echo "Node manager process:"
-            sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep weblogic.NodeManager"
+            ps aux  | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager
             echo
         fi
         echo "Node manager properties:"
-        sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
+        if [ $(woami) != $DOMAIN_OWNER ]; then
+            sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
+        else
+            cat $DOMAIN_HOME/nodemanager/nodemanager.properties
+        fi
+
         ;;
     *)
         case $DOMAIN_TYPE in
         wls)
-            status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic")
+            status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic)
             if [ -z "$status" ]; then
             echo "Weblogic not running."
             echo 
             else
                 echo "Weblogic process:"
-                sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic"
+                ps aux | grep "^$DOMAIN_OWNER"  | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic
                 echo 
             fi
             ;;
         ohs)
-            status=$(sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep httpd")
+            status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
             if [ -z "$status" ]; then
             echo "OHS not running."
             echo 
             else
                 echo "OHS process:"
-                sudo su - $DOMAIN_OWNER -c "ps ux | grep -v grep | grep httpd"
+                ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd
                 echo
             fi
             ;;
