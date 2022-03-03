@@ -37,7 +37,7 @@ function status() {
 
 
 function register_initd() {
-    cat >/tmp/$ohs_component\_$ohs_identifier <<EOF
+    cat >/tmp/$ohs_component <<EOF
 #!/bin/bash
 #
 # chkconfig:   12345 01 99
@@ -47,31 +47,31 @@ function register_initd() {
 sudo su - $DOMAIN_OWNER /etc/init.d/$ohs_component \$1
 EOF
 
-    chmod +x /tmp/$ohs_component\_$ohs_identifier
-    sudo mv /tmp/$ohs_component\_$ohs_identifier /etc/init.d/$ohs_component\_$ohs_identifier
+    chmod +x /tmp/$ohs_component
+    sudo mv /tmp/$ohs_component /etc/init.d/$ohs_component
 
-    sudo chkconfig --add $ohs_component\_$ohs_identifier
+    sudo chkconfig --add $ohs_component
 
     echo echo "Service registered. Start the service:"
     cat <<EOF
-sudo service $ohs_component\_$ohs_identifier start
-sudo service $ohs_component\_$ohs_identifier status
-sudo service $ohs_component\_$ohs_identifier stop
+sudo service $ohs_component start
+sudo service $ohs_component status
+sudo service $ohs_component stop
 EOF
 }
 
 function unregister_initd() {
 
     stop
-    sudo chkconfig --del $ohs_component\_$ohs_identifier
-    sudo rm -f /etc/init.d/$ohs_component\_$ohs_identifier
+    sudo chkconfig --del $ohs_component
+    sudo rm -f /etc/init.d/$ohs_component
 
     echo "Service unregistered."
 }
 
 function register_systemd() {
 
-    cat >/tmp/$ohs_component\_$ohs_identifier <<EOF
+    cat >/tmp/$ohs_component <<EOF
 [Unit]
 Description=WebLogic start script - $ohs_component
 
@@ -93,9 +93,9 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /tmp/$ohs_component\_$ohs_identifier /etc/systemd/system/$ohs_component\_$ohs_identifier.service
+    sudo mv /tmp/$ohs_component /etc/systemd/system/$ohs_component.service
     sudo systemctl daemon-reload
-    sudo systemctl enable $ohs_component\_$ohs_identifier.service
+    sudo systemctl enable $ohs_component.service
 
     echo "Service registered. Start and manage the service:"
     cat <<EOF
@@ -113,8 +113,8 @@ EOF
 function unregister_systemd() {
 
     stop
-    sudo systemctl disable $ohs_component\_$ohs_identifier.service
-    sudo rm -f /etc/systemd/system/$ohs_component\_$ohs_identifier.service
+    sudo systemctl disable $ohs_component.service
+    sudo rm -f /etc/systemd/system/$ohs_component.service
 
     sudo systemctl daemon-reload
 
