@@ -16,18 +16,18 @@ EOF
 function start() {
     case $WLS_INSTANCE in
     nodemanager)
-        sudo su - $DOMAIN_OWNER -c "$start_service >> $DOMAIN_HOME/servers/$wls_component.out &"
+        sudo su - $DOMAIN_OWNER -c "$start_service &"
         echo "Started in background."   
         ;;
     *)
-        sudo su - $DOMAIN_OWNER -c "$start_service >> $DOMAIN_HOME/servers/$wls_component.out"
+        sudo su - $DOMAIN_OWNER -c "$start_service"
         echo Started.    
         ;;
     esac
 }
 
 function stop() {
-    sudo su - $DOMAIN_OWNER -c "$stop_service >> $DOMAIN_HOME/servers/$wls_component.out"
+    sudo su - $DOMAIN_OWNER -c "$stop_service"
 }
 
 function status() {
