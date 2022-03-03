@@ -14,11 +14,11 @@ EOF
 #
 
 function start() {
-    $start_service >> $DOMAIN_HOME/servers/$wls_component.out
+    sudo su - $DOMAIN_OWNER -c "$start_service >> $DOMAIN_HOME/servers/$wls_component.out"
 }
 
 function stop() {
-    $stop_service >> $DOMAIN_HOME/servers/$wls_component.out
+    sudo su - $DOMAIN_OWNER -c "$stop_service >> $DOMAIN_HOME/servers/$wls_component.out"
 }
 
 function status() {
