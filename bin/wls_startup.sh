@@ -297,8 +297,13 @@ wls)
 
         ADMIN_URL=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.management.server)
         ADMIN_T3=$(echo $ADMIN_URL | tr [A-Z] [a-z] | sed s/http/t3/)
-
     fi
+
+    echo $DOMAIN_HOME
+    echo $DOMAIN_OWNER
+    echo $ADMIN_T3
+    echo $WLS_HOME
+
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]; then
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
         echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
