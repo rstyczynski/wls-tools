@@ -224,6 +224,11 @@ function unregister_systemd() {
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 script_name=$(basename "${BASH_SOURCE[0]}")
 
+echo xxxxxx
+set
+whoami
+echo xxxxxx
+
 # wls_nodemanager
 # wls_adminserver
 # wls_soa_server1
