@@ -214,7 +214,7 @@ function unregister_systemd() {
 }
 
 #
-# main logic
+# main logic 
 #
 
 # use cd to eliminate potentially relative path. we need the absolute one.
