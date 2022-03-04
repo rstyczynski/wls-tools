@@ -265,10 +265,6 @@ if [ -z "$DOMAIN_OWNER" ]; then
     DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 fi
 
-if [ -z "$DOMAIN_TYPE" ]; then
-    DOMAIN_TYPE=$(getcfg $config_id DOMAIN_TYPE 2>/dev/null)
-fi
-
 if [ -z "$ADMIN_T3" ]; then
     ADMIN_T3=$(getcfg $config_id ADMIN_T3 2>/dev/null)
 fi
@@ -350,13 +346,6 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     fi
 
-    # ask for domain type
-    test -z "$DOMAIN_TYPE" && read -p "Enter domain type (wls/ohs):" DOMAIN_TYPE
-    DOMAIN_TYPE=$(echo $DOMAIN_TYPE  tr [A-Z] [a-z])
-    if [ "$DOMAIN_TYPE" != ohs ] || [ "$DOMAIN_TYPE" != wls ]; then
-        unset DOMAIN_TYPE
-    fi
-
     # ask for adin url
     test -z "$ADMIN_T3" && read -p "Enter Weblogic AdminServer URL. Skip for OHS only domain:" ADMIN_T3
 
@@ -364,7 +353,6 @@ fi
 
 # save provided data to configuration
 test ! -z "$DOMAIN_OWNER" && setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-test ! -z "$DOMAIN_TYPE" && setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
 test ! -z "$DOMAIN_HOME" && setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
 test ! -z "$ADMIN_T3" && setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
 
@@ -392,10 +380,15 @@ if [ -z "$DOMAIN_OWNER" ]; then
     exit 1
 fi
 
-if [ -z "$DOMAIN_TYPE" ]; then
+DOMAIN_TYPE=$(echo $DOMAIN_TYPE  tr [A-Z] [a-z])
+case $DOMAIN_TYPE in 
+ohs | wls)
+    ;;
+*)
     echo "DOMAIN_TYPE not set or wrong. Exiting."
     exit 1
-fi
+    ;;
+esac
 
 if [ -z "$ADMIN_T3" ]; then
     echo "ADMIN_T3 not set or wrong. Exiting."
@@ -422,6 +415,7 @@ nodemanager)
     1. DOMAIN_HOME:  $DOMAIN_HOME
     2. DOMAIN_OWNER: $DOMAIN_OWNER
     3. INSTANCE:     $WLS_INSTANCE
+    3. ADMIN URL:    $ADMIN_T3
 
 EOF
         case $WLS_INSTANCE in
@@ -434,7 +428,7 @@ EOF
             ;;
         *)
             start_service="$script_dir/wls_startServer.sh $DOMAIN_HOME $ADMIN_T3 $WLS_INSTANCE"
-            stop_service=stop_service="$script_dir/wls_shutdownServer.sh $DOMAIN_HOME $ADMIN_T3 $WLS_INSTANCE"
+            stop_service="$script_dir/wls_shutdownServer.sh $DOMAIN_HOME $ADMIN_T3 $WLS_INSTANCE"
 
             start_priority=95
             stop_priority=55
