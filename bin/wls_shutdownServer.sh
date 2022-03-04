@@ -8,7 +8,7 @@ WLS_NAME=$4
 source $DOMAIN_HOME/bin/setDomainEnv.sh 
 cd $DOMAIN_HOME
 
-cat | $WLS_HOME/oracle_common/common/bin/wlst.sh <<EOF_wlst
+cat | $WLS_HOME/../../oracle_common/common/bin/wlst.sh <<EOF_wlst
 connect(url='$ADMIN_URL', adminServerName='AdminServer')
 try:
   shutdown('$WLS_NAME','Server', 'true', 900, 'true')
