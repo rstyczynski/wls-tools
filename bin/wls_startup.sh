@@ -363,10 +363,10 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
 fi
 
 # save provided data to configuration
-test ! -z "$DOMAIN_OWNER" ] && setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-test ! -z "$DOMAIN_TYPE" ] && setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
-test ! -z "$DOMAIN_HOME" ] && setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
-test ! -z "$ADMIN_T3" ] && setcfg $config_id DOMAIN_HOME $ADMIN_T3 force 2>/dev/null
+test ! -z "$DOMAIN_OWNER" && setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+test ! -z "$DOMAIN_TYPE" && setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
+test ! -z "$DOMAIN_HOME" && setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+test ! -z "$ADMIN_T3" && setcfg $config_id DOMAIN_HOME $ADMIN_T3 force 2>/dev/null
 
 export DOMAIN_OWNER
 export DOMAIN_TYPE
