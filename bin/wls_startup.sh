@@ -49,6 +49,13 @@ function stop() {
 function status() {
     case $WLS_INSTANCE in
     nodemanager)
+        echo "Node manager properties:"
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
+            sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
+        else
+            cat $DOMAIN_HOME/nodemanager/nodemanager.properties
+        fi
+        
         status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
         if [ -z "$status" ]; then
             echo "Node manager not running."
@@ -58,24 +65,17 @@ function status() {
             ps aux  | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager
             echo
         fi
-        echo "Node manager properties:"
-        if [ $(whoami) != $DOMAIN_OWNER ]; then
-            sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
-        else
-            cat $DOMAIN_HOME/nodemanager/nodemanager.properties
-        fi
-
         ;;
     *)
         case $DOMAIN_TYPE in
         wls)
-            status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic | grep -i "Dweblogic.Name=$WLS_INSTANCE")
+            status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
             if [ -z "$status" ]; then
             echo "Weblogic not running."
             echo 
             else
                 echo "Weblogic process:"
-                ps aux | grep "^$DOMAIN_OWNER"  | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic | grep -i "Dweblogic.Name=$WLS_INSTANCE"
+                ps aux | grep "^$DOMAIN_OWNER"  | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE"
                 echo 
             fi
             ;;
