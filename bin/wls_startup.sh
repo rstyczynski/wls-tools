@@ -242,7 +242,7 @@ wls_component=$1
 shift
 
 DOMAIN_TYPE=$(echo $wls_component | cut -d_ -f1 | tr [A-Z] [a-z])
-WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2 | tr [A-Z] [a-z])
+WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2-999 | tr [A-Z] [a-z])
 
 config_id=$1
 shift
