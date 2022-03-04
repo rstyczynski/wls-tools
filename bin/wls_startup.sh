@@ -156,7 +156,7 @@ ExecStart=$script_dir/$script_name $wls_component start
 ExecStop=$script_dir/$script_name $wls_component stop
 
 LimitNOFILE=65535
-RemainAfterExit=no
+RemainAfterExit=yes
 KillMode=process
 Restart=always
   
@@ -179,7 +179,7 @@ ExecStart=$script_dir/$script_name $wls_component start
 ExecStop=$script_dir/$script_name $wls_component stop
 
 LimitNOFILE=65535
-RemainAfterExit=no
+RemainAfterExit=yes
 KillMode=process
 Restart=always
   
@@ -298,11 +298,6 @@ wls)
         ADMIN_URL=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.management.server)
         ADMIN_T3=$(echo $ADMIN_URL | tr [A-Z] [a-z] | sed s/http/t3/)
     fi
-
-    echo $DOMAIN_HOME
-    echo $DOMAIN_OWNER
-    echo $ADMIN_T3
-    echo $WLS_HOME
 
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]; then
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
@@ -459,6 +454,7 @@ nodemanager)
     2. DOMAIN_OWNER: $DOMAIN_OWNER
     3. INSTANCE:     $WLS_INSTANCE
     3. ADMIN URL:    $ADMIN_T3
+    4. WLS_HOME:     $WLS_HOME
 
 EOF
         case $WLS_INSTANCE in
