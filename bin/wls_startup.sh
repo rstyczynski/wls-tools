@@ -13,9 +13,6 @@ EOF
 function start() {
     case $WLS_INSTANCE in
     nodemanager)
-        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
-        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
-
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
             sudo su - $DOMAIN_OWNER -c "$start_service &"
@@ -26,66 +23,17 @@ function start() {
         echo "Started in background."   
         ;;
     *)
-        case $DOMAIN_TYPE in
-        wls)
-            case $WLS_INSTANCE in
-            adminserver)
-                start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
-                stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
-
-                if [ $(whoami) != $DOMAIN_OWNER ]; then
-                    echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
-                    sudo su - $DOMAIN_OWNER -c "$start_service"
-                else
-                    echo "Executing: $start_service"
-                    $start_service
-                fi
-                echo "Start requested."  
-                ;;
-            *)
-            
-                ;;
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
+            sudo su - $DOMAIN_OWNER -c "$start_service"
+        else
+            echo "Executing: $start_service"
+            $start_service
+        fi
+        echo "Start requested."  
+        ;;
     esac
 }
-
-XXXX
-
-case $WLS_INSTANCE in
-nodemanager)
-    start_priority=60
-    stop_priority=90
-    ;;
-*)
-    case $DOMAIN_TYPE in
-    wls)
-        case $WLS_INSTANCE in
-        adminserver)
-            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
-            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
-
-            start_priority=90
-            stop_priority=60
-            ;;
-        *)
-            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
-            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
-
-            start_priority=95
-            stop_priority=55
-            ;;
-        esac
-        ;;
-    ohs)
-    start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
-    stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
-
-    start_priority=90
-    stop_priority=60
-    ;;
-    esac
-
-XXXX
-
 
 function stop() {
     if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -269,12 +217,8 @@ function unregister_systemd() {
 # main logic
 #
 
-# use cd to eliminate potentially relative path
+# use cd to eliminate potentially relative path. we need the absolute one.
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-
-# wls_component is embeded in filename. No! It was wrong!
-# wls_component=$(basename "$0" | cut -d. -f1)
-
 script_name=$(basename "${BASH_SOURCE[0]}")
 
 operation=$1
@@ -289,10 +233,9 @@ start | stop | status | restart | register | unregister)
     ;;
 esac
 
-
 # wls_nodemanager
 # wls_adminserver
-# wls_managedserver1
+# wls_soa_server1
 # ohs_nodemanager
 # ohs_ohs1
 wls_component=$1
@@ -303,7 +246,7 @@ WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2 | tr [A-Z] [a-z])
 
 config_id=$1
 shift
-config_id=${config_id:-wls1}
+config_id=${config_id:=wls1}
 
 os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
 if [ $os_release -eq 6 ]; then
@@ -322,14 +265,17 @@ if [ -z "$DOMAIN_OWNER" ]; then
     DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 fi
 
-
 if [ -z "$DOMAIN_TYPE" ]; then
     DOMAIN_TYPE=$(getcfg $config_id DOMAIN_TYPE 2>/dev/null)
 fi
 
+if [ -z "$ADMIN_T3" ]; then
+    ADMIN_T3=$(getcfg $config_id ADMIN_T3 2>/dev/null)
+fi
+
 case $DOMAIN_TYPE in
 wls)
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] ; then
 
         #
         # WebLogic discovery
@@ -338,15 +284,20 @@ wls)
         source $script_dir/discover_processes.sh 
         discoverWLS
 
-        DOMAIN_TYPE=Weblogic
+        DOMAIN_TYPE=wls
 
         DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
         : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
         DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
         : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
+
+        ADMIN_URL=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.management.server)
+        ADMIN_T3=$(echo $ADMIN_URL | tr [A-Z] [a-z] | sed s/http/t3/)
+
     fi
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
-        echo "WebLogic processes not found."
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
+        echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
+        echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
     fi
     ;;
 ohs)
@@ -368,7 +319,7 @@ ohs)
 esac
 
 # Weblogic nor OHS not found. Ask operator for domain parameters.
-if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
     echo "Running processes processes not found. Manual configuration required."
     #
     # Weblogic manual parametrisation
@@ -399,18 +350,28 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     fi
 
+    # ask for domain type
+    test -z "$DOMAIN_TYPE" && read -p "Enter domain type (wls/ohs):" DOMAIN_TYPE
+    DOMAIN_TYPE=$(echo $DOMAIN_TYPE  tr [A-Z] [a-z])
+    if [ "$DOMAIN_TYPE" != ohs ] || [ "$DOMAIN_TYPE" != wls ]; then
+        unset DOMAIN_TYPE
+    fi
+
+    # ask for adin url
+    test -z "$ADMIN_T3" && read -p "Enter Weblogic AdminServer URL. Skip for OHS only domain:" ADMIN_T3
+
 fi
 
-if [ ! -z "$DOMAIN_OWNER" ] && [ ! -z "$DOMAIN_HOME" ]; then
-    setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-    setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
-    setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
-fi
-
+# save provided data to configuration
+test ! -z "$DOMAIN_OWNER" ] && setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+test ! -z "$DOMAIN_TYPE" ] && setcfg $config_id DOMAIN_TYPE $DOMAIN_TYPE force 2>/dev/null
+test ! -z "$DOMAIN_HOME" ] && setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+test ! -z "$ADMIN_T3" ] && setcfg $config_id DOMAIN_HOME $ADMIN_T3 force 2>/dev/null
 
 export DOMAIN_OWNER
 export DOMAIN_TYPE
 export DOMAIN_HOME
+export ADMIN_T3
 
 # final test of DOMAIN_HOME 
 if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -433,6 +394,11 @@ fi
 
 if [ -z "$DOMAIN_TYPE" ]; then
     echo "DOMAIN_TYPE not set or wrong. Exiting."
+    exit 1
+fi
+
+if [ -z "$ADMIN_T3" ]; then
+    echo "ADMIN_T3 not set or wrong. Exiting."
     exit 1
 fi
 
@@ -467,8 +433,8 @@ EOF
             stop_priority=60
             ;;
         *)
-            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
-            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+            start_service="$script_dir/wls_startServer.sh $DOMAIN_HOME $ADMIN_T3 $WLS_INSTANCE"
+            stop_service=stop_service="$script_dir/wls_shutdownServer.sh $DOMAIN_HOME $ADMIN_T3 $WLS_INSTANCE"
 
             start_priority=95
             stop_priority=55
