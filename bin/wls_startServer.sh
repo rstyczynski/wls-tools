@@ -1,14 +1,14 @@
 #!/bin/bash
 
 DOMAIN_HOME=$1
-ADMIN_URL=$2
-WLS_NAME=$3
+WLS_HOME=$2
+ADMIN_URL=$3
+WLS_NAME=$4
 
 source $DOMAIN_HOME/bin/setDomainEnv.sh 
 cd $DOMAIN_HOME
 
-#cat | java weblogic.WLST <<EOF_wlst
-cat | /ora01/app/fmw/oracle_common/common/bin/wlst.sh <<EOF_wlst
+cat | $WLS_HOME/oracle_common/common/bin/wlst.sh <<EOF_wlst
 connect(url='$ADMIN_URL', adminServerName='AdminServer')
 try:
   start('$WLS_NAME','Server')

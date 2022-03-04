@@ -268,13 +268,17 @@ if [ -z "$DOMAIN_OWNER" ]; then
     DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 fi
 
+if [ -z "$WLS_HOME" ]; then
+    WLS_HOME=$(getcfg $config_id WLS_HOME 2>/dev/null)
+fi
+
 if [ -z "$ADMIN_T3" ]; then
     ADMIN_T3=$(getcfg $config_id ADMIN_T3 2>/dev/null)
 fi
 
 case $DOMAIN_TYPE in
 wls)
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] ; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]  ; then
 
         #
         # WebLogic discovery
@@ -288,11 +292,14 @@ wls)
         DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
         : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
 
+        WLS_HOME=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.home)}
+        : ${WLS_HOME:=$(getWLSjvmAttr ${wls_admin[0]} -Dweblogic.home)}
+
         ADMIN_URL=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.management.server)
         ADMIN_T3=$(echo $ADMIN_URL | tr [A-Z] [a-z] | sed s/http/t3/)
 
     fi
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]  ; then
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
         echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
     fi
@@ -316,7 +323,7 @@ ohs)
 esac
 
 # Weblogic nor OHS not found. Ask operator for domain parameters.
-if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  || [ -z "$WLS_HOME" ]  ; then
     echo "Running processes processes not found. Manual configuration required."
     #
     # Weblogic manual parametrisation
@@ -347,6 +354,10 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     fi
 
+     # ask for wls home 
+    test -z "$WLS_HOME" && read -p "Enter Weblogic home directory:" WLS_HOME
+
+
     # ask for adin url
     test -z "$ADMIN_T3" && read -p "Enter Weblogic AdminServer URL. Skip for OHS only domain:" ADMIN_T3
 
@@ -370,14 +381,23 @@ fi
 if [ ! -z "$ADMIN_T3" ]; then
     config_value=$(getcfg $config_id ADMIN_T3)
     if [ "$config_value" != $ADMIN_T3 ]; then
-        setcfg $config_id DOMAIN_HOME $ADMIN_T3 force 2>/dev/null
+        setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
     fi
 fi
+
+if [ ! -z "$WLS_HOME" ]; then
+    config_value=$(getcfg $config_id WLS_HOME)
+    if [ "$config_value" != $WLS_HOME ]; then
+        setcfg $config_id WLS_HOME $WLS_HOME force 2>/dev/null
+    fi
+fi
+
 
 export DOMAIN_OWNER
 export DOMAIN_TYPE
 export DOMAIN_HOME
 export ADMIN_T3
+export WLS_HOME
 
 # final test of DOMAIN_HOME 
 if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -445,8 +465,8 @@ EOF
             stop_priority=60
             ;;
         *)
-            start_service="$script_dir/wls_startServer.sh $DOMAIN_HOME $ADMIN_T3 $WLS_INSTANCE"
-            stop_service="$script_dir/wls_shutdownServer.sh $DOMAIN_HOME $ADMIN_T3 $WLS_INSTANCE"
+            start_service="$script_dir/wls_startServer.sh $DOMAIN_HOME $WLS_HOME $ADMIN_T3 $WLS_INSTANCE"
+            stop_service="$script_dir/wls_shutdownServer.sh $DOMAIN_HOME $WLS_HOME $ADMIN_T3 $WLS_INSTANCE"
 
             start_priority=95
             stop_priority=55
