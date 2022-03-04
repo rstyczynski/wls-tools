@@ -469,7 +469,7 @@ EOF
             start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
             stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
-            start_mode=requesting
+            start_mode=blocking
 
             start_priority=90
             stop_priority=60
