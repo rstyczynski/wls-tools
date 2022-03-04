@@ -20,4 +20,5 @@ exit()
 EOF_wlst
 WLST_result=$?
 
-exit($WLST_result)
+exit $WLST_result
+
