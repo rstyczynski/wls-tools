@@ -515,7 +515,7 @@ EOF
     start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
     stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
 
-    start_mode=blocking
+    start_mode=requesting
 
     start_priority=90
     stop_priority=60
