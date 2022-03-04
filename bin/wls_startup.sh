@@ -139,9 +139,37 @@ function unregister_initd() {
 
 function register_systemd() {
 
-    if [ $WLS_INSTANCE == 'nodemanager' ]; then
+case $start_mode in
+blocking)
 
     # TODO: add [Unit] Requires= After=
+
+    # nodemanager process start is blocking, so may be managed by systemd. notice RemainAfterExit=no
+    cat >/tmp/$wls_component <<EOF
+[Unit]
+Description=WebLogic start script - $wls_component
+
+[Service]
+Type=simple
+
+User=$DOMAIN_OWNER
+TimeoutStartSec=600
+
+ExecStart=$start_service
+ExecStop=$stop_service
+
+RemainAfterExit=no
+KillMode=process
+Restart=always
+  
+[Install]
+WantedBy=multi-user.target
+EOF
+    ;;
+requesting)
+    # TODO: add [Unit] Requires= After=
+
+    # server process start is non blocking, so cannot be managed by systemd. notice RemainAfterExit=yes
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
@@ -162,29 +190,8 @@ Restart=no
 [Install]
 WantedBy=multi-user.target
 EOF
-else
-    # TODO: add [Unit] Requires= After=
-    cat >/tmp/$wls_component <<EOF
-[Unit]
-Description=WebLogic start script - $wls_component
-
-[Service]
-Type=simple
-
-User=$DOMAIN_OWNER
-TimeoutStartSec=600
-
-ExecStart=$script_dir/$script_name $wls_component start
-ExecStop=$script_dir/$script_name $wls_component stop
-
-RemainAfterExit=yes
-KillMode=process
-Restart=no
-  
-[Install]
-WantedBy=multi-user.target
-EOF
-fi
+    ;;
+esac
 
     sudo mv /tmp/$wls_component /etc/systemd/system/$wls_component.service
     sudo systemctl daemon-reload
@@ -440,6 +447,8 @@ nodemanager)
     start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
     stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
 
+    start_mode=blocking
+
     start_priority=60
     stop_priority=90
     ;;
@@ -460,12 +469,16 @@ EOF
             start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
             stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
+            start_mode=blocking
+
             start_priority=90
             stop_priority=60
             ;;
         *)
             start_service="$script_dir/wls_startServer.sh $DOMAIN_HOME $WLS_HOME $ADMIN_T3 $WLS_INSTANCE"
             stop_service="$script_dir/wls_shutdownServer.sh $DOMAIN_HOME $WLS_HOME $ADMIN_T3 $WLS_INSTANCE"
+
+            start_mode=requesting
 
             start_priority=95
             stop_priority=55
