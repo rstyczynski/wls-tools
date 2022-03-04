@@ -13,7 +13,7 @@ try:
 except Exception, err:
   print('Error stopping server.')
   print(err)
-  exit(exitCode=1)
+  exit(exitcode=1)
 
 disconnect()
 exit()
