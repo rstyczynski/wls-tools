@@ -292,14 +292,14 @@ wls)
         DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
         : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
 
-        WLS_HOME=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.home)}
+        WLS_HOME=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.home)
         : ${WLS_HOME:=$(getWLSjvmAttr ${wls_admin[0]} -Dweblogic.home)}
 
         ADMIN_URL=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.management.server)
         ADMIN_T3=$(echo $ADMIN_URL | tr [A-Z] [a-z] | sed s/http/t3/)
 
     fi
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]  ; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]; then
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
         echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
     fi
