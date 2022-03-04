@@ -11,7 +11,7 @@ connect(url='$ADMIN_URL', adminServerName='AdminServer')
 try:
   start('$WLS_NAME','Server')
 except Exception, err:
-  print('Error stopping server.')
+  print('Error starting server.')
   print(err)
   exit(exitcode=1)
 
