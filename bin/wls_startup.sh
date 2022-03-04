@@ -375,7 +375,6 @@ esac
 
 
 # save provided data to configuration if nw value was provided / discovered
-
 case $DOMAIN_TYPE in
 wls | ohs)
     if [ ! -z "$DOMAIN_OWNER" ]; then
@@ -416,38 +415,47 @@ export ADMIN_T3
 export WLS_HOME
 
 # final test of DOMAIN_HOME 
-if [ $(whoami) != $DOMAIN_OWNER ]; then
-    DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
-    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
-else
-    DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
-    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
-fi
+case $DOMAIN_TYPE in
+wls | ohs)
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
+        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+        test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+    else
+        DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
+        test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+    fi
 
-if [ -z "$DOMAIN_HOME" ]; then
-    echo "DOMAIN_HOME not set or wrong. Exiting."
-    exit 1
-fi
+    if [ -z "$DOMAIN_HOME" ]; then
+        echo "DOMAIN_HOME not set or wrong. Exiting."
+        exit 1
+    fi
 
-if [ -z "$DOMAIN_OWNER" ]; then
-    echo "DOMAIN_OWNER not set or wrong. Exiting."
-    exit 1
-fi
+    if [ -z "$DOMAIN_OWNER" ]; then
+        echo "DOMAIN_OWNER not set or wrong. Exiting."
+        exit 1
+    fi
 
-DOMAIN_TYPE=$(echo $DOMAIN_TYPE | tr [A-Z] [a-z])
-case $DOMAIN_TYPE in 
-ohs | wls)
+    DOMAIN_TYPE=$(echo $DOMAIN_TYPE | tr [A-Z] [a-z])
+    case $DOMAIN_TYPE in 
+    ohs | wls)
+        ;;
+    *)
+        echo "DOMAIN_TYPE not set or wrong. Exiting."
+        exit 1
+        ;;
+    esac
     ;;
-*)
-    echo "DOMAIN_TYPE not set or wrong. Exiting."
-    exit 1
+wls)
+    if [ -z "$ADMIN_T3" ]; then
+        echo "ADMIN_T3 not set or wrong. Exiting."
+        exit 1
+    fi
+    if [ -z "$WLS_HOME" ]; then
+        echo "WLS_HOME not set or wrong. Exiting."
+        exit 1
+    fi
     ;;
 esac
-
-if [ -z "$ADMIN_T3" ]; then
-    echo "ADMIN_T3 not set or wrong. Exiting."
-    exit 1
-fi
 
 #
 # run
