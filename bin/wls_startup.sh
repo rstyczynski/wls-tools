@@ -69,13 +69,13 @@ function status() {
     *)
         case $DOMAIN_TYPE in
         wls)
-            status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic | grep $WLS_INSTANCE)
+            status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic | grep -i "-Dweblogic.Name=$WLS_INSTANCE")
             if [ -z "$status" ]; then
             echo "Weblogic not running."
             echo 
             else
                 echo "Weblogic process:"
-                ps aux | grep "^$DOMAIN_OWNER"  | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic | grep $WLS_INSTANCE
+                ps aux | grep "^$DOMAIN_OWNER"  | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic | grep -i "-Dweblogic.Name=$WLS_INSTANCE"
                 echo 
             fi
             ;;
