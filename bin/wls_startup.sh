@@ -2,7 +2,7 @@
 
 function usage() {
     cat <<EOF
-Usage: $script_name svc_def [start|stop|status|restart|register|unregister] 
+Usage: $script_name type_name [start|stop|status|restart|register|unregister] 
 EOF
 }
 
@@ -221,6 +221,17 @@ function unregister_systemd() {
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 script_name=$(basename "${BASH_SOURCE[0]}")
 
+# wls_nodemanager
+# wls_adminserver
+# wls_soa_server1
+# ohs_nodemanager
+# ohs_ohs1
+wls_component=$1
+shift
+
+DOMAIN_TYPE=$(echo $wls_component | cut -d_ -f1 | tr [A-Z] [a-z])
+WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2-999 | tr [A-Z] [a-z])
+
 operation=$1
 shift
 
@@ -232,17 +243,6 @@ start | stop | status | restart | register | unregister)
     exit 1
     ;;
 esac
-
-# wls_nodemanager
-# wls_adminserver
-# wls_soa_server1
-# ohs_nodemanager
-# ohs_ohs1
-wls_component=$1
-shift
-
-DOMAIN_TYPE=$(echo $wls_component | cut -d_ -f1 | tr [A-Z] [a-z])
-WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2-999 | tr [A-Z] [a-z])
 
 config_id=$1
 shift
