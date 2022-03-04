@@ -155,10 +155,9 @@ TimeoutStartSec=600
 ExecStart=$script_dir/$script_name $wls_component start
 ExecStop=$script_dir/$script_name $wls_component stop
 
-LimitNOFILE=65535
 RemainAfterExit=yes
 KillMode=process
-Restart=always
+Restart=no
   
 [Install]
 WantedBy=multi-user.target
@@ -178,10 +177,9 @@ TimeoutStartSec=600
 ExecStart=$script_dir/$script_name $wls_component start
 ExecStop=$script_dir/$script_name $wls_component stop
 
-LimitNOFILE=65535
 RemainAfterExit=yes
 KillMode=process
-Restart=always
+Restart=no
   
 [Install]
 WantedBy=multi-user.target
