@@ -6,7 +6,13 @@ WLS_NAME=$3
 
 source $DOMAIN_HOME/bin/setDomainEnv.sh 
 cd $DOMAIN_HOME
-cat | java weblogic.WLST <<EOF_wlst
+
+
+
+
+#cat | java weblogic.WLST <<EOF_wlst
+
+cat | /ora01/app/fmw/oracle_common/common/bin/wlst.sh <<EOF_wlst
 connect(url='$ADMIN_URL', adminServerName='AdminServer')
 try:
   start('$WLS_NAME','Server')
