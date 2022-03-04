@@ -108,7 +108,7 @@ function register_initd() {
 # description: WebLogic startup service for $wls_component
 #
 
-$script_dir/$script_name \$1 $wls_component 
+$script_dir/$script_name $wls_component \$1
 EOF
 
     chmod +x /tmp/$wls_component
@@ -150,8 +150,8 @@ Type=simple
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
 
-ExecStart=$script_dir/$script_name start $wls_component 
-ExecStop=$script_dir/$script_name stop $wls_component 
+ExecStart=$script_dir/$script_name $wls_component start
+ExecStop=$script_dir/$script_name $wls_component stop
 
 LimitNOFILE=65535
 RemainAfterExit=no
