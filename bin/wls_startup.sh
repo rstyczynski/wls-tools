@@ -224,13 +224,6 @@ function unregister_systemd() {
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 script_name=$(basename "${BASH_SOURCE[0]}")
 
-echo xxxxxx
-set
-whoami
-set -x
-echo xxxxxx
-
-
 # wls_nodemanager
 # wls_adminserver
 # wls_soa_server1
@@ -359,10 +352,27 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ]  ; then
 
 fi
 
-# save provided data to configuration
-test ! -z "$DOMAIN_OWNER" && setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-test ! -z "$DOMAIN_HOME" && setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
-test ! -z "$ADMIN_T3" && setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
+# save provided data to configuration if nw value was provided / discovered
+if [ ! -z "$DOMAIN_OWNER" ]; then
+    config_value=$(getcfg $config_id DOMAIN_OWNER)
+    if [ "$config_value" != $DOMAIN_OWNER ]; then
+        setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+    fi
+fi
+
+if [ ! -z "$DOMAIN_HOME" ]; then
+    config_value=$(getcfg $config_id DOMAIN_HOME)
+    if [ "$config_value" != $DOMAIN_HOME ]; then
+        setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+    fi
+fi
+
+if [ ! -z "$ADMIN_T3" ]; then
+    config_value=$(getcfg $config_id ADMIN_T3)
+    if [ "$config_value" != $ADMIN_T3 ]; then
+        setcfg $config_id DOMAIN_HOME $ADMIN_T3 force 2>/dev/null
+    fi
+fi
 
 export DOMAIN_OWNER
 export DOMAIN_TYPE
