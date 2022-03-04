@@ -1,8 +1,5 @@
 #!/bin/bash
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-
-
 function usage() {
     cat <<EOF
 Usage: $script_name svc_def [start|stop|status|restart|register|unregister] 
@@ -16,6 +13,9 @@ EOF
 function start() {
     case $WLS_INSTANCE in
     nodemanager)
+        start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
+        stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
+
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
             sudo su - $DOMAIN_OWNER -c "$start_service &"
@@ -26,17 +26,66 @@ function start() {
         echo "Started in background."   
         ;;
     *)
-        if [ $(whoami) != $DOMAIN_OWNER ]; then
-            echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
-            sudo su - $DOMAIN_OWNER -c "$start_service"
-        else
-            echo "Executing: $start_service"
-            $start_service
-        fi
-        echo "Start requested."  
-        ;;
+        case $DOMAIN_TYPE in
+        wls)
+            case $WLS_INSTANCE in
+            adminserver)
+                start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
+                stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+
+                if [ $(whoami) != $DOMAIN_OWNER ]; then
+                    echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
+                    sudo su - $DOMAIN_OWNER -c "$start_service"
+                else
+                    echo "Executing: $start_service"
+                    $start_service
+                fi
+                echo "Start requested."  
+                ;;
+            *)
+            
+                ;;
     esac
 }
+
+XXXX
+
+case $WLS_INSTANCE in
+nodemanager)
+    start_priority=60
+    stop_priority=90
+    ;;
+*)
+    case $DOMAIN_TYPE in
+    wls)
+        case $WLS_INSTANCE in
+        adminserver)
+            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
+            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+
+            start_priority=90
+            stop_priority=60
+            ;;
+        *)
+            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
+            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+
+            start_priority=95
+            stop_priority=55
+            ;;
+        esac
+        ;;
+    ohs)
+    start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
+    stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
+
+    start_priority=90
+    stop_priority=60
+    ;;
+    esac
+
+XXXX
+
 
 function stop() {
     if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -111,7 +160,7 @@ function register_initd() {
 # description: WebLogic startup service for $wls_component
 #
 
-sudo su - $DOMAIN_OWNER /etc/init.d/$wls_component \$1
+$script_dir/$script_name \$1 $wls_component 
 EOF
 
     chmod +x /tmp/$wls_component
@@ -142,7 +191,7 @@ function unregister_initd() {
 
 function register_systemd() {
 
-    if [ xxx == 'nodemanager' ]; then
+    if [ $WLS_INSTANCE == 'nodemanager' ]; then
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
@@ -153,8 +202,8 @@ Type=simple
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
 
-ExecStart=$start_service
-ExecStop=$stop_service
+ExecStart=$script_dir/$script_name start $wls_component 
+ExecStop=$script_dir/$script_name stop $wls_component 
 
 LimitNOFILE=65535
 RemainAfterExit=no
@@ -175,8 +224,8 @@ Type=simple
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
 
-ExecStart=$start_service
-ExecStop=$stop_service
+ExecStart=$script_dir/$script_name start $wls_component 
+ExecStop=$script_dir/$script_name stop $wls_component 
 
 LimitNOFILE=65535
 RemainAfterExit=no
@@ -220,36 +269,41 @@ function unregister_systemd() {
 # main logic
 #
 
-case $1 in
+# use cd to eliminate potentially relative path
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+# wls_component is embeded in filename. No! It was wrong!
+# wls_component=$(basename "$0" | cut -d. -f1)
+
+script_name=$(basename "${BASH_SOURCE[0]}")
+
+operation=$1
+shift
+
+case $operation in
 start | stop | status | restart | register | unregister)
-    operation=$1
-    shift
-
-    # wls_nodemanager
-    # wls_adminserver
-    # wls_managedserver1
-    # ohs_nodemanager
-    # ohs_ohs1
-    wls_component=$1
-    shift
-
-    DOMAIN_TYPE=$(echo $wls_component | cut -d_ -f1 | tr [A-Z] [a-z])
-    WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2 | tr [A-Z] [a-z])
-
-    if [ $WLS_INSTANCE == nodemanager ]; then
-        wls_component=fmw_nodemanager
-    fi
-
-    config_id=$1
-    shift
-    config_id=${config_id:-wls1}
-
     ;;
 *)
     usage
     exit 1
     ;;
 esac
+
+
+# wls_nodemanager
+# wls_adminserver
+# wls_managedserver1
+# ohs_nodemanager
+# ohs_ohs1
+wls_component=$1
+shift
+
+DOMAIN_TYPE=$(echo $wls_component | cut -d_ -f1 | tr [A-Z] [a-z])
+WLS_INSTANCE=$(echo $wls_component | cut -d_ -f2 | tr [A-Z] [a-z])
+
+config_id=$1
+shift
+config_id=${config_id:-wls1}
 
 os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
 if [ $os_release -eq 6 ]; then
@@ -313,7 +367,7 @@ ohs)
     ;;
 esac
 
-# Weblogic nor OHS not found. Ask operator for data.
+# Weblogic nor OHS not found. Ask operator for domain parameters.
 if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
     echo "Running processes processes not found. Manual configuration required."
     #
@@ -411,6 +465,13 @@ EOF
 
             start_priority=90
             stop_priority=60
+            ;;
+        *)
+            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
+            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+
+            start_priority=95
+            stop_priority=55
             ;;
         esac
         ;;
