@@ -140,6 +140,8 @@ function unregister_initd() {
 function register_systemd() {
 
     if [ $WLS_INSTANCE == 'nodemanager' ]; then
+
+    # TODO: add [Unit] Requires= After=
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
@@ -162,6 +164,7 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 else
+    # TODO: add [Unit] Requires= After=
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
@@ -172,8 +175,8 @@ Type=simple
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
 
-ExecStart=$script_dir/$script_name start $wls_component 
-ExecStop=$script_dir/$script_name stop $wls_component 
+ExecStart=$script_dir/$script_name $wls_component start
+ExecStop=$script_dir/$script_name $wls_component stop
 
 LimitNOFILE=65535
 RemainAfterExit=no
