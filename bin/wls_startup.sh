@@ -280,8 +280,6 @@ wls)
         source $script_dir/discover_processes.sh 
         discoverWLS
 
-        DOMAIN_TYPE=wls
-
         DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
         : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
         DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
@@ -302,7 +300,7 @@ ohs)
         echo -n "OHS discovery..."
 
         NM_OHS=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)
-        test ! -z "$NM_OHS" && DOMAIN_TYPE=OHS
+        test ! -z "$NM_OHS" && DOMAIN_TYPE=ohs
 
         DOMAIN_OWNER=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)
         DOMAIN_HOME=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)
@@ -380,7 +378,7 @@ if [ -z "$DOMAIN_OWNER" ]; then
     exit 1
 fi
 
-DOMAIN_TYPE=$(echo $DOMAIN_TYPE  tr [A-Z] [a-z])
+DOMAIN_TYPE=$(echo $DOMAIN_TYPE | tr [A-Z] [a-z])
 case $DOMAIN_TYPE in 
 ohs | wls)
     ;;
