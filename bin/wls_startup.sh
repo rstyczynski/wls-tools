@@ -227,7 +227,9 @@ script_name=$(basename "${BASH_SOURCE[0]}")
 echo xxxxxx
 set
 whoami
+set -x
 echo xxxxxx
+
 
 # wls_nodemanager
 # wls_adminserver
