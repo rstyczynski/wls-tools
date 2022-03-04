@@ -327,10 +327,9 @@ ohs)
     ;;
 esac
 
-
+# Weblogic nor OHS not found. Ask operator for domain parameters.
 case $DOMAIN_TYPE in
 wls | ohs)
-    # Weblogic nor OHS not found. Ask operator for domain parameters.
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]; then
         echo "Running processes processes not found. Manual configuration required."
         #
@@ -376,34 +375,39 @@ esac
 
 
 # save provided data to configuration if nw value was provided / discovered
-if [ ! -z "$DOMAIN_OWNER" ]; then
-    config_value=$(getcfg $config_id DOMAIN_OWNER)
-    if [ "$config_value" != $DOMAIN_OWNER ]; then
-        setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-    fi
-fi
 
-if [ ! -z "$DOMAIN_HOME" ]; then
-    config_value=$(getcfg $config_id DOMAIN_HOME)
-    if [ "$config_value" != $DOMAIN_HOME ]; then
-        setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+case $DOMAIN_TYPE in
+wls | ohs)
+    if [ ! -z "$DOMAIN_OWNER" ]; then
+        config_value=$(getcfg $config_id DOMAIN_OWNER)
+        if [ "$config_value" != $DOMAIN_OWNER ]; then
+            setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+        fi
     fi
-fi
 
-if [ ! -z "$ADMIN_T3" ]; then
-    config_value=$(getcfg $config_id ADMIN_T3)
-    if [ "$config_value" != $ADMIN_T3 ]; then
-        setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
+    if [ ! -z "$DOMAIN_HOME" ]; then
+        config_value=$(getcfg $config_id DOMAIN_HOME)
+        if [ "$config_value" != $DOMAIN_HOME ]; then
+            setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+        fi
     fi
-fi
-
-if [ ! -z "$WLS_HOME" ]; then
-    config_value=$(getcfg $config_id WLS_HOME)
-    if [ "$config_value" != $WLS_HOME ]; then
-        setcfg $config_id WLS_HOME $WLS_HOME force 2>/dev/null
+    ;;
+wls)
+    if [ ! -z "$ADMIN_T3" ]; then
+        config_value=$(getcfg $config_id ADMIN_T3)
+        if [ "$config_value" != $ADMIN_T3 ]; then
+            setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
+        fi
     fi
-fi
 
+    if [ ! -z "$WLS_HOME" ]; then
+        config_value=$(getcfg $config_id WLS_HOME)
+        if [ "$config_value" != $WLS_HOME ]; then
+            setcfg $config_id WLS_HOME $WLS_HOME force 2>/dev/null
+        fi
+    fi
+    ;;
+esac
 
 export DOMAIN_OWNER
 export DOMAIN_TYPE
