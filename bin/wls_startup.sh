@@ -14,8 +14,10 @@ function start() {
     case $start_mode in
     blocking)
         if [ $(whoami) != $DOMAIN_OWNER ]; then
-            echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
-            sudo su - $DOMAIN_OWNER -c "$start_service &"
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
+            # TODO Direct stdout, stderr to file
+            # TODO rotate on start
+            sudo su - $DOMAIN_OWNER -c "nohup $start_service &"
         else
             echo "Executing: \"$start_service &\""
             $start_service &
@@ -299,24 +301,17 @@ wls)
 
         DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
         : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
-        DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
-        : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
-
-
-        WLS_HOME=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.home)
-        : ${WLS_HOME:=$(getWLSjvmAttr ${wls_admin[0]} -Dweblogic.home)}
-
-        ADMIN_URL=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.management.server)
-        ADMIN_T3=$(echo $ADMIN_URL | tr [A-Z] [a-z] | sed s/http/t3/)
+        DOMAIN_NAME=$(getDomainName)
+        DOMAIN_HOME=$(getDomainHome)
     fi
 
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
         echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
     fi
     ;;
 ohs)
-    # Weblogic not found try OHS
+    # Weblogic not found, try OHS
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo -n "OHS discovery..."
 
@@ -325,108 +320,39 @@ ohs)
 
         DOMAIN_OWNER=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)
         DOMAIN_HOME=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)
+        DOMAIN_NAME=$(filename $DOMAIN_HOME)
         NM_PID=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)
     fi
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo "OHS processes not found."
     fi
     ;;
 esac
 
 # Weblogic nor OHS not found. Ask operator for domain parameters.
-case $DOMAIN_TYPE in
-wls | ohs)
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]; then
-        echo "Running processes processes not found. Manual configuration required."
-        #
-        # Weblogic manual parametrisation
-        #
+if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
+    echo "Running processes not found. Manual configuration required."
+    #
+    # Weblogic manual parametrisation
+    #
 
-        # ask for username and test
-        test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
+    # ask for username and test
+    test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
 
-        if [ $(whoami) != $DOMAIN_OWNER ]; then
-            DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami) | tail -1')
-            test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
-        fi
-
-        # get domain home from users's env, ask for, and test
-        if [ $(whoami) != $DOMAIN_OWNER ]; then
-            test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
-        else
-            test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME | tail -1)
-        fi
-
-        test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
-
-        if [ $(whoami) != $DOMAIN_OWNER ]; then
-            DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
-            test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
-        else
-            DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
-            test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
-        fi
-    fi
-    ;;
-wls)
-    if [ $WLS_INSTANCE != nodemanager ] && [ $WLS_INSTANCE != adminserver ]; then
-        if [ -z "$WLS_HOME" ] || [ -z "$ADMIN_T3" ]; then
-            # ask for wls home 
-            test -z "$WLS_HOME" && read -p "Enter Weblogic home directory:" WLS_HOME
-
-            # ask for adin url
-            test -z "$ADMIN_T3" && read -p "Enter Weblogic AdminServer URL. Skip for OHS only domain:" ADMIN_T3
-        fi
-    fi
-    ;;
-esac
-
-
-# save provided data to configuration if nw value was provided / discovered
-case $DOMAIN_TYPE in
-wls | ohs)
-    if [ ! -z "$DOMAIN_OWNER" ]; then
-        config_value=$(getcfg $config_id DOMAIN_OWNER)
-        if [ "$config_value" != $DOMAIN_OWNER ]; then
-            setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
-        fi
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
+        DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami) | tail -1')
+        test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
     fi
 
-    if [ ! -z "$DOMAIN_HOME" ]; then
-        config_value=$(getcfg $config_id DOMAIN_HOME)
-        if [ "$config_value" != $DOMAIN_HOME ]; then
-            setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
-        fi
+    # get domain home from users's env, ask for, and test
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
+        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
+    else
+        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME | tail -1)
     fi
-    ;;
-wls)
-    if [ $WLS_INSTANCE != nodemanager ] && [ $WLS_INSTANCE != adminserver ]; then
-        if [ ! -z "$ADMIN_T3" ]; then
-            config_value=$(getcfg $config_id ADMIN_T3)
-            if [ "$config_value" != $ADMIN_T3 ]; then
-                setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
-            fi
-        fi
 
-        if [ ! -z "$WLS_HOME" ]; then
-            config_value=$(getcfg $config_id WLS_HOME)
-            if [ "$config_value" != $WLS_HOME ]; then
-                setcfg $config_id WLS_HOME $WLS_HOME force 2>/dev/null
-            fi
-        fi
-    fi
-    ;;
-esac
+    test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
-export DOMAIN_OWNER
-export DOMAIN_TYPE
-export DOMAIN_HOME
-export ADMIN_T3
-export WLS_HOME
-
-# final test of DOMAIN_HOME 
-case $DOMAIN_TYPE in
-wls | ohs)
     if [ $(whoami) != $DOMAIN_OWNER ]; then
         DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
@@ -435,35 +361,78 @@ wls | ohs)
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     fi
 
-    if [ -z "$DOMAIN_HOME" ]; then
-        echo "DOMAIN_HOME not set or wrong. Exiting."
-        exit 1
+    test -z "$DOMAIN_NAME" && read -p "Enter Weblogic domain name:" DOMAIN_NAME
+    if [ $(whoami) != $DOMAIN_OWNER ]; then
+        DOMAIN_NAME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $(basename $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh")
+        test -z "$DOMAIN_NAME_TEST" && unset DOMAIN_HOME
+    else
+        DOMAIN_HOME_TEST=$(ls $(basename $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh)
+        test -z "$DOMAIN_NAME_TEST" && unset DOMAIN_HOME
     fi
 
-    if [ -z "$DOMAIN_OWNER" ]; then
-        echo "DOMAIN_OWNER not set or wrong. Exiting."
-        exit 1
-    fi
+fi
 
-    DOMAIN_TYPE=$(echo $DOMAIN_TYPE | tr [A-Z] [a-z])
-    case $DOMAIN_TYPE in 
-    ohs | wls)
-        ;;
-    *)
-        echo "DOMAIN_TYPE not set or wrong. Exiting."
-        exit 1
-        ;;
-    esac
+
+
+# save provided data to configuration if nw value was provided / discovered
+if [ ! -z "$DOMAIN_OWNER" ]; then
+    config_value=$(getcfg $config_id DOMAIN_OWNER)
+    if [ "$config_value" != $DOMAIN_OWNER ]; then
+        setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+    fi
+fi
+
+if [ ! -z "$DOMAIN_NAME" ]; then
+    config_value=$(getcfg $config_id DOMAIN_NAME)
+    if [ "$config_value" != $DOMAIN_NAME ]; then
+        setcfg $config_id DOMAIN_NAME $DOMAIN_NAME force 2>/dev/null
+    fi
+fi
+
+if [ ! -z "$DOMAIN_HOME" ]; then
+    config_value=$(getcfg $config_id DOMAIN_HOME)
+    if [ "$config_value" != $DOMAIN_HOME ]; then
+        setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+    fi
+fi
+
+
+export DOMAIN_OWNER
+export DOMAIN_TYPE
+export DOMAIN_HOME
+export DOMAIN_NAME
+
+# final test of DOMAIN_HOME 
+if [ $(whoami) != $DOMAIN_OWNER ]; then
+    DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+else
+    DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
+    test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
+fi
+
+if [ -z "$DOMAIN_NAME" ]; then
+    echo "DOMAIN_NAME not set or wrong. Exiting."
+    exit 1
+fi
+
+if [ -z "$DOMAIN_HOME" ]; then
+    echo "DOMAIN_HOME not set or wrong. Exiting."
+    exit 1
+fi
+
+if [ -z "$DOMAIN_OWNER" ]; then
+    echo "DOMAIN_OWNER not set or wrong. Exiting."
+    exit 1
+fi
+
+DOMAIN_TYPE=$(echo $DOMAIN_TYPE | tr [A-Z] [a-z])
+case $DOMAIN_TYPE in 
+ohs | wls)
     ;;
-wls)
-    if [ -z "$ADMIN_T3" ]; then
-        echo "ADMIN_T3 not set or wrong. Exiting."
-        exit 1
-    fi
-    if [ -z "$WLS_HOME" ]; then
-        echo "WLS_HOME not set or wrong. Exiting."
-        exit 1
-    fi
+*)
+    echo "DOMAIN_TYPE not set or wrong. Exiting."
+    exit 1
     ;;
 esac
 
@@ -487,10 +456,9 @@ nodemanager)
         cat <<EOF
     Running for WebLogic:
     1. DOMAIN_HOME:  $DOMAIN_HOME
-    2. DOMAIN_OWNER: $DOMAIN_OWNER
-    3. INSTANCE:     $WLS_INSTANCE
-    3. ADMIN URL:    $ADMIN_T3
-    4. WLS_HOME:     $WLS_HOME
+    2. DOMAIN_HOME:  $DOMAIN_NAME
+    3. DOMAIN_OWNER: $DOMAIN_OWNER
+    4. INSTANCE:     $WLS_INSTANCE
 
 EOF
         case $WLS_INSTANCE in
@@ -504,8 +472,15 @@ EOF
             stop_priority=60
             ;;
         *)
-            start_service="$script_dir/wls_startServer.sh $DOMAIN_HOME $WLS_HOME $ADMIN_T3 $WLS_INSTANCE"
-            stop_service="$script_dir/wls_shutdownServer.sh $DOMAIN_HOME $WLS_HOME $ADMIN_T3 $WLS_INSTANCE"
+            if [ $(whoami) != $DOMAIN_OWNER ]; then
+                NM_HOST=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut-d= -f2")
+                NM_PORT=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut-d= -f2")
+            else
+                NM_HOST=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut-d= -f2 )
+                NM_PORT=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut-d= -f2 )
+            fi
+            start_service="$script_dir/wls_startServer.sh $DOMAIN_NAME $DOMAIN_HOME $NM_HOST $NM_PORT $WLS_INSTANCE"
+            stop_service="$script_dir/wls_stopServer.sh $DOMAIN_NAME $DOMAIN_HOME $NM_HOST $NM_PORT $WLS_INSTANCE"
 
             start_mode=requesting
 
@@ -518,8 +493,9 @@ EOF
         cat <<EOF
     Running for OHS:
     1. DOMAIN_HOME:  $DOMAIN_HOME
-    2. DOMAIN_OWNER: $DOMAIN_OWNER
-    3. INSTANCE:     $WLS_INSTANCE
+    2. DOMAIN_HOME:  $DOMAIN_NAME
+    3. DOMAIN_OWNER: $DOMAIN_OWNER
+    4. INSTANCE:     $WLS_INSTANCE
 
 EOF
     start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
