@@ -276,21 +276,18 @@ if [ -z "$DOMAIN_HOME" ]; then
     DOMAIN_HOME=$(getcfg $config_id DOMAIN_HOME 2>/dev/null)
 fi
 
+if [ -z "$DOMAIN_NAME" ]; then
+    DOMAIN_NAME=$(getcfg $config_id DOMAIN_NAME 2>/dev/null)
+fi
+
 if [ -z "$DOMAIN_OWNER" ]; then
     DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 fi
 
-if [ -z "$WLS_HOME" ]; then
-    WLS_HOME=$(getcfg $config_id WLS_HOME 2>/dev/null)
-fi
-
-if [ -z "$ADMIN_T3" ]; then
-    ADMIN_T3=$(getcfg $config_id ADMIN_T3 2>/dev/null)
-fi
 
 case $DOMAIN_TYPE in
 wls)
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ] || [ -z "$ADMIN_T3" ] || [ -z "$WLS_HOME" ]  ; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
 
         #
         # WebLogic discovery
@@ -312,7 +309,7 @@ wls)
     ;;
 ohs)
     # Weblogic not found, try OHS
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo -n "OHS discovery..."
 
         NM_OHS=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)
