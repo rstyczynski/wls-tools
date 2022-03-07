@@ -19,8 +19,8 @@ function start() {
             # TODO rotate on start
             sudo su - $DOMAIN_OWNER -c "nohup $start_service &"
         else
-            echo "Executing: \"$start_service &\""
-            $start_service &
+            echo "Executing: \"nohup $start_service &\""
+            nohup $start_service &
         fi
         echo "Started in background."   
         ;;
@@ -470,11 +470,11 @@ EOF
             ;;
         *)
             if [ $(whoami) != $DOMAIN_OWNER ]; then
-                NM_HOST=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut-d= -f2")
-                NM_PORT=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut-d= -f2")
+                NM_HOST=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut -d= -f2")
+                NM_PORT=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut -d= -f2")
             else
-                NM_HOST=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut-d= -f2 )
-                NM_PORT=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut-d= -f2 )
+                NM_HOST=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut -d= -f2 )
+                NM_PORT=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut -d= -f2 )
             fi
             start_service="$script_dir/wls_startServer.sh $DOMAIN_NAME $DOMAIN_HOME $NM_HOST $NM_PORT $WLS_INSTANCE"
             stop_service="$script_dir/wls_stopServer.sh $DOMAIN_NAME $DOMAIN_HOME $NM_HOST $NM_PORT $WLS_INSTANCE"
