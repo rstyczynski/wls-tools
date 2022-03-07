@@ -11,8 +11,8 @@ EOF
 #
 
 function start() {
-    case $WLS_INSTANCE in
-    nodemanager)
+    case $start_mode in
+    blocking)
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service &\""
             sudo su - $DOMAIN_OWNER -c "$start_service &"
@@ -22,7 +22,7 @@ function start() {
         fi
         echo "Started in background."   
         ;;
-    *)
+    requesting)
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"$start_service\""
             sudo su - $DOMAIN_OWNER -c "$start_service"
@@ -31,6 +31,9 @@ function start() {
             $start_service
         fi
         echo "Start requested."  
+        ;;
+    *)
+        echo "Error. Wrong start mode."
         ;;
     esac
 }
@@ -49,13 +52,15 @@ function stop() {
 function status() {
     case $WLS_INSTANCE in
     nodemanager)
+        echo
         echo "Node manager properties:"
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
         else
             cat $DOMAIN_HOME/nodemanager/nodemanager.properties
         fi
-        
+        echo "Source: $DOMAIN_HOME/nodemanager/nodemanager.properties"
+
         status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
         if [ -z "$status" ]; then
             echo "Node manager not running."
@@ -297,6 +302,7 @@ wls)
         DOMAIN_HOME=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
         : ${DOMAIN_HOME:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
 
+
         WLS_HOME=$(getWLSjvmAttr ${wls_managed[0]} -Dweblogic.home)
         : ${WLS_HOME:=$(getWLSjvmAttr ${wls_admin[0]} -Dweblogic.home)}
 
@@ -308,6 +314,7 @@ wls)
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
         echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
     fi
+    esac
     ;;
 ohs)
     # Weblogic not found try OHS
@@ -363,12 +370,14 @@ wls | ohs)
     fi
     ;;
 wls)
-    if [ -z "$WLS_HOME" ] || [ -z "$ADMIN_T3" ]; then
-        # ask for wls home 
-        test -z "$WLS_HOME" && read -p "Enter Weblogic home directory:" WLS_HOME
+    if [ $WLS_INSTANCE != nodemanager ] && [ $WLS_INSTANCE != adminserver ]; then
+        if [ -z "$WLS_HOME" ] || [ -z "$ADMIN_T3" ]; then
+            # ask for wls home 
+            test -z "$WLS_HOME" && read -p "Enter Weblogic home directory:" WLS_HOME
 
-        # ask for adin url
-        test -z "$ADMIN_T3" && read -p "Enter Weblogic AdminServer URL. Skip for OHS only domain:" ADMIN_T3
+            # ask for adin url
+            test -z "$ADMIN_T3" && read -p "Enter Weblogic AdminServer URL. Skip for OHS only domain:" ADMIN_T3
+        fi
     fi
     ;;
 esac
@@ -392,17 +401,19 @@ wls | ohs)
     fi
     ;;
 wls)
-    if [ ! -z "$ADMIN_T3" ]; then
-        config_value=$(getcfg $config_id ADMIN_T3)
-        if [ "$config_value" != $ADMIN_T3 ]; then
-            setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
+    if [ $WLS_INSTANCE != nodemanager ] && [ $WLS_INSTANCE != adminserver ]; then
+        if [ ! -z "$ADMIN_T3" ]; then
+            config_value=$(getcfg $config_id ADMIN_T3)
+            if [ "$config_value" != $ADMIN_T3 ]; then
+                setcfg $config_id ADMIN_T3 $ADMIN_T3 force 2>/dev/null
+            fi
         fi
-    fi
 
-    if [ ! -z "$WLS_HOME" ]; then
-        config_value=$(getcfg $config_id WLS_HOME)
-        if [ "$config_value" != $WLS_HOME ]; then
-            setcfg $config_id WLS_HOME $WLS_HOME force 2>/dev/null
+        if [ ! -z "$WLS_HOME" ]; then
+            config_value=$(getcfg $config_id WLS_HOME)
+            if [ "$config_value" != $WLS_HOME ]; then
+                setcfg $config_id WLS_HOME $WLS_HOME force 2>/dev/null
+            fi
         fi
     fi
     ;;
