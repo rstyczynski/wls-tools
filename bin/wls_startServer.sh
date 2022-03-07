@@ -48,6 +48,7 @@ except Exception, err:
   print(err)
   exit(exitcode=4)
 
+nmDisconnect()
 exit()
 EOF_wlst
 WLST_result=$?
