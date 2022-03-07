@@ -13,13 +13,10 @@ export AES_PASSWORD="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.proper
 source $DOMAIN_HOME/bin/setDomainEnv.sh 
 # cat | $WLS_HOME/../../oracle_common/common/bin/wlst.sh <<EOF_wlst
 cat | java weblogic.WLST <<EOF_wlst
-
 try:
   ms_name=os.environ['MS_NAME']
-
   domain_home=os.environ['DOMAIN_HOME']
   domain_name=os.environ['DOMAIN_NAME']
-
   nm_host=os.environ['NM_HOST']
   nm_port=os.environ['NM_PORT']
 except Exception, err:
@@ -30,7 +27,6 @@ except Exception, err:
 try:
   service = weblogic.security.internal.SerializedSystemIni.getEncryptionService(domain_home)
   encryption = weblogic.security.internal.encryption.ClearOrEncryptedService(service)
-
   username=encryption.decrypt(os.environ['AES_USERNAME'])
   password=encryption.decrypt(os.environ['AES_PASSWORD'])
 except Exception, err:
@@ -57,4 +53,3 @@ EOF_wlst
 WLST_result=$?
 
 exit $WLST_result
-
