@@ -314,7 +314,6 @@ wls)
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
         echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
     fi
-    esac
     ;;
 ohs)
     # Weblogic not found try OHS
