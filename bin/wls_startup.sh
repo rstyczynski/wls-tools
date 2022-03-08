@@ -458,7 +458,7 @@ nodemanager)
     stdout_log=$log_dir/$log_name.out.$file_no
     stderr_log=$log_dir/$log_name.err.$file_no
 
-    start_service="rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out; rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err; $DOMAIN_HOME/bin/startNodeManager.sh >$stdout_log 2>$stderr_log"
+    start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/stopWebLogic.sh $log_dir $log_name $stdout_log $stderr_log"
     stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
 
     start_mode=blocking
@@ -494,7 +494,7 @@ EOF
             stdout_log=$log_dir/$log_name.out.$file_no
             stderr_log=$log_dir/$log_name.err.$file_no
 
-            start_service="rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out; rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err; $DOMAIN_HOME/bin/startWebLogic.sh >$stdout_log 2>$stderr_log"
+            start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/stopWebLogic.sh $log_dir $log_name $stdout_log $stderr_log"
             stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
             start_mode=blocking
