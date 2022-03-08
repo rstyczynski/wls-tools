@@ -349,10 +349,10 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
 
     test -z "$DOMAIN_NAME" && read -p "Enter Weblogic domain name:" DOMAIN_NAME
     if [ $(whoami) != $DOMAIN_OWNER ]; then
-        DOMAIN_NAME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $(basename $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh")
+        DOMAIN_NAME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh")
         test -z "$DOMAIN_NAME_TEST" && unset DOMAIN_HOME
     else
-        DOMAIN_HOME_TEST=$(ls $(basename $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh)
+        DOMAIN_HOME_TEST=$(ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh)
         test -z "$DOMAIN_NAME_TEST" && unset DOMAIN_HOME
     fi
 
