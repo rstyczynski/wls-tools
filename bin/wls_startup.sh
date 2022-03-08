@@ -270,18 +270,9 @@ fi
 # get / set domain home
 #
 source $script_dir/config.sh 
-if [ -z "$DOMAIN_HOME" ]; then
-    DOMAIN_HOME=$(getcfg $config_id DOMAIN_HOME 2>/dev/null)
-fi
-
-if [ -z "$DOMAIN_NAME" ]; then
-    DOMAIN_NAME=$(getcfg $config_id DOMAIN_NAME 2>/dev/null)
-fi
-
-if [ -z "$DOMAIN_OWNER" ]; then
-    DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
-fi
-
+DOMAIN_HOME=$(getcfg $config_id DOMAIN_HOME 2>/dev/null)
+DOMAIN_NAME=$(getcfg $config_id DOMAIN_NAME 2>/dev/null)
+DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 
 case $DOMAIN_TYPE in
 wls)
@@ -294,10 +285,10 @@ wls)
         source $script_dir/discover_processes.sh 
         discoverWLS
 
-        DOMAIN_OWNER=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+        : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_managed[0]} os_user)}
         : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
-        DOMAIN_NAME=$(getDomainName)
-        DOMAIN_HOME=$(getDomainHome)
+        : ${DOMAIN_NAME:=$(getDomainName)}
+        : ${DOMAIN_HOME:=$(getDomainHome)}
     fi
 
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
@@ -310,13 +301,13 @@ ohs)
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo -n "OHS discovery..."
 
-        NM_OHS=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)
+        : ${NM_OHS:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)}
         test ! -z "$NM_OHS" && DOMAIN_TYPE=ohs
 
-        DOMAIN_OWNER=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)
-        DOMAIN_HOME=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)
-        DOMAIN_NAME=$(filename $DOMAIN_HOME)
-        NM_PID=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)
+        : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)}
+        : ${DOMAIN_HOME:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)}
+        : ${DOMAIN_NAME:=$(filename $DOMAIN_HOME)}
+        : ${NM_PID:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)}
     fi
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
         echo "OHS processes not found."
