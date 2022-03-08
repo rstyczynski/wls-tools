@@ -15,16 +15,24 @@ function start() {
     blocking)
 
         if [ $(whoami) != $DOMAIN_OWNER ]; then
-            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service >$stdout_log 2>$stderr_log &\""
-            sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out"
-            sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err"
-            sudo su $DOMAIN_OWNER -c "nohup $start_service >$stdout_log 2>$stderr_log &"
+            # echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service >$stdout_log 2>$stderr_log &\""
+            # sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out"
+            # sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err"
+            # sudo su $DOMAIN_OWNER -c "nohup $start_service >$stdout_log 2>$stderr_log &"
+
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
+            sudo su $DOMAIN_OWNER -c "nohup $start_service &"
+
         else
 
-            echo "Executing: \"nohup $start_service >$stdout_log 2>$stderr_log &\""
-            rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out
-            rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err
-            nohup $start_service >$stdout_log 2>$stderr_log &
+            # echo "Executing: \"nohup $start_service >$stdout_log 2>$stderr_log &\""
+            # rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out
+            # rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err
+            # nohup $start_service >$stdout_log 2>$stderr_log &
+
+            echo "Executing: \"nohup $start_service &\""
+            nohup $start_service &
+
         fi
         echo "Started in background."   
         ;;
@@ -435,9 +443,6 @@ esac
 
 case $WLS_INSTANCE in
 nodemanager)
-    start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
-    stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
-
     # handle stdout/err file rotation
     log_name=nodemanager
     log_dir=$DOMAIN_HOME/nodemanager
@@ -452,6 +457,9 @@ nodemanager)
     file_no=$(( $file_no + 1 ))
     stdout_log=$log_dir/$log_name.out.$file_no
     stderr_log=$log_dir/$log_name.err.$file_no
+
+    start_service="rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out; rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err; $DOMAIN_HOME/bin/startNodeManager.sh >$stdout_log 2>$stderr_log"
+    stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
 
     start_mode=blocking
 
@@ -471,9 +479,6 @@ nodemanager)
 EOF
         case $WLS_INSTANCE in
         adminserver)
-            start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
-            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
-
             # handle stdout/err file rotation
             log_name=AdminServer
             log_dir=$DOMAIN_HOME/servers/AdminServer/logs
@@ -488,6 +493,9 @@ EOF
             file_no=$(( $file_no + 1 ))
             stdout_log=$log_dir/$log_name.out.$file_no
             stderr_log=$log_dir/$log_name.err.$file_no
+
+            start_service="rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out; rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err; $DOMAIN_HOME/bin/startWebLogic.sh"
+            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
             start_mode=blocking
 
