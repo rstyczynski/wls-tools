@@ -327,7 +327,7 @@ ohs)
 
         : ${DOMAIN_HOME:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)}
 
-        test -z "$DOMAIN_HOME" || ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
+        test -z "$DOMAIN_HOME" || : ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
         : ${NM_PID:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)}
     fi
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
