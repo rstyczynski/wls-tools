@@ -13,14 +13,16 @@ EOF
 function start() {
     case $start_mode in
     blocking)
+        : ${stdout_log:=$DOMAIN_HOME}
+        : ${stderr_log:=xxx}
+
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
-            # TODO Direct stdout, stderr to file
             # TODO rotate on start
-            sudo su - $DOMAIN_OWNER -c "nohup $start_service &"
+            sudo su - $DOMAIN_OWNER -c "nohup $start_service > $stdout_log 2> $stderr_log  &"
         else
             echo "Executing: \"nohup $start_service &\""
-            nohup $start_service &
+            nohup $start_service > $stdout_log 2> $stderr_log &
         fi
         echo "Started in background."   
         ;;
@@ -428,6 +430,9 @@ nodemanager)
     start_service="$DOMAIN_HOME/bin/startNodeManager.sh"
     stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
 
+    stdout_log=$DOMAIN_HOME/nodemanager/nodemanager.out
+    stderr_log=$DOMAIN_HOME/nodemanager/nodemanager.err
+    
     start_mode=blocking
 
     start_priority=60
@@ -448,6 +453,9 @@ EOF
         adminserver)
             start_service="$DOMAIN_HOME/bin/startWebLogic.sh"
             stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
+
+            stdout_log=$DOMAIN_HOME/servers/AdminServer/logs/AdminServer.out
+            stderr_log=$DOMAIN_HOME/servers/AdminServer/logs/AdminServer.err
 
             start_mode=blocking
 
