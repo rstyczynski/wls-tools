@@ -175,9 +175,10 @@ WantedBy=multi-user.target
 EOF
     ;;
 requesting)
-    # TODO: add [Unit] Requires= After=
-
     # server process start is non blocking, so cannot be managed by systemd. notice RemainAfterExit=yes
+
+    # Note that [Unit] Requires= After= can't be used as node mamanger service name is not static - may be prefixd with wls_ or ohs_
+    # wait for nm process is implemented in wls start / stop scripts.
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
