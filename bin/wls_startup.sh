@@ -15,16 +15,16 @@ function start() {
     blocking)
 
         if [ $(whoami) != $DOMAIN_OWNER ]; then
-            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service >$stdout_log 2>$stderr_log &\""
             sudo su - $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out"
             sudo su - $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err"
-            sudo su - $DOMAIN_OWNER -c "nohup $start_service > $stdout_log 2> $stderr_log  &"
+            sudo su - $DOMAIN_OWNER -c "nohup $start_service >$stdout_log 2>$stderr_log &"
         else
 
-            echo "Executing: \"nohup $start_service &\""
+            echo "Executing: \"nohup $start_service >$stdout_log 2>$stderr_log &\""
             rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out
             rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err
-            nohup $start_service > $stdout_log 2> $stderr_log &
+            nohup $start_service >$stdout_log 2>$stderr_log &
         fi
         echo "Started in background."   
         ;;
@@ -452,7 +452,6 @@ nodemanager)
     file_no=$(( $file_no + 1 ))
     stdout_log=$log_dir/$log_name.out.$file_no
     stderr_log=$log_dir/$log_name.err.$file_no
-
 
     start_mode=blocking
 
