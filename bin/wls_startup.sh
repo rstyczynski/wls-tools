@@ -133,7 +133,6 @@ EOF
 
 function unregister_initd() {
 
-    stop
     sudo chkconfig --del $wls_component
     sudo rm -f /etc/init.d/$wls_component
 
@@ -219,7 +218,6 @@ EOF
 
 function unregister_systemd() {
 
-    stop
     sudo systemctl disable $wls_component.service
     sudo rm -f /etc/systemd/system/$wls_component.service
 
@@ -334,7 +332,7 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
     #
 
     # ask for username and test
-    test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
+    test -z "$DOMAIN_OWNER" || read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
 
     if [ $(whoami) != $DOMAIN_OWNER ]; then
         DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami) | tail -1')
@@ -348,7 +346,7 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME | tail -1)
     fi
 
-    test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
+    test -z "$DOMAIN_HOME" || read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
     if [ $(whoami) != $DOMAIN_OWNER ]; then
         DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
@@ -358,7 +356,7 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     fi
 
-    test -z "$DOMAIN_NAME" && read -p "Enter Weblogic domain name:" DOMAIN_NAME
+    test -z "$DOMAIN_NAME" || read -p "Enter Weblogic domain name:" DOMAIN_NAME
     if [ $(whoami) != $DOMAIN_OWNER ]; then
         DOMAIN_NAME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $(basename $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh")
         test -z "$DOMAIN_NAME_TEST" && unset DOMAIN_HOME
@@ -369,9 +367,7 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
 
 fi
 
-
-
-# save provided data to configuration if nw value was provided / discovered
+# save provided data to configuration if no value was provided / discovered
 if [ ! -z "$DOMAIN_OWNER" ]; then
     config_value=$(getcfg $config_id DOMAIN_OWNER)
     if [ "$config_value" != $DOMAIN_OWNER ]; then
@@ -392,7 +388,6 @@ if [ ! -z "$DOMAIN_HOME" ]; then
         setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
     fi
 fi
-
 
 export DOMAIN_OWNER
 export DOMAIN_TYPE
