@@ -2,8 +2,8 @@
 
 start_cmd=$1
 DOMAIN_OWNER=$2
-log_dir=$2
-log_name=$3
+log_dir=$3
+log_name=$4
 
 if [ $(whoami) != $DOMAIN_OWNER ]; then
     file_no=$(sudo su $DOMAIN_OWNER -c "ls $log_dir | grep -P '$log_name\.out\.\d+' | cut -d. -f3 | sort -nr | head -1")
