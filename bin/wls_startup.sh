@@ -443,7 +443,7 @@ nodemanager)
     log_dir=$DOMAIN_HOME/nodemanager
 
     if [ $(whoami) != $DOMAIN_OWNER ]; then
-        file_no=$(sudo su $DOMAIN_OWNER -c "ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1")
+        file_no=$(sudo su $DOMAIN_OWNER -c "ls $log_dir | grep -P "$log_name\.out\.\d+" | cut -d. -f3 | sort -nr | head -1")
     else
         file_no=$(ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1)
     fi
