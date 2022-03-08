@@ -16,9 +16,9 @@ function start() {
 
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service >$stdout_log 2>$stderr_log &\""
-            sudo su - $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out"
-            sudo su - $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err"
-            sudo su - $DOMAIN_OWNER -c "nohup $start_service >$stdout_log 2>$stderr_log &"
+            sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.out; ln -s $stdout_log $log_dir/$log_name.out"
+            sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err"
+            sudo su $DOMAIN_OWNER -c "nohup $start_service >$stdout_log 2>$stderr_log &"
         else
 
             echo "Executing: \"nohup $start_service >$stdout_log 2>$stderr_log &\""
@@ -443,9 +443,9 @@ nodemanager)
     log_dir=$DOMAIN_HOME/nodemanager
 
     if [ $(whoami) != $DOMAIN_OWNER ]; then
-        file_no=$(ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1)
+        file_no=$(sudo su $DOMAIN_OWNER -c "ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1")
     else
-        file_no=$(sudo su  $DOMAIN_OWNER -c "ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1")
+        file_no=$(ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1)
     fi
     : ${file_no:=0}
 
