@@ -10,6 +10,33 @@ export MS_NAME=$5
 export AES_USERNAME="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.properties | grep username | cut -d= -f2)="
 export AES_PASSWORD="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.properties | grep password | cut -d= -f2)="
 
+
+# wait for node manager to come up
+echo "Waiting for node manager..." 
+timeout=5
+NM_STATUS=DOWN
+while [ "$NM_STATUS" = DOWN ]; do
+  echo -n "."
+  python 2>&1 << EOF
+import socket  
+try:
+  s=socket.socket()  
+  s.settimeout($timeout)
+  s.connect(("$NM_HOST",$NM_PORT))
+  s.close()
+  exit(0)
+except Exception, err:
+  print(err)
+  exit(1)
+EOF
+  socket_test=$?
+
+  if [ $socket_test -eq 0 ]; then
+    NM_STATUS=UP
+    echo OK
+  fi
+done
+
 source $DOMAIN_HOME/bin/setDomainEnv.sh 
 # cat | $WLS_HOME/../../oracle_common/common/bin/wlst.sh <<EOF_wlst
 cat | java weblogic.WLST <<EOF_wlst

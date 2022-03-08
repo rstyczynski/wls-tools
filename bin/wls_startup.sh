@@ -147,10 +147,7 @@ function register_systemd() {
 
 case $start_mode in
 blocking)
-
-    # TODO: add [Unit] Requires= After=
-
-    # nodemanager process start is blocking, so may be managed by systemd. notice RemainAfterExit=no
+    # nodemanager and adminserver process start is blocking, so may be managed by systemd. notice RemainAfterExit=no
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
