@@ -13,8 +13,11 @@ export AES_PASSWORD="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.proper
 # wait for node manager to come up
 echo "Waiting for node manager..." 
 timeout=5
+total_timeout=300
+wait_time=0
 NM_STATUS=DOWN
 while [ "$NM_STATUS" = DOWN ]; do
+  wait_time=$(( $wait_cnt + $timeout ))
   echo -n "."
   python 2>&1 << EOF
 import socket  
@@ -34,7 +37,17 @@ EOF
     NM_STATUS=UP
     echo OK
   fi
+
+  if [ $wait_time -gt $total_timeout ]; then
+    echo "Time out!"
+    break
+  fi
 done
+
+if [ $NM_STATUS == DOWN ]; then
+  exit 1
+fi
+
 
 
 source $DOMAIN_HOME/bin/setDomainEnv.sh 
