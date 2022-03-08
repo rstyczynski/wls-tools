@@ -447,18 +447,7 @@ nodemanager)
     log_name=nodemanager
     log_dir=$DOMAIN_HOME/nodemanager
 
-    if [ $(whoami) != $DOMAIN_OWNER ]; then
-        file_no=$(sudo su $DOMAIN_OWNER -c "ls $log_dir | grep -P '$log_name\.out\.\d+' | cut -d. -f3 | sort -nr | head -1")
-    else
-        file_no=$(ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1)
-    fi
-    : ${file_no:=0}
-
-    file_no=$(( $file_no + 1 ))
-    stdout_log=$log_dir/$log_name.out.$file_no
-    stderr_log=$log_dir/$log_name.err.$file_no
-
-    start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/stopWebLogic.sh $log_dir $log_name $stdout_log $stderr_log"
+    start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/startNodeManager.sh $DOMAIN_OWNER $log_dir $log_name"
     stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
 
     start_mode=blocking
@@ -483,18 +472,7 @@ EOF
             log_name=AdminServer
             log_dir=$DOMAIN_HOME/servers/AdminServer/logs
 
-            if [ $(whoami) != $DOMAIN_OWNER ]; then
-                file_no=$(sudo su $DOMAIN_OWNER -c "ls $log_dir | grep -P '$log_name\.out\.\d+' | cut -d. -f3 | sort -nr | head -1")
-            else
-                file_no=$(ls $log_dir | grep -P "$log_dir\.out\.\d+" | cut -d. -f3 | sort -nr | head -1)
-            fi
-            : ${file_no:=0}
-
-            file_no=$(( $file_no + 1 ))
-            stdout_log=$log_dir/$log_name.out.$file_no
-            stderr_log=$log_dir/$log_name.err.$file_no
-
-            start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/stopWebLogic.sh $log_dir $log_name $stdout_log $stderr_log"
+            start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/startWebLogic.sh $DOMAIN_OWNER $log_dir $log_name"
             stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
             start_mode=blocking
