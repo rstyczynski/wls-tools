@@ -326,13 +326,13 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
     test -z "$DOMAIN_OWNER" && read -p "Enter Weblogic domain owner name:" DOMAIN_OWNER
 
     if [ $(whoami) != "$DOMAIN_OWNER" ]; then
-        DOMAIN_OWNER_TEST=$(sudo su - $DOMAIN_OWNER -c 'echo $(whoami) | tail -1')
+        DOMAIN_OWNER_TEST=$(sudo su  $DOMAIN_OWNER -c 'echo $(whoami) | tail -1')
         test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
     fi
 
     # get domain home from users's env, ask for, and test
     if [ $(whoami) != "$DOMAIN_OWNER" ]; then
-        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
+        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su  $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
     else
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME | tail -1)
     fi
@@ -340,7 +340,7 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
     test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
     if [ $(whoami) != "$DOMAIN_OWNER" ]; then
-        DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+        DOMAIN_HOME_TEST=$(sudo su  $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     else
         DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
@@ -349,7 +349,7 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
 
     test -z "$DOMAIN_NAME" && read -p "Enter Weblogic domain name:" DOMAIN_NAME
     if [ $(whoami) != $DOMAIN_OWNER ]; then
-        DOMAIN_NAME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh")
+        DOMAIN_NAME_TEST=$(sudo su  $DOMAIN_OWNER -c "ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh")
         test -z "$DOMAIN_NAME_TEST" && unset DOMAIN_HOME
     else
         DOMAIN_HOME_TEST=$(ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh)
@@ -387,7 +387,7 @@ export DOMAIN_NAME
 
 # final test of DOMAIN_HOME 
 if [ $(whoami) != $DOMAIN_OWNER ]; then
-    DOMAIN_HOME_TEST=$(sudo su - $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+    DOMAIN_HOME_TEST=$(sudo su  $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
     test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
 else
     DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
@@ -462,8 +462,8 @@ EOF
             ;;
         *)
             if [ $(whoami) != $DOMAIN_OWNER ]; then
-                NM_HOST=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut -d= -f2")
-                NM_PORT=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut -d= -f2")
+                NM_HOST=$(sudo su  $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut -d= -f2")
+                NM_PORT=$(sudo su  $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut -d= -f2")
             else
                 NM_HOST=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenAddress | cut -d= -f2 )
                 NM_PORT=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep ListenPort | cut -d= -f2 )
