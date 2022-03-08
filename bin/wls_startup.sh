@@ -262,7 +262,7 @@ esac
 
 config_id=$1
 shift
-config_id=${config_id:=wls1}
+: ${config_id:=wls1}
 
 os_release=$(cat /etc/os-release | grep '^VERSION=' | cut -d= -f2 | tr -d '"' | cut -d. -f1)
 if [ $os_release -eq 6 ]; then
