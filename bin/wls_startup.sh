@@ -13,8 +13,6 @@ EOF
 function start() {
     case $start_mode in
     blocking)
-        : ${stdout_log:=$DOMAIN_HOME}
-        : ${stderr_log:=xxx}
 
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
