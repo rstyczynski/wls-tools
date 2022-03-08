@@ -14,7 +14,7 @@ export AES_PASSWORD="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.proper
 # wait for node manager to come up
 echo -n "Waiting for node manager..." 
 timeout=5
-total_timeout=300
+total_timeout=15
 wait_time=0
 NM_STATUS=DOWN
 while [ "$NM_STATUS" = DOWN ]; do

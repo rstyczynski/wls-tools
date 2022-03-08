@@ -32,7 +32,12 @@ function start() {
             echo "Executing: $start_service"
             $start_service
         fi
-        echo "Start requested."  
+
+        if [ $? -eq 0 ]; then
+            echo "Start requested."
+        else
+            echo "Start failed."
+        fi
         ;;
     *)
         echo "Error. Wrong start mode."
