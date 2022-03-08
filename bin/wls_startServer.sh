@@ -10,8 +10,9 @@ export MS_NAME=$5
 export AES_USERNAME="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.properties | grep username | cut -d= -f2)="
 export AES_PASSWORD="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.properties | grep password | cut -d= -f2)="
 
-
+#
 # wait for node manager to come up
+#
 echo -n "Waiting for node manager..." 
 timeout=5
 total_timeout=15

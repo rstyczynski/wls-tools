@@ -10,15 +10,18 @@ export MS_NAME=$5
 export AES_USERNAME="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.properties | grep username | cut -d= -f2)="
 export AES_PASSWORD="$(cat $DOMAIN_HOME/servers/AdminServer/security/boot.properties | grep password | cut -d= -f2)="
 
+#
 # wait for node manager to come up
+#
 echo -n "Waiting for node manager..." 
 timeout=5
-total_timeout=300
+total_timeout=15
 wait_time=0
 NM_STATUS=DOWN
 while [ "$NM_STATUS" = DOWN ]; do
-  wait_time=$(( $wait_cnt + $timeout ))
   echo -n "."
+
+  start_sec=$(date +%s)
   python 2>&1 << EOF
 import socket  
 try:
@@ -28,7 +31,6 @@ try:
   s.close()
   exit(0)
 except Exception, err:
-  print(err)
   exit(1)
 EOF
   socket_test=$?
@@ -36,9 +38,14 @@ EOF
   if [ $socket_test -eq 0 ]; then
     NM_STATUS=UP
     echo OK
+  else
+    sleep 5
   fi
+  run_time=$(( $(date +%s) - $start_sec ))
 
-  if [ $wait_time -gt $total_timeout ]; then
+  wait_time=$(( $wait_time + $run_time ))
+
+  if [ $wait_time -ge $total_timeout ]; then
     echo "Time out!"
     break
   fi
