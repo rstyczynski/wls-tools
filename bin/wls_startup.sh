@@ -323,7 +323,10 @@ ohs)
         test ! -z "$NM_OHS" && DOMAIN_TYPE=ohs
 
         : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)}
+        : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep odl_rotatelogs | tr -s ' ' | cut -d' ' -f1 | head -1)}
+
         : ${DOMAIN_HOME:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)}
+
         test -z "$DOMAIN_HOME" || ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
         : ${NM_PID:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)}
     fi
@@ -352,22 +355,22 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
     if [ $(whoami) != "$DOMAIN_OWNER" ]; then
         test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su  $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
     else
-        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME | tail -1)
+        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME 2>/dev/null | tail -1)
     fi
 
     test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
     if [ $(whoami) != "$DOMAIN_OWNER" ]; then
-        DOMAIN_HOME_TEST=$(sudo su  $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh")
+        DOMAIN_HOME_TEST=$(sudo su  $DOMAIN_OWNER -c "ls $DOMAIN_HOME/bin/startNodeManager.sh 2>/dev/null ")
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     else
-        DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh)
+        DOMAIN_HOME_TEST=$(ls $DOMAIN_HOME/bin/startNodeManager.sh 2>/dev/null )
         test -z "$DOMAIN_HOME_TEST" && unset DOMAIN_HOME
     fi
 
     test -z "$DOMAIN_NAME" && read -p "Enter Weblogic domain name:" DOMAIN_NAME
     if [ $(whoami) != $DOMAIN_OWNER ]; then
-        DOMAIN_NAME_TEST=$(sudo su  $DOMAIN_OWNER -c "ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh")
+        DOMAIN_NAME_TEST=$(sudo su  $DOMAIN_OWNER -c "ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh 2>/dev/null ")
         test -z "$DOMAIN_NAME_TEST" && unset DOMAIN_HOME
     else
         DOMAIN_HOME_TEST=$(ls $(dirname $DOMAIN_HOME)/$DOMAIN_NAME/bin/startNodeManager.sh)
