@@ -529,7 +529,7 @@ start)
     ;;
 stop)
     status
-    if [ $? -eq 0 ]; then
+    if [ $? -eq 1 ]; then
         echo "Not running. Nothing to do."
     else
         stop
