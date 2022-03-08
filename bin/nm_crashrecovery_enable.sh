@@ -30,5 +30,4 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 script_name=$(basename "${BASH_SOURCE[0]}")
 
 enable_nm_CrashRecoveryEnable
-exit($?)
-
+exit $?

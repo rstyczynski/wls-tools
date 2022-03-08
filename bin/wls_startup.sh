@@ -71,6 +71,7 @@ function status() {
         status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
         if [ -z "$status" ]; then
             echo "Node manager not running."
+            return 1
             echo
         else
             echo "Node manager process:"
@@ -84,6 +85,7 @@ function status() {
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
             if [ -z "$status" ]; then
             echo "Weblogic not running."
+            return 1
             echo 
             else
                 echo "Weblogic process:"
@@ -95,6 +97,7 @@ function status() {
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
             if [ -z "$status" ]; then
             echo "OHS not running."
+            return 1
             echo 
             else
                 echo "OHS process:"
@@ -504,10 +507,20 @@ esac
 
 case $operation in
 start)
-    start
+    status
+    if [ $? -eq 0 ]; then
+        echo "Already running. Nothing to do."
+    else
+        start
+    fi
     ;;
 stop)
-    stop
+    status
+    if [ $? -eq 0 ]; then
+        echo "Not running. Nothing to do."
+    else
+        stop
+    fi
     ;;
 status)
     status
