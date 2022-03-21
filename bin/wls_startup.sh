@@ -174,6 +174,7 @@ Description=WebLogic start script - $wls_component
 
 [Service]
 Type=simple
+After=$start_after
 
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
@@ -200,6 +201,7 @@ Description=WebLogic start script - $wls_component
 
 [Service]
 Type=simple
+After=$start_after
 
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
@@ -457,6 +459,8 @@ nodemanager)
 
     start_priority=60
     stop_priority=90
+
+    start_after="network.target sshd.service"
     ;;
 *)
     case $DOMAIN_TYPE in
@@ -482,6 +486,8 @@ EOF
 
             start_priority=90
             stop_priority=60
+
+            start_after="network.target sshd.service"
             ;;
         *)
             if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -498,6 +504,8 @@ EOF
 
             start_priority=95
             stop_priority=55
+
+            start_after="$DOMAIN_TYPE\_nodemanager.service"
             ;;
         esac
         ;;
