@@ -72,14 +72,27 @@ function status() {
     case $WLS_INSTANCE in
     nodemanager)
         echo
-        echo "Node manager properties:"
+        echo "Node manager properties. Source: $DOMAIN_HOME/nodemanager/nodemanager.properties"
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
         else
             cat $DOMAIN_HOME/nodemanager/nodemanager.properties
         fi
-        echo "Source: $DOMAIN_HOME/nodemanager/nodemanager.properties"
 
+        echo
+        echo -n "Crash recovery test..."
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
+            CrashRecoveryEnabled=$(sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep CrashRecoveryEnabled | cut -d= -f2 | tr [A-Z] [a-z]")
+        else
+            CrashRecoveryEnabled=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep CrashRecoveryEnabled | cut -d= -f2 | tr [A-Z] [a-z])
+        fi
+        if [ "$CrashRecoveryEnabled" == "true" ]; then
+            echo OK
+        else
+            echo "Not enabled. Managed servers will be not started by node manager."
+        fi
+
+        echo
         status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
         if [ -z "$status" ]; then
             echo "Node manager not running."
@@ -313,7 +326,7 @@ wls)
 
     if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
         echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
-        echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id."
+        echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id (defaults to wls1)."
     fi
     ;;
 ohs)
