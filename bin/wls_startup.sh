@@ -171,10 +171,10 @@ blocking)
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
+After=$start_after
 
 [Service]
 Type=simple
-After=$start_after
 
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
@@ -198,10 +198,10 @@ requesting)
     cat >/tmp/$wls_component <<EOF
 [Unit]
 Description=WebLogic start script - $wls_component
+After=$start_after
 
 [Service]
 Type=simple
-After=$start_after
 
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
