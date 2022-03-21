@@ -84,7 +84,7 @@ function status() {
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             CrashRecoveryEnabled=$(sudo su $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep CrashRecoveryEnabled | cut -d= -f2 | tr [A-Z] [a-z]")
         else
-                
+            CrashRecoveryEnabled=$(cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep CrashRecoveryEnabled | cut -d= -f2 | tr [A-Z] [a-z])
         fi
         if [ "$CrashRecoveryEnabled" == "true" ]; then
             echo OK
