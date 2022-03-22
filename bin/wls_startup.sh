@@ -623,7 +623,7 @@ EOF
             start_priority=95
             stop_priority=55
 
-            start_after="${config_id}_nodemanager.service"
+            start_after="${config_id}_nodemanager.service mwlogs.mount"
 
             service_name=${config_id}_$WLS_INSTANCE
             ;;
@@ -648,7 +648,7 @@ EOF
     start_priority=90
     stop_priority=60
 
-    start_after="${config_id}_nodemanager.service"
+    start_after="${config_id}_nodemanager.service mwlogs.mount"
 
     service_name=${config_id}_$WLS_INSTANCE
     ;;
