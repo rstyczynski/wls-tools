@@ -336,12 +336,12 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; t
     : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
     : ${DOMAIN_NAME:=$(getDomainName)}
     : ${DOMAIN_HOME:=$(getDomainHome)}
-fi
 
-if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
-    echo "WebLogic processes not found."
-else 
-    echo OK
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
+        echo "WebLogic processes not found."
+    else 
+        echo OK
+    fi
 fi
 
 # Weblogic not found, try OHS
@@ -357,11 +357,12 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; t
     test -z "$DOMAIN_HOME" || : ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
 
     : ${NM_PID:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)}
-fi
-if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
-    echo "OHS processes not found."
-else 
-    echo OK
+
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+        echo "OHS processes not found."
+    else 
+        echo OK
+    fi
 fi
 
 # Weblogic not found, try nodemanager
@@ -371,14 +372,14 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; t
     : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)}
     : ${DOMAIN_HOME:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)}
     test -z "$DOMAIN_HOME" || : ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
-fi
 
-if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
-    echo "Node manager process not found."
-else 
-    echo OK
-fi
+    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+        echo "Node manager process not found."
+    else 
+        echo OK
+    fi
 
+fi
 
 
 # Weblogic nor OHS not found. Ask operator for domain parameters.
