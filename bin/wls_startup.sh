@@ -564,7 +564,7 @@ nodemanager)
     log_name=nodemanager
     log_dir=$DOMAIN_HOME/nodemanager
 
-    start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/startNodeManager.sh $DOMAIN_OWNER $log_dir $log_name"
+    start_service="$script_dir/process_start.sh $DOMAIN_HOME/bin/startNodeManager.sh $DOMAIN_OWNER $log_dir $log_name"
     stop_service="$DOMAIN_HOME/bin/stopNodeManager.sh"
 
     start_mode=blocking
@@ -595,7 +595,7 @@ EOF
             log_name=AdminServer
             log_dir=$DOMAIN_HOME/servers/AdminServer/logs
 
-            start_service="$script_dir/nm_process_start.sh $DOMAIN_HOME/bin/startWebLogic.sh $DOMAIN_OWNER $log_dir $log_name"
+            start_service="$script_dir/process_start.sh $DOMAIN_HOME/bin/startWebLogic.sh $DOMAIN_OWNER $log_dir $log_name"
             stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
             start_mode=blocking
