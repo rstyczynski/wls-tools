@@ -56,8 +56,9 @@ if [ $NM_STATUS == DOWN ]; then
 fi
 
 source $DOMAIN_HOME/bin/setDomainEnv.sh 
-# cat | $WLS_HOME/../../oracle_common/common/bin/wlst.sh <<EOF_wlst
-cat | java weblogic.WLST <<EOF_wlst
+#cat | java weblogic.WLST <<EOF_wlst
+
+cat | $WLS_HOME/../../oracle_common/common/bin/wlst.sh <<EOF_wlst
 try:
   ms_name=os.environ['MS_NAME']
   domain_home=os.environ['DOMAIN_HOME']
