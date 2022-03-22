@@ -24,7 +24,7 @@ function start() {
             sudo su $DOMAIN_OWNER -c "
             rm ~/$service_name.out
             nohup $start_service > ~/$service_name.out &
-            sleep
+            sleep 1
             tail ~/$service_name.out
             "
         else
