@@ -117,10 +117,19 @@ function status() {
         fi
 
         echo "Recent stdout entries:"
-        tail $DOMAIN_HOME/nodemanager/nodemanager.log
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
+            sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/nodemanager/nodemanager.out"
+        else
+            tail $DOMAIN_HOME/nodemanager/nodemanager.out
+        fi
+
         echo 
         echo "Recent stderr entries:"
-        tail $DOMAIN_HOME/nodemanager/nodemanager.err
+        if [ $(whoami) != $DOMAIN_OWNER ]; then
+            sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/nodemanager/nodemanager.err"
+        else
+            tail $DOMAIN_HOME/nodemanager/nodemanager.err
+        fi
 
         ;;
     *)
