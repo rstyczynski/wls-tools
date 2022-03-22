@@ -72,7 +72,9 @@ function status() {
     case $WLS_INSTANCE in
     nodemanager)
         echo
-        echo "Node manager properties. Source: $DOMAIN_HOME/nodemanager/nodemanager.properties"
+        echo "Node manager home: $DOMAIN_HOME/nodemanager" 
+        echo
+        echo "Node manager properties:"
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
         else
@@ -80,7 +82,7 @@ function status() {
         fi
 
         echo
-        echo -n "Crash recovery test..."
+        echo -n "Crash recovery check..."
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             CrashRecoveryEnabled=$(sudo su $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties | grep CrashRecoveryEnabled | cut -d= -f2 | tr [A-Z] [a-z]")
         else
@@ -107,6 +109,10 @@ function status() {
     *)
         case $DOMAIN_TYPE in
         wls)
+            echo
+            echo "Server home: $DOMAIN_HOME" 
+
+            echo
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
             if [ -z "$status" ]; then
             echo "Weblogic not running."
@@ -119,6 +125,10 @@ function status() {
             fi
             ;;
         ohs)
+            echo
+            echo "OHS home: $DOMAIN_HOME" 
+
+            echo
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
             if [ -z "$status" ]; then
             echo "OHS not running."
@@ -178,6 +188,9 @@ function unregister_initd() {
 
 function register_systemd() {
 
+# type:    https://www.freedesktop.org/software/systemd/man/systemd.service.html
+# aliases: https://www.freedesktop.org/software/systemd/man/systemd.unit.html
+
 case $start_mode in
 blocking)
     # nodemanager and adminserver process start is blocking, so may be managed by systemd. notice RemainAfterExit=no
@@ -232,12 +245,13 @@ EOF
     ;;
 esac
 
-    sudo mv /tmp/$wls_component /etc/systemd/system/$wls_component.service
-    sudo systemctl daemon-reload
-    sudo systemctl enable $wls_component.service
+sudo mv /tmp/$wls_component /etc/systemd/system/$wls_component.service
 
-    echo "Service registered. Start and manage the service:"
-    cat <<EOF
+sudo systemctl daemon-reload
+sudo systemctl enable $wls_component.service
+
+echo "Service registered. Start and manage the service:"
+cat <<EOF
 sudo systemctl start $wls_component
 sudo systemctl status $wls_component
 sudo systemctl restart $wls_component
@@ -245,6 +259,8 @@ sudo systemctl stop $wls_component
 
 sudo journalctl -u $wls_component
 sudo journalctl -u $wls_component -f
+
+Service definition: /etc/systemd/system/$wls_component.service
 EOF
 
 }
@@ -307,53 +323,69 @@ DOMAIN_HOME=$(getcfg $config_id DOMAIN_HOME 2>/dev/null)
 DOMAIN_NAME=$(getcfg $config_id DOMAIN_NAME 2>/dev/null)
 DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
 
-case $DOMAIN_TYPE in
-wls)
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
 
-        #
-        # WebLogic discovery
-        #
-        echo -n "WLS discovery..."
-        source $script_dir/discover_processes.sh 
-        discoverWLS
+    #
+    # WebLogic discovery
+    #
+    echo -n "WLS discovery..."
+    source $script_dir/discover_processes.sh 
+    discoverWLS
 
-        : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_managed[0]} os_user)}
-        : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
-        : ${DOMAIN_NAME:=$(getDomainName)}
-        : ${DOMAIN_HOME:=$(getDomainHome)}
-    fi
+    : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_managed[0]} os_user)}
+    : ${DOMAIN_OWNER:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
+    : ${DOMAIN_NAME:=$(getDomainName)}
+    : ${DOMAIN_HOME:=$(getDomainHome)}
+fi
 
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
-        echo "WebLogic processes not found. Make sure all process are up during install to enable auto discovery."
-        echo "When not possible, prepare configuration using $script_dir/config.sh with proper config_id (defaults to wls1)."
-    fi
-    ;;
-ohs)
-    # Weblogic not found, try OHS
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
-        echo -n "OHS discovery..."
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
+    echo "WebLogic processes not found."
+else 
+    echo OK
+fi
 
-        : ${NM_OHS:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)}
-        test ! -z "$NM_OHS" && DOMAIN_TYPE=ohs
+# Weblogic not found, try OHS
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    echo -n "OHS discovery..."
 
-        : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)}
-        : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep odl_rotatelogs | tr -s ' ' | cut -d' ' -f1 | head -1)}
+    : ${NM_OHS:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep ohs.product.home | cut -d= -f2 | head -1)}
 
-        : ${DOMAIN_HOME:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)}
+    : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)}
+    : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep odl_rotatelogs | tr -s ' ' | cut -d' ' -f1 | head -1)}
 
-        test -z "$DOMAIN_HOME" || : ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
-        : ${NM_PID:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)}
-    fi
-    if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
-        echo "OHS processes not found."
-    fi
-    ;;
-esac
+    : ${DOMAIN_HOME:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)}
+    test -z "$DOMAIN_HOME" || : ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
+
+    : ${NM_PID:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f2 | head -1)}
+fi
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    echo "OHS processes not found."
+else 
+    echo OK
+fi
+
+# Weblogic not found, try nodemanager
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    echo -n "Node manager discovery..."
+
+    : ${DOMAIN_OWNER=:$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | cut -d' ' -f1 | head -1)}
+    : ${DOMAIN_HOME:=$(ps aux | grep -v grep | grep java | grep weblogic.NodeManager | tr -s ' ' | tr ' ' '\n' | grep weblogic.RootDirectory | cut -d= -f2 | head -1)}
+    test -z "$DOMAIN_HOME" || : ${DOMAIN_NAME:=$(basename $DOMAIN_HOME)}
+fi
+
+if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
+    echo "Node manager process not found."
+else 
+    echo OK
+fi
+
+
 
 # Weblogic nor OHS not found. Ask operator for domain parameters.
 if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
-    echo "Running processes not found. Manual configuration required."
+    echo "Running processes not found. Make sure all process are up during install to enable auto discovery."
+    echo 
+    echo "Manual configuration required."
     #
     # Weblogic manual parametrisation
     #
@@ -474,6 +506,8 @@ nodemanager)
     stop_priority=90
 
     start_after="network.target sshd.service"
+
+    service_alias=$DOMAIN_NAME\_nodemanager
     ;;
 *)
     case $DOMAIN_TYPE in
@@ -518,7 +552,7 @@ EOF
             start_priority=95
             stop_priority=55
 
-            start_after="$DOMAIN_TYPE\_nodemanager.service"
+            start_after="$DOMAIN_NAME\_nodemanager.service"
             ;;
         esac
         ;;
@@ -538,6 +572,8 @@ EOF
 
     start_priority=90
     stop_priority=60
+
+    start_after="$DOMAIN_NAME\_nodemanager.service"
     ;;
     esac
 esac
