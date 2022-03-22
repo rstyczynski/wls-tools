@@ -572,7 +572,7 @@ nodemanager)
     start_priority=60
     stop_priority=90
 
-    start_after="network.target sshd.service"
+    start_after="network.target remote-fs.target"
 
     service_name=${config_id}_nodemanager
     ;;
@@ -603,7 +603,7 @@ EOF
             start_priority=90
             stop_priority=60
 
-            start_after="network.target sshd.service"
+            start_after="network.target remote-fs.target"
 
             service_name=${config_id}_adminserver
             ;;
@@ -623,7 +623,7 @@ EOF
             start_priority=95
             stop_priority=55
 
-            start_after="${config_id}_nodemanager.service mwlogs.mount"
+            start_after="remote-fs.target ${config_id}_nodemanager.service"
 
             service_name=${config_id}_$WLS_INSTANCE
             ;;
@@ -648,7 +648,7 @@ EOF
     start_priority=90
     stop_priority=60
 
-    start_after="${config_id}_nodemanager.service mwlogs.mount"
+    start_after="remote-fs.target ${config_id}_nodemanager.service"
 
     service_name=${config_id}_$WLS_INSTANCE
     ;;
