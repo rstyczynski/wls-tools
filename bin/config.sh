@@ -3,6 +3,7 @@
 function getcfg() {
     which=$1
     what=$2
+    info=$3
 
     if [ $# -lt 2 ]; then
         >&2 echo Nothing to do....
@@ -11,13 +12,21 @@ function getcfg() {
 
     value_row=$(cat /etc/$which.config 2>/dev/null | grep "^$what=" | tail -1 | grep "^$what=" )
     if [ $? -eq 0 ]; then
-        echo $value_row | cut -d= -f2
+        if [ "$info" == show_file ]; then
+            echo "$which/$what has value $(echo $value_row | cut -d= -f2) stored in config file: /etc/$which.config"
+        else
+            echo $value_row | cut -d= -f2
+        fi
     else
             value_row=$(cat ~/.$which/config 2>/dev/null | grep "^$what=" | tail -1 | grep "^$what=" )
             if [ $? -eq 0 ]; then
-                echo $value_row | cut -d= -f2
+                if [ "$info" == show_file ]; then
+                    echo "$which/$what has value $(echo $value_row | cut -d= -f2) stored in config file: /etc/$which.config"
+                else
+                    echo $value_row | cut -d= -f2
+                fi
             else
-                return $?
+                return 1
             fi
     fi
 }
