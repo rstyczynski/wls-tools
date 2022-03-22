@@ -108,23 +108,24 @@ function status() {
         fi
         echo '-----------------------------'
 
+        echo
         echo "Recent stdout entries:"
         echo '-----------------------------'
         if [ $(whoami) != $DOMAIN_OWNER ]; then
-            sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/nodemanager/nodemanager.out"
+            sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.out"
         else
-            tail $DOMAIN_HOME/nodemanager/nodemanager.out
+            tail $log_dir/$log_name.out
         fi
 
         echo 
         echo "Recent stderr entries:"
         echo '-----------------------------'
         if [ $(whoami) != $DOMAIN_OWNER ]; then
-            sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/nodemanager/nodemanager.err"
+            sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.out"
         else
-            tail $DOMAIN_HOME/nodemanager/nodemanager.err
+            tail $log_dir/$log_name.out
         fi
-        
+
         echo
         status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
         if [ -z "$status" ]; then
@@ -151,6 +152,26 @@ function status() {
             echo
             echo "Server home: $DOMAIN_HOME" 
             echo '-----------------------------'
+
+            if [ "$WLS_INSTANCE" == adminserver ]; then
+                echo
+                echo "Recent stdout entries:"
+                echo '-----------------------------'
+                if [ $(whoami) != $DOMAIN_OWNER ]; then
+                    sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.out"
+                else
+                    tail $log_dir/$log_name.out
+                fi
+
+                echo 
+                echo "Recent stderr entries:"
+                echo '-----------------------------'
+                if [ $(whoami) != $DOMAIN_OWNER ]; then
+                    sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.out"
+                else
+                    tail $log_dir/$log_name.out
+                fi
+            fi
 
             echo
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
@@ -559,12 +580,13 @@ nodemanager)
     case $DOMAIN_TYPE in
     wls)
         cat <<EOF
-    Running for WebLogic:
-    1. DOMAIN_HOME:  $DOMAIN_HOME
-    2. DOMAIN_HOME:  $DOMAIN_NAME
-    3. DOMAIN_OWNER: $DOMAIN_OWNER
-    4. INSTANCE:     $WLS_INSTANCE
-    5. Config id:    $config_id
+Running for WebLogic:
+---------------------
+1. DOMAIN_HOME:  $DOMAIN_HOME
+2. DOMAIN_HOME:  $DOMAIN_NAME
+3. DOMAIN_OWNER: $DOMAIN_OWNER
+4. INSTANCE:     $WLS_INSTANCE
+5. Config id:    $config_id
 
 EOF
         case $WLS_INSTANCE in
@@ -609,12 +631,13 @@ EOF
         ;;
     ohs)
         cat <<EOF
-    Running for OHS:
-    1. DOMAIN_HOME:  $DOMAIN_HOME
-    2. DOMAIN_HOME:  $DOMAIN_NAME
-    3. DOMAIN_OWNER: $DOMAIN_OWNER
-    4. INSTANCE:     $WLS_INSTANCE
-    5. Config id:    $config_id
+Running for OHS:
+----------------
+1. DOMAIN_HOME:  $DOMAIN_HOME
+2. DOMAIN_HOME:  $DOMAIN_NAME
+3. DOMAIN_OWNER: $DOMAIN_OWNER
+4. INSTANCE:     $WLS_INSTANCE
+5. Config id:    $config_id
 
 EOF
     start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
