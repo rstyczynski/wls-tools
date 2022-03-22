@@ -108,19 +108,6 @@ function status() {
         fi
         echo '-----------------------------'
 
-        echo
-        status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
-        if [ -z "$status" ]; then
-            echo "Node manager not running."
-            return 1
-            echo
-        else
-            echo "Node manager process:"
-            echo '-----------------------------'
-            ps aux  | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager
-            echo
-        fi
-
         echo "Recent stdout entries:"
         echo '-----------------------------'
         if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -136,6 +123,19 @@ function status() {
             sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/nodemanager/nodemanager.err"
         else
             tail $DOMAIN_HOME/nodemanager/nodemanager.err
+        fi
+        
+        echo
+        status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
+        if [ -z "$status" ]; then
+            echo "Node manager not running."
+            return 1
+            echo
+        else
+            echo "Node manager process:"
+            echo '-----------------------------'
+            ps aux  | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager
+            echo
         fi
 
         ;;
