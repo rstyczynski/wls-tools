@@ -20,7 +20,7 @@ function start() {
             # sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err"
             # sudo su $DOMAIN_OWNER -c "nohup $start_service >$stdout_log 2>$stderr_log &"
 
-            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service & > 2/dev/null\""
             sudo su $DOMAIN_OWNER -c "nohup $start_service &"
 
         else
@@ -523,7 +523,7 @@ nodemanager)
     3. DOMAIN_OWNER: $DOMAIN_OWNER
     4. INSTANCE:     $WLS_INSTANCE
     5. Config id:    $config_id
-    
+
 EOF
         case $WLS_INSTANCE in
         adminserver)
