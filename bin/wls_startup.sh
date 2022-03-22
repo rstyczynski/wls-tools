@@ -453,9 +453,9 @@ if [ ! -z "$DOMAIN_HOME" ]; then
 fi
 
 export DOMAIN_OWNER
-export DOMAIN_TYPE
 export DOMAIN_HOME
 export DOMAIN_NAME
+export DOMAIN_TYPE
 
 # final test of DOMAIN_HOME 
 if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -511,7 +511,7 @@ nodemanager)
 
     start_after="network.target sshd.service"
 
-    service_alias=$DOMAIN_NAME\_nodemanager
+    service_name=$config_id\_nodemanager
     ;;
 *)
     case $DOMAIN_TYPE in
@@ -522,7 +522,8 @@ nodemanager)
     2. DOMAIN_HOME:  $DOMAIN_NAME
     3. DOMAIN_OWNER: $DOMAIN_OWNER
     4. INSTANCE:     $WLS_INSTANCE
-
+    5. Config id:    $config_id
+    
 EOF
         case $WLS_INSTANCE in
         adminserver)
@@ -539,6 +540,8 @@ EOF
             stop_priority=60
 
             start_after="network.target sshd.service"
+
+            service_name=$config_id\_adminserver
             ;;
         *)
             if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -556,7 +559,9 @@ EOF
             start_priority=95
             stop_priority=55
 
-            start_after="$DOMAIN_NAME\_nodemanager.service"
+            start_after="$config_id\_nodemanager.service"
+
+            service_name=$config_id\_$WLS_INSTANCE
             ;;
         esac
         ;;
@@ -567,6 +572,7 @@ EOF
     2. DOMAIN_HOME:  $DOMAIN_NAME
     3. DOMAIN_OWNER: $DOMAIN_OWNER
     4. INSTANCE:     $WLS_INSTANCE
+    5. Config id:    $config_id
 
 EOF
     start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
@@ -577,7 +583,9 @@ EOF
     start_priority=90
     stop_priority=60
 
-    start_after="$DOMAIN_NAME\_nodemanager.service"
+    start_after="$config_id\_nodemanager.service"
+
+    service_name=$config_id\_$WLS_INSTANCE
     ;;
     esac
 esac
