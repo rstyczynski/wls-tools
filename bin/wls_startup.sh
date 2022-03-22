@@ -71,6 +71,12 @@ function stop() {
 function status() {
     case $WLS_INSTANCE in
     nodemanager)
+        echo "Config code: $config_id"
+        getcfg $config_id DOMAIN_HOME show_file
+        getcfg $config_id DOMAIN_NAME show_file
+        getcfg $config_id DOMAIN_OWNER show_file
+
+        echo 
         echo
         echo "Node manager home: $DOMAIN_HOME/nodemanager" 
         echo
