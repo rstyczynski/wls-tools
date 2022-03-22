@@ -115,6 +115,13 @@ function status() {
             ps aux  | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager
             echo
         fi
+
+        echo "Recent stdout entries:"
+        tail $DOMAIN_HOME/nodemanager/nodemanager.log
+        echo 
+        echo "Recent stderr entries:"
+        tail $DOMAIN_HOME/nodemanager/nodemanager.err
+
         ;;
     *)
         case $DOMAIN_TYPE in
