@@ -76,6 +76,7 @@ function status() {
     case $WLS_INSTANCE in
     nodemanager)
         echo "Config code: $config_id"
+        echo '-----------------------------'
         getcfg $config_id DOMAIN_HOME show_file
         getcfg $config_id DOMAIN_NAME show_file
         getcfg $config_id DOMAIN_OWNER show_file
@@ -83,8 +84,10 @@ function status() {
         echo 
         echo
         echo "Node manager home: $DOMAIN_HOME/nodemanager" 
+        echo '-----------------------------'
         echo
         echo "Node manager properties:"
+        echo '-----------------------------'
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             sudo su - $DOMAIN_OWNER -c "cat $DOMAIN_HOME/nodemanager/nodemanager.properties"
         else
@@ -103,6 +106,7 @@ function status() {
         else
             echo "Not enabled. Managed servers will be not started by node manager."
         fi
+        echo '-----------------------------'
 
         echo
         status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager)
@@ -112,11 +116,13 @@ function status() {
             echo
         else
             echo "Node manager process:"
+            echo '-----------------------------'
             ps aux  | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep weblogic.NodeManager
             echo
         fi
 
         echo "Recent stdout entries:"
+        echo '-----------------------------'
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/nodemanager/nodemanager.out"
         else
@@ -125,6 +131,7 @@ function status() {
 
         echo 
         echo "Recent stderr entries:"
+        echo '-----------------------------'
         if [ $(whoami) != $DOMAIN_OWNER ]; then
             sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/nodemanager/nodemanager.err"
         else
@@ -135,8 +142,15 @@ function status() {
     *)
         case $DOMAIN_TYPE in
         wls)
+            echo "Config code: $config_id"
+            echo '-----------------------------'
+            getcfg $config_id DOMAIN_HOME show_file
+            getcfg $config_id DOMAIN_NAME show_file
+            getcfg $config_id DOMAIN_OWNER show_file
+
             echo
             echo "Server home: $DOMAIN_HOME" 
+            echo '-----------------------------'
 
             echo
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
@@ -146,14 +160,21 @@ function status() {
             echo 
             else
                 echo "Weblogic process:"
+                echo '-----------------------------'
                 ps aux | grep "^$DOMAIN_OWNER"  | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE"
                 echo 
             fi
             ;;
         ohs)
+            echo "Config code: $config_id"
+            echo '-----------------------------'
+            getcfg $config_id DOMAIN_HOME show_file
+            getcfg $config_id DOMAIN_NAME show_file
+            getcfg $config_id DOMAIN_OWNER show_file
+
             echo
             echo "OHS home: $DOMAIN_HOME" 
-
+            echo '-----------------------------'
             echo
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
             if [ -z "$status" ]; then
@@ -162,6 +183,7 @@ function status() {
             echo 
             else
                 echo "OHS process:"
+                echo '-----------------------------'
                 ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd
                 echo
             fi
