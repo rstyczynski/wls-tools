@@ -75,11 +75,11 @@ function stop() {
 function status() {
     case $WLS_INSTANCE in
     nodemanager)
-        echo "Config code: $config_id"
+        echo "Config code: ${config_id}"
         echo '-----------------------------'
-        getcfg $config_id DOMAIN_HOME show_file
-        getcfg $config_id DOMAIN_NAME show_file
-        getcfg $config_id DOMAIN_OWNER show_file
+        getcfg ${config_id} DOMAIN_HOME show_file
+        getcfg ${config_id} DOMAIN_NAME show_file
+        getcfg ${config_id} DOMAIN_OWNER show_file
 
         echo 
         echo
@@ -143,11 +143,11 @@ function status() {
     *)
         case $DOMAIN_TYPE in
         wls)
-            echo "Config code: $config_id"
+            echo "Config code: ${config_id}"
             echo '-----------------------------'
-            getcfg $config_id DOMAIN_HOME show_file
-            getcfg $config_id DOMAIN_NAME show_file
-            getcfg $config_id DOMAIN_OWNER show_file
+            getcfg ${config_id} DOMAIN_HOME show_file
+            getcfg ${config_id} DOMAIN_NAME show_file
+            getcfg ${config_id} DOMAIN_OWNER show_file
 
             echo
             echo "Server home: $DOMAIN_HOME" 
@@ -187,11 +187,11 @@ function status() {
             fi
             ;;
         ohs)
-            echo "Config code: $config_id"
+            echo "Config code: ${config_id}"
             echo '-----------------------------'
-            getcfg $config_id DOMAIN_HOME show_file
-            getcfg $config_id DOMAIN_NAME show_file
-            getcfg $config_id DOMAIN_OWNER show_file
+            getcfg ${config_id} DOMAIN_HOME show_file
+            getcfg ${config_id} DOMAIN_NAME show_file
+            getcfg ${config_id} DOMAIN_OWNER show_file
 
             echo
             echo "OHS home: $DOMAIN_HOME" 
@@ -227,7 +227,7 @@ function register_initd() {
 # description: WebLogic startup service for $wls_component
 #
 
-$script_dir/$script_name $wls_component $config_id \$1
+$script_dir/$script_name $wls_component ${config_id} \$1
 EOF
 
     chmod +x /tmp/$service_name
@@ -301,8 +301,8 @@ Type=simple
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
 
-ExecStart=$script_dir/$script_name $wls_component start $config_id
-ExecStop=$script_dir/$script_name $wls_component stop $config_id
+ExecStart=$script_dir/$script_name $wls_component start ${config_id}
+ExecStop=$script_dir/$script_name $wls_component stop ${config_id}
 
 RemainAfterExit=yes
 KillMode=process
@@ -388,9 +388,9 @@ fi
 # get / set domain home
 #
 source $script_dir/config.sh 
-DOMAIN_HOME=$(getcfg $config_id DOMAIN_HOME 2>/dev/null)
-DOMAIN_NAME=$(getcfg $config_id DOMAIN_NAME 2>/dev/null)
-DOMAIN_OWNER=$(getcfg $config_id DOMAIN_OWNER 2>/dev/null)
+DOMAIN_HOME=$(getcfg ${config_id} DOMAIN_HOME 2>/dev/null)
+DOMAIN_NAME=$(getcfg ${config_id} DOMAIN_NAME 2>/dev/null)
+DOMAIN_OWNER=$(getcfg ${config_id} DOMAIN_OWNER 2>/dev/null)
 
 if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; then
 
@@ -495,23 +495,23 @@ fi
 
 # save provided data to configuration if no value was provided / discovered
 if [ ! -z "$DOMAIN_OWNER" ]; then
-    config_value=$(getcfg $config_id DOMAIN_OWNER)
+    config_value=$(getcfg ${config_id} DOMAIN_OWNER)
     if [ "$config_value" != $DOMAIN_OWNER ]; then
-        setcfg $config_id DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
+        setcfg ${config_id} DOMAIN_OWNER $DOMAIN_OWNER force 2>/dev/null
     fi
 fi
 
 if [ ! -z "$DOMAIN_NAME" ]; then
-    config_value=$(getcfg $config_id DOMAIN_NAME)
+    config_value=$(getcfg ${config_id} DOMAIN_NAME)
     if [ "$config_value" != $DOMAIN_NAME ]; then
-        setcfg $config_id DOMAIN_NAME $DOMAIN_NAME force 2>/dev/null
+        setcfg ${config_id} DOMAIN_NAME $DOMAIN_NAME force 2>/dev/null
     fi
 fi
 
 if [ ! -z "$DOMAIN_HOME" ]; then
-    config_value=$(getcfg $config_id DOMAIN_HOME)
+    config_value=$(getcfg ${config_id} DOMAIN_HOME)
     if [ "$config_value" != $DOMAIN_HOME ]; then
-        setcfg $config_id DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
+        setcfg ${config_id} DOMAIN_HOME $DOMAIN_HOME force 2>/dev/null
     fi
 fi
 
@@ -574,7 +574,7 @@ nodemanager)
 
     start_after="network.target sshd.service"
 
-    service_name=$config_id\_nodemanager
+    service_name=${config_id}\_nodemanager
     ;;
 *)
     case $DOMAIN_TYPE in
@@ -586,7 +586,7 @@ Running for WebLogic:
 2. DOMAIN_HOME:  $DOMAIN_NAME
 3. DOMAIN_OWNER: $DOMAIN_OWNER
 4. INSTANCE:     $WLS_INSTANCE
-5. Config id:    $config_id
+5. Config id:    ${config_id}
 
 EOF
         case $WLS_INSTANCE in
@@ -605,7 +605,7 @@ EOF
 
             start_after="network.target sshd.service"
 
-            service_name=$config_id\_adminserver
+            service_name=${config_id}\_adminserver
             ;;
         *)
             if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -623,9 +623,9 @@ EOF
             start_priority=95
             stop_priority=55
 
-            start_after="$config_id\_nodemanager.service"
+            start_after="${config_id}\_nodemanager.service"
 
-            service_name=$config_id\_$WLS_INSTANCE
+            service_name=${config_id}\_$WLS_INSTANCE
             ;;
         esac
         ;;
@@ -637,7 +637,7 @@ Running for OHS:
 2. DOMAIN_HOME:  $DOMAIN_NAME
 3. DOMAIN_OWNER: $DOMAIN_OWNER
 4. INSTANCE:     $WLS_INSTANCE
-5. Config id:    $config_id
+5. Config id:    ${config_id}
 
 EOF
     start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
@@ -648,9 +648,9 @@ EOF
     start_priority=90
     stop_priority=60
 
-    start_after="$config_id\_nodemanager.service"
+    start_after="${config_id}_nodemanager.service"
 
-    service_name=$config_id\_$WLS_INSTANCE
+    service_name=${config_id}\_$WLS_INSTANCE
     ;;
     esac
 esac
