@@ -379,7 +379,6 @@ if [ -z "$DOMAIN_HOME" ] || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]  ; t
     fi
 fi
 
-
 # Weblogic nor OHS not found. Ask operator for domain parameters.
 if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; then
     echo "Running processes not found. Make sure all process are up during install to enable auto discovery."
