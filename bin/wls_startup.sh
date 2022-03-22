@@ -22,9 +22,9 @@ function start() {
 
             echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
             sudo su $DOMAIN_OWNER -c "
-            rm ~/$service_name.out
+            rm -f ~/$service_name.out
             nohup $start_service > ~/$service_name.out &
-            sleep 1
+            sleep 5
             tail ~/$service_name.out
             "
         else
