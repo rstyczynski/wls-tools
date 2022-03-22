@@ -20,9 +20,13 @@ function start() {
             # sudo su $DOMAIN_OWNER -c "rm -f $log_dir/$log_name.err; ln -s $stderr_log $log_dir/$log_name.err"
             # sudo su $DOMAIN_OWNER -c "nohup $start_service >$stdout_log 2>$stderr_log &"
 
-            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service & > 2/dev/null\""
-            sudo su $DOMAIN_OWNER -c "nohup $start_service &"
-
+            echo "Executing: sudo su - $DOMAIN_OWNER -c \"nohup $start_service &\""
+            sudo su $DOMAIN_OWNER -c "
+            rm ~/$service_name.out
+            nohup $start_service > ~/$service_name.out &
+            sleep
+            tail ~/$service_name.out
+            "
         else
 
             # echo "Executing: \"nohup $start_service >$stdout_log 2>$stderr_log &\""
