@@ -121,9 +121,9 @@ function status() {
         echo "Recent stderr entries:"
         echo '-----------------------------'
         if [ $(whoami) != $DOMAIN_OWNER ]; then
-            sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.out"
+            sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.err"
         else
-            tail $log_dir/$log_name.out
+            tail $log_dir/$log_name.err
         fi
 
         echo
@@ -167,9 +167,9 @@ function status() {
                 echo "Recent stderr entries:"
                 echo '-----------------------------'
                 if [ $(whoami) != $DOMAIN_OWNER ]; then
-                    sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.out"
+                    sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.err"
                 else
-                    tail $log_dir/$log_name.out
+                    tail $log_dir/$log_name.err
                 fi
             fi
 
