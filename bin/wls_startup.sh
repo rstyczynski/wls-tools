@@ -574,7 +574,7 @@ nodemanager)
 
     start_after="network.target sshd.service"
 
-    service_name=${config_id}\_nodemanager
+    service_name=${config_id}_nodemanager
     ;;
 *)
     case $DOMAIN_TYPE in
@@ -605,7 +605,7 @@ EOF
 
             start_after="network.target sshd.service"
 
-            service_name=${config_id}\_adminserver
+            service_name=${config_id}_adminserver
             ;;
         *)
             if [ $(whoami) != $DOMAIN_OWNER ]; then
@@ -623,9 +623,9 @@ EOF
             start_priority=95
             stop_priority=55
 
-            start_after="${config_id}\_nodemanager.service"
+            start_after="${config_id}_nodemanager.service"
 
-            service_name=${config_id}\_$WLS_INSTANCE
+            service_name=${config_id}_$WLS_INSTANCE
             ;;
         esac
         ;;
@@ -650,7 +650,7 @@ EOF
 
     start_after="${config_id}_nodemanager.service"
 
-    service_name=${config_id}\_$WLS_INSTANCE
+    service_name=${config_id}_$WLS_INSTANCE
     ;;
     esac
 esac
