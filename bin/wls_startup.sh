@@ -161,33 +161,33 @@ function status() {
 
 function register_initd() {
 
-    cat >/tmp/$wls_component <<EOF
+    cat >/tmp/$service_name <<EOF
 #!/bin/bash
 #
 # chkconfig:   2345 $start_priority $stop_priority
 # description: WebLogic startup service for $wls_component
 #
 
-$script_dir/$script_name $wls_component \$1
+$script_dir/$script_name $wls_component $config_id \$1
 EOF
 
-    chmod +x /tmp/$wls_component
-    sudo mv /tmp/$wls_component /etc/init.d/$wls_component
+    chmod +x /tmp/$service_name
+    sudo mv /tmp/$service_name /etc/init.d/$service_name
 
-    sudo chkconfig --add $wls_component
+    sudo chkconfig --add $service_name
 
     echo echo "Service registered. Start the service:"
     cat <<EOF
-sudo service $wls_component start
-sudo service $wls_component status
-sudo service $wls_component stop
+sudo service $service_name start
+sudo service $service_name status
+sudo service $service_name stop
 EOF
 }
 
 function unregister_initd() {
 
-    sudo chkconfig --del $wls_component
-    sudo rm -f /etc/init.d/$wls_component
+    sudo chkconfig --del $service_name
+    sudo rm -f /etc/init.d/$service_name
 
     echo "Service unregistered."
 }
@@ -204,9 +204,9 @@ function register_systemd() {
 case $start_mode in
 blocking)
     # nodemanager and adminserver process start is blocking, so may be managed by systemd. notice RemainAfterExit=no
-    cat >/tmp/$wls_component <<EOF
+    cat >/tmp/$service_name <<EOF
 [Unit]
-Description=WebLogic start script - $wls_component
+Description=WebLogic start script - $service_name
 After=$start_after
 
 [Service]
@@ -231,9 +231,9 @@ requesting)
 
     # Note that [Unit] Requires= After= can't be used as node mamanger service name is not static - may be prefixd with wls_ or ohs_
     # wait for nm process is implemented in wls start / stop scripts.
-    cat >/tmp/$wls_component <<EOF
+    cat >/tmp/$service_name <<EOF
 [Unit]
-Description=WebLogic start script - $wls_component
+Description=WebLogic start script - $service_name
 After=$start_after
 
 [Service]
@@ -242,8 +242,8 @@ Type=simple
 User=$DOMAIN_OWNER
 TimeoutStartSec=600
 
-ExecStart=$script_dir/$script_name $wls_component start
-ExecStop=$script_dir/$script_name $wls_component stop
+ExecStart=$script_dir/$script_name $wls_component start $config_id
+ExecStop=$script_dir/$script_name $wls_component stop $config_id
 
 RemainAfterExit=yes
 KillMode=process
@@ -255,30 +255,30 @@ EOF
     ;;
 esac
 
-sudo mv /tmp/$wls_component /etc/systemd/system/$wls_component.service
+sudo mv /tmp/$service_name /etc/systemd/system/$service_name.service
 
 sudo systemctl daemon-reload
-sudo systemctl enable $wls_component.service
+sudo systemctl enable $service_name.service
 
 echo "Service registered. Start and manage the service:"
 cat <<EOF
-sudo systemctl start $wls_component
-sudo systemctl status $wls_component
-sudo systemctl restart $wls_component
-sudo systemctl stop $wls_component
+sudo systemctl start $service_name
+sudo systemctl status $service_name
+sudo systemctl restart $service_name
+sudo systemctl stop $service_name
 
-sudo journalctl -u $wls_component
-sudo journalctl -u $wls_component -f
+sudo journalctl -u $service_name
+sudo journalctl -u $service_name -f
 
-Service definition: /etc/systemd/system/$wls_component.service
+Service definition: /etc/systemd/system/$service_name.service
 EOF
 
 }
 
 function unregister_systemd() {
 
-    sudo systemctl disable $wls_component.service
-    sudo rm -f /etc/systemd/system/$wls_component.service
+    sudo systemctl disable $service_name.service
+    sudo rm -f /etc/systemd/system/$service_name.service
 
     sudo systemctl daemon-reload
 
