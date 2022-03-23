@@ -465,13 +465,7 @@ if [ -z "$DOMAIN_HOME" ]  || [ -z "$DOMAIN_NAME" ] || [ -z "$DOMAIN_OWNER" ]; th
         test -z "$DOMAIN_OWNER_TEST" && unset DOMAIN_OWNER
     fi
 
-    # get domain home from users's env, ask for, and test
-    if [ $(whoami) != "$DOMAIN_OWNER" ]; then
-        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(sudo su  $DOMAIN_OWNER -c "ls $DOMAIN_HOME | tail -1")
-    else
-        test -z "$DOMAIN_HOME" && DOMAIN_HOME=$(ls $DOMAIN_HOME 2>/dev/null | tail -1)
-    fi
-
+    # ask for domain home, and test
     test -z "$DOMAIN_HOME" && read -p "Enter Weblogic domain home directory:" DOMAIN_HOME
 
     if [ $(whoami) != "$DOMAIN_OWNER" ]; then
