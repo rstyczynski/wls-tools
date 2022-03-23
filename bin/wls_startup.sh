@@ -234,6 +234,11 @@ function status() {
 
                 ;;
             *)
+                echo
+                echo "Recent log entries:"
+                echo '-----------------------------'
+                tail $DOMAIN_HOME/servers/$WLS_INSTANCE/logs/$WLS_INSTANCE.log
+                
                 status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
                 if [ -z "$status" ]; then
                 echo "OHS not running."
