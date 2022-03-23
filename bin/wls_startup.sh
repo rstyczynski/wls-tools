@@ -197,17 +197,56 @@ function status() {
             echo "OHS home: $DOMAIN_HOME" 
             echo '-----------------------------'
             echo
-            status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
-            if [ -z "$status" ]; then
-            echo "OHS not running."
-            return 1
-            echo 
-            else
-                echo "OHS process:"
-                echo '-----------------------------'
-                ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd
+
+            case $WLS_INSTANCE in
+            adminserver)
                 echo
-            fi
+                echo "Recent stdout entries:"
+                echo '-----------------------------'
+                if [ $(whoami) != $DOMAIN_OWNER ]; then
+                    sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.out"
+                else
+                    tail $log_dir/$log_name.out
+                fi
+
+                echo 
+                echo "Recent stderr entries:"
+                echo '-----------------------------'
+                if [ $(whoami) != $DOMAIN_OWNER ]; then
+                    sudo su $DOMAIN_OWNER -c "tail $log_dir/$log_name.err"
+                else
+                    tail $log_dir/$log_name.err
+                fi
+
+                echo
+                status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
+                if [ -z "$status" ]; then
+                echo "Weblogic not running."
+                return 1
+                echo 
+                else
+                    echo "Weblogic process:"
+                    echo '-----------------------------'
+                    ps aux | grep "^$DOMAIN_OWNER"  | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE"
+                    echo 
+                fi
+
+
+                ;;
+            *)
+                status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
+                if [ -z "$status" ]; then
+                echo "OHS not running."
+                return 1
+                echo 
+                else
+                    echo "OHS process:"
+                    echo '-----------------------------'
+                    ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd
+                    echo
+                fi
+                ;;
+            esac
             ;;
         esac
         ;;
@@ -634,17 +673,38 @@ Running for OHS:
 5. Config id:    ${config_id}
 
 EOF
-    start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
-    stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
+        case $WLS_INSTANCE in
+        adminserver)
+            # handle stdout/err file rotation
+            log_name=AdminServer
+            log_dir=$DOMAIN_HOME/servers/AdminServer/logs
 
-    start_mode=requesting
+            start_service="$script_dir/process_start.sh $DOMAIN_HOME/bin/startWebLogic.sh $DOMAIN_OWNER $log_dir $log_name"
+            stop_service="$DOMAIN_HOME/bin/stopWebLogic.sh"
 
-    start_priority=90
-    stop_priority=60
+            start_mode=blocking
 
-    start_after="remote-fs.target ${config_id}_nodemanager.service"
+            start_priority=90
+            stop_priority=60
 
-    service_name=${config_id}_$WLS_INSTANCE
+            start_after="network.target remote-fs.target"
+
+            service_name=${config_id}_adminserver
+            ;;
+        *)
+            start_service="$DOMAIN_HOME/bin/startComponent.sh $WLS_INSTANCE"
+            stop_service="$DOMAIN_HOME/bin/stopComponent.sh $WLS_INSTANCE"
+
+            start_mode=requesting
+
+            start_priority=90
+            stop_priority=60
+
+            start_after="remote-fs.target ${config_id}_nodemanager.service"
+
+            service_name=${config_id}_$WLS_INSTANCE
+            ;;
+        esac
     ;;
     esac
 esac
