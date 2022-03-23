@@ -180,9 +180,9 @@ function status() {
                 sudo su $DOMAIN_OWNER -c "
                 cd $DOMAIN_HOME/servers
                 inode=$(ls -il |  tr [A-Z] [a-z] | grep -P "$WLS_INSTANCE\$" | cut -f1 -d' ')
-                WLS_INSTANCE_NATURAL_NAME=$(ls -il | grep -P "^$inode" | tr ' ' '\n' | tail -1)
+                WLS_INSTANCE_NATURAL_NAME=$(ls -il | grep -P "^\$inode" | tr ' ' '\n' | tail -1)
                 cd - >/dev/null
-                tail $DOMAIN_HOME/servers/$WLS_INSTANCE_NATURAL_NAME/logs/$WLS_INSTANCE_NATURAL_NAME.log
+                tail $DOMAIN_HOME/servers/\$WLS_INSTANCE_NATURAL_NAME/logs/\$WLS_INSTANCE_NATURAL_NAME.log
                 "
             else
                 cd $DOMAIN_HOME/servers
