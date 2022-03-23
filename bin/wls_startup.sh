@@ -174,6 +174,15 @@ function status() {
             fi
 
             echo
+            echo "Recent log entries:"
+            echo '-----------------------------'
+            if [ $(whoami) != $DOMAIN_OWNER ]; then
+                sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/servers/$WLS_INSTANCE/logs/$WLS_INSTANCE.log"
+            else
+                tail $DOMAIN_HOME/servers/$WLS_INSTANCE/logs/$WLS_INSTANCE.log
+            fi
+
+            echo
             status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
             if [ -z "$status" ]; then
             echo "Weblogic not running."
@@ -219,6 +228,15 @@ function status() {
                 fi
 
                 echo
+                echo "Recent log entries:"
+                echo '-----------------------------'
+                if [ $(whoami) != $DOMAIN_OWNER ]; then
+                    sudo su $DOMAIN_OWNER -c "tail $DOMAIN_HOME/servers/$WLS_INSTANCE/logs/$WLS_INSTANCE.log"
+                else
+                    tail $DOMAIN_HOME/servers/$WLS_INSTANCE/logs/$WLS_INSTANCE.log
+                fi
+
+                echo
                 status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep java | grep -v  weblogic.NodeManager | grep weblogic.Server | grep -i "Dweblogic.Name=$WLS_INSTANCE")
                 if [ -z "$status" ]; then
                 echo "Weblogic not running."
@@ -243,6 +261,7 @@ function status() {
                     tail $DOMAIN_HOME/servers/$WLS_INSTANCE/logs/$WLS_INSTANCE.log
                 fi
 
+                echo
                 status=$(ps aux | grep "^$DOMAIN_OWNER" | grep -v grep | grep httpd)
                 if [ -z "$status" ]; then
                 echo "OHS not running."
