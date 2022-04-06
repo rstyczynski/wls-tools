@@ -370,7 +370,7 @@ ExecStop=$stop_service
 
 RemainAfterExit=no
 KillMode=process
-Restart=on-failure
+Restart=always
   
 [Install]
 WantedBy=multi-user.target
