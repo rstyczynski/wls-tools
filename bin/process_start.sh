@@ -23,4 +23,5 @@ echo Executing: $start_cmd
 echo stdout:    $stdout_log 
 echo stderr:    $stderr_log
 $start_cmd >$stdout_log 2>$stderr_log
+exit $?
 
