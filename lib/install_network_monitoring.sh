@@ -60,6 +60,10 @@ test -f $domain_home/config/jdbc/WLSSchemaDataSource-jdbc.xml && jdbc_src=$domai
 test -f $domain_home/config/jdbc/SOADataSource-jdbc.xml && jdbc_src=$domain_home/config/jdbc/SOADataSource-jdbc.xml 
 test -f $domain_home/config/jdbc/MFTDataSource-jdbc.xml && jdbc_src=$domain_home/config/jdbc/MFTDataSource-jdbc.xml 
 
+if [ -z "$jdbc_src " ]; then
+    echo "Error. jdbc files are not found in expcted location. Are you in middlwre owner OS context? Exiting."
+    exit 1
+fi
 
 jdbc_url=$(cat $jdbc_src | grep url | perl -ne 'while(/<url>(.+)<\/url>/gm){print "$1\n";}')
 
