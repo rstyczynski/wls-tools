@@ -73,12 +73,18 @@ function discover_processes::load() {
 
 #
 function discoverWLSnames() {
-    discoverWLSroles
+    #discoverWLSroles
     wls_names=()
 
-    for wls_name in $(ps aux | grep java | perl -ne 'm{java -server.+-Dweblogic.Name=(\w+)} && print "$1\n"'); do
-        wls_names+=($wls_name)
-    done
+    if [ -z "$wls_server_selector" ]; then
+        for wls_name in $(ps aux | grep java | perl -ne 'm{java -server.+-Dweblogic.Name=(\w+)} && print "$1\n"'); do
+            wls_names+=($wls_name)
+        done
+    else
+        for wls_name in $(ps aux | grep java | grep $wls_server_selector | perl -ne 'm{java -server.+-Dweblogic.Name=(\w+)} && print "$1\n"'); do
+            wls_names+=($wls_name)
+        done
+    fi
 
     echo ${wls_names[@]}
 }
@@ -134,7 +140,11 @@ function analyzeWLSjava() {
 
     #echo "=== $wls_server"
     export wls_server
-    domain_config=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=([\w\/]+)} && print "$1"')
+    if [ -z "$wls_server_selector" ]; then
+        domain_config=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=([\w\/]+)} && print "$1"')
+    else
+        domain_config=$(ps aux | grep java | grep $wls_server_selector | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=([\w\/]+)} && print "$1"')
+    fi
     #echo $domain_path
 
     wls_attributes[$wls_server$delim\domain_config]=$domain_config
@@ -142,14 +152,36 @@ function analyzeWLSjava() {
 
     export wls_server
     #regexp="(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=$domain_config"
-    os_user=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
+    if [ -z "$wls_server_selector" ]; then
+        os_user=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server} && print "$1\n"')
+
+        # check if selector is required
+        if [ $(echo $os_user | wc -w) -gt 1 ]; then
+            echo "Error. More than one server found with the same name! You need to use selector. Users: $(echo $os_user | tr '\n' ' ')"
+            echo "Use 'export wls_server_selector=xxx', where xxx is something what makes it possible to identify right process e.g. full path or part of home directory."
+            echo "Can't continue. Exiting process..."
+            exit 1
+        fi
+    else
+        os_user=$(ps aux | grep java | grep $wls_server_selector | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
+    fi
     wls_attributes[$wls_server$delim\os_user]=$os_user
     wls_attributes_groups[$wls_server$delim\info$delim\os_user]=$os_user
 
     export wls_server
     #regexp="\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server.+-Doracle.domain.config.dir=$domain_config"
-    os_pid=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
-
+    if [ -z "$wls_server_selector" ]; then
+        os_pid=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1\n"')
+        # check if selector is required
+        if [ $(echo $os_pid | wc -w) -gt 1 ]; then
+            echo "Error. More than one server found with the same name! You need to use selector. PIDs: $(echo $os_pid | tr '\n' ' ')"
+            echo "Use 'export wls_server_selector=xxx', where xxx is something what makes it possible to identify right process e.g. full path or part of home directory."
+            echo "Can't continue. Exiting process..."
+            exit 1
+        fi
+            else
+        os_pid=$(ps aux | grep java | grep $wls_server_selector | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
+    fi
     #echo $os_pid
     wls_attributes[$wls_server$delim\os_pid]=$os_pid
     wls_attributes_groups[$wls_server$delim\info$delim\os_pid]=$os_pid
@@ -418,6 +450,11 @@ function showSample() {
 }
 
 function discoverWLS() {
+
+    if [ ! -z "$wls_server_selector" ]; then
+        echo "Info. wls_server_selector set to discover specific instances when more domains with the same server names aer running on the same host"
+        echo "Info. wls_server_selector set to $wls_server_selector"
+    fi
 
     unset wls_names
     wls_names=()

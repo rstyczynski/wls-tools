@@ -15,8 +15,8 @@ function jcmd_error_handler() {
 
         echo "Error conecting to JVM. JFR interaction not possible. Writing thread dump instead."
 
-        if [ ! -z $wls_jfr_server_selector ]; then
-            file_name=$(hostname)_${wls_jfr_server_selector}_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jtop
+        if [ ! -z $wls_server_selector ]; then
+            file_name=$(hostname)_${wls_server_selector}_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jtop
         else
             file_name=$(hostname)_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jtop
         fi
@@ -71,8 +71,8 @@ function wls_jfr() {
     echo "== date: $(date)"
     echo "======================================="
     echo "== wls_server:      $wls_server"
-    if [ ! -z $wls_jfr_server_selector ]; then
-        echo "== server_selector: $wls_jfr_server_selector"
+    if [ ! -z $wls_server_selector ]; then
+        echo "== server_selector: $wls_server_selector"
     fi
     echo "== operation:       $operation"
     echo "== duration:        $duration"
@@ -92,8 +92,8 @@ function wls_jfr() {
     fi
 
     export wls_server
-    if [ ! -z $wls_jfr_server_selector ]; then
-        os_pid=$(ps aux | grep java | grep $wls_jfr_server_selector | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1 "')
+    if [ ! -z $wls_server_selector ]; then
+        os_pid=$(ps aux | grep java | grep $wls_server_selector | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1 "')
     else
         os_pid=$(ps aux | grep java | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1 "')
     fi
@@ -105,7 +105,7 @@ function wls_jfr() {
     # 
     if [ $(echo $os_pid | tr ' ' '\n' | wc -l) -gt 1 ]; then
         echo "Error.Multiple WLS servers with the same name found. Can't continue."
-        echo "Use 'export wls_jfr_server_selector=xxx', where xxx is something what makes it possible to identify right process e.g. full path or part of home directory."
+        echo "Use 'export wls_server_selector=xxx', where xxx is something what makes it possible to identify right process e.g. full path or part of home directory."
         return 1
     fi
 
@@ -125,8 +125,8 @@ function wls_jfr() {
                 recNo=$(grep Recording: $tmp/jfr_check | grep wls-tools_JFR | cut -d: -f2 | cut -d= -f2 | cut -d' ' -f1 | head -1)
                 if [ -z "$recNo" ]; then
 
-                    if [ ! -z $wls_jfr_server_selector ]; then
-                        file_name=$(hostname)_${wls_jfr_server_selector}_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
+                    if [ ! -z $wls_server_selector ]; then
+                        file_name=$(hostname)_${wls_server_selector}_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
                     else
                         file_name=$(hostname)_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
                     fi
@@ -168,8 +168,8 @@ function wls_jfr() {
             else
                 recNo=$(grep Recording: $tmp/jfr_check | cut -d: -f2 | cut -d= -f2 | cut -d' ' -f1 | head -1)
                 if [ ! -z "$recNo" ]; then
-                    if [ ! -z $wls_jfr_server_selector ]; then
-                        file_name=$(hostname)_${wls_jfr_server_selector}_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
+                    if [ ! -z $wls_server_selector ]; then
+                        file_name=$(hostname)_${wls_server_selector}_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
                     else
                         file_name=$(hostname)_${wls_server}_$(date -u +"%Y-%m-%dT%H%M%S.000Z").jfr
                     fi
