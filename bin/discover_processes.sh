@@ -464,7 +464,7 @@ function showSample() {
 function discoverWLS() {
 
     if [ ! -z "$wls_server_selector" ]; then
-        echo "Info. wls_server_selector set to discover specific instances when more domains with the same server names aer running on the same host"
+        echo "Info. wls_server_selector set to discover specific instances when more domains with the same server names are running on the same host"
         echo "Info. wls_server_selector set to $wls_server_selector"
     fi
 
