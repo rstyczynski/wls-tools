@@ -474,14 +474,16 @@ function discoverWLS() {
     mkdir -p $tmp
 
     discoverWLSnames
-
     if [ -z ${wls_names[0]} ]; then
         echo "Weblogic not detected on this host."
         return 1
     fi
 
     discoverWLSjvmCfg
+    test $? -ne 0 && return $?
+
     discoverWLSroles
+    test $? -ne 0 && return $?
 }
 
 function wls() {
