@@ -278,7 +278,12 @@ function discoverWLSroles() {
         if [ -z "$domain_home" ]; then
             echo "Notice. Domain home not found in expected location. Trying to discover from process environment..."
             os_pid=$(getWLSjvmAttr $wls_server os_pid)
-            domain_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^DOMAIN_HOME" | head -1 | cut -d= -f2)
+            os_user=$(getWLSjvmAttr $wls_server os_user)
+            if [ $(whoami) != $os_user ]; then
+                domain_home=$(sudo su $os_user -c "xargs -0 -L1 -a /proc/$os_pid/environ" | grep "^DOMAIN_HOME" | head -1 | cut -d= -f2)
+            else
+                domain_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^DOMAIN_HOME" | head -1 | cut -d= -f2)
+            fi
         fi
 
         # do not do this. does not work w/o access to to this directory, what is true when you are not mw wner user
@@ -300,7 +305,13 @@ function discoverWLSroles() {
         if [ -z "$wls_home" ]; then
             echo -"Notice. WebLogic home not found in expected location. Trying to discover from process environment..."
             os_pid=$(getWLSjvmAttr $wls_server os_pid)
-            wls_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^WLS_HOME" | head -1 | cut -d= -f2)
+            os_user=$(getWLSjvmAttr $wls_server os_user)
+            if [ $(whoami) != $os_user ]; then
+                wls_home=$(sudo su $os_user -c "xargs -0 -L1 -a /proc/$os_pid/environ" | grep "^WLS_HOME" | head -1 | cut -d= -f2)
+            else
+                wls_home=$(xargs -0 -L1 -a /proc/$os_pid/environ | grep "^WLS_HOME" | head -1 | cut -d= -f2)
+            fi
+
         fi
 
         # do not do this. does not work w/o access to to this directory, what is true when you are not mw wner user
