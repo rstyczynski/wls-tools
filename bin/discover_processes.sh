@@ -159,8 +159,8 @@ function analyzeWLSjava() {
         if [ $(echo $os_user | wc -w) -gt 1 ]; then
             echo "Error. More than one server found with the same name! You need to use selector. Users: $(echo $os_user | tr '\n' ' ')"
             echo "Use 'export wls_server_selector=xxx', where xxx is something what makes it possible to identify right process e.g. full path or part of home directory."
-            echo "Can't continue. Exiting process..."
-            exit 1
+            echo "Can't continue. Exiting..."
+            return 1
         fi
     else
         os_user=$(ps aux | grep java | grep $wls_server_selector | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{(\w+)\s+\d+.+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
@@ -176,8 +176,8 @@ function analyzeWLSjava() {
         if [ $(echo $os_pid | wc -w) -gt 1 ]; then
             echo "Error. More than one server found with the same name! You need to use selector. PIDs: $(echo $os_pid | tr '\n' ' ')"
             echo "Use 'export wls_server_selector=xxx', where xxx is something what makes it possible to identify right process e.g. full path or part of home directory."
-            echo "Can't continue. Exiting process..."
-            exit 1
+            echo "Can't continue. Exiting..."
+            return 1
         fi
             else
         os_pid=$(ps aux | grep java | grep $wls_server_selector | perl -ne 'BEGIN{$wls_server=$ENV{'wls_server'};} m{\w+\s+(\d+).+java -server.+-Dweblogic.Name=$wls_server} && print "$1"')
@@ -233,6 +233,7 @@ function discoverWLSjvmCfg() {
         echo "====== $wls_server"
         echo "================================"
         analyzeWLSjava $wls_server 'Xm server cp Dlaunch da java Xloggc verbose Djava XX:+ XX:- XX Doracle DHTTPClient Dorg.apache.commons.logging DJAAS DUSE_JAAS Djps Dweblogic Ddomain.home Dwls Dtangosol Dmft Dums Dem Dcommon Djrf Dopss Dadf'
+        test $? -ne 0 && return $?
         echo "================================"
     done
 }
