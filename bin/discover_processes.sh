@@ -233,7 +233,7 @@ function discoverWLSjvmCfg() {
         echo "====== $wls_server"
         echo "================================"
         analyzeWLSjava $wls_server 'Xm server cp Dlaunch da java Xloggc verbose Djava XX:+ XX:- XX Doracle DHTTPClient Dorg.apache.commons.logging DJAAS DUSE_JAAS Djps Dweblogic Ddomain.home Dwls Dtangosol Dmft Dums Dem Dcommon Djrf Dopss Dadf'
-        test $? -ne 0 && return $?
+        test $? -ne 0 && return 1
         echo "================================"
     done
 }
@@ -480,10 +480,10 @@ function discoverWLS() {
     fi
 
     discoverWLSjvmCfg
-    test $? -ne 0 && return $?
+    test $? -ne 0 && return 1
 
     discoverWLSroles
-    test $? -ne 0 && return $?
+    test $? -ne 0 && return 1
 }
 
 function wls() {
