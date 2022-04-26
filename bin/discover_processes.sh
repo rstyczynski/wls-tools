@@ -486,9 +486,6 @@ function discoverWLS() {
     test $? -ne 0 && return 1
 }
 
-function wls() {
-    server_name=$1
-    action=$2
-
-    # wls get soa_server1 jvm args
-}
+echo "WebLogic process discovery loaded.
+* use discoverWLS to discover WebLogic processes.
+* use showSample to see exemplary data dump."
