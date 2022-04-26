@@ -48,8 +48,10 @@ function discover_processes::dump() {
     echo "# =======================================" >>$tmp/discover_processes.dump
     echo "# == host: $(hostname)" >>$tmp/discover_processes.dump
     echo "# == user: $(whoami)" >>$tmp/discover_processes.dump
+    echo "# == wls_server_selector: $wls_server_selector" $tmp/discover_processes.dump
     echo "# == date: $(date)" >>$tmp/discover_processes.dump
     echo "# =======================================" >>$tmp/discover_processes.dump
+    declare -p wls_server_selector >>$tmp/discover_processes.dump
     declare -p wls_names >>$tmp/discover_processes.dump
     declare -p wls_managed >>$tmp/discover_processes.dump
     declare -p wls_admin >>$tmp/discover_processes.dump
@@ -72,6 +74,9 @@ function discover_processes::load() {
 }
 
 #
+#
+#
+
 function discoverWLSnames() {
     #discoverWLSroles
     wls_names=()
@@ -195,12 +200,12 @@ function analyzeWLSjava() {
     wls_attributes[$wls_server$delim\java_bin]=$java_bin
     wls_attributes_groups[$wls_server$delim\info$delim\java_bin]=$java_bin
 
-    #echo 'Java binary version:'
-#     java_version="$(sudo su - $os_user <<EOF
-# $java_bin -version 2>&1 | tr '\n' ' ' 
-# EOF
-# )"
-    java_version="$($java_bin -version 2>&1 | tr '\n' ' ')"
+    os_user=$(getWLSjvmAttr $wls_server os_user)
+    if [ $(whoami) != $os_user ]; then
+        java_version="$(sudo su $os_user -c "$java_bin -version 2>&1" | tr '\n' ' ')"
+    else
+        java_version="$($java_bin -version 2>&1 | tr '\n' ' ')"
+    fi
     echo $java_version >$tmp/skiplines.$$
     wls_attributes[$wls_server$delim\java_version]="$java_version"
     wls_attributes_groups[$wls_server$delim\info$delim\java_version]="$java_version"
