@@ -157,7 +157,7 @@ function analyzeWLSjava() {
 
         # check if selector is required
         if [ $(echo $os_user | wc -w) -gt 1 ]; then
-            echo "Error. More than one server found with the same name! You need to use selector. Users: $(echo $os_user | tr '\n' ' ')"
+            echo "Error. More than one server found with the same name! You need to use selector."
             echo "Use 'export wls_server_selector=xxx', where xxx is something what makes it possible to identify right process e.g. full path or part of home directory."
             echo "Can't continue. Exiting..."
             return 1
