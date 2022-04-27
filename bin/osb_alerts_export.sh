@@ -74,7 +74,7 @@ ADMIN_NAME=${wls_admin[0]}
 MW_HOME=$(getWLSjvmAttr $ADMIN_NAME mw_home)
 
 DOMAIN_HOME=$(getDomainHome)
-DOMAIN_NAMEe=$(getDomainName)
+DOMAIN_NAME=$(getDomainName)
 # DOMAIN_HOME=$(getWLSjvmAttr $ADMIN_NAME -Ddomain.home)
 # DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
 
