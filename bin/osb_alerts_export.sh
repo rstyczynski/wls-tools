@@ -72,8 +72,11 @@ fi
 
 ADMIN_NAME=${wls_admin[0]}
 MW_HOME=$(getWLSjvmAttr $ADMIN_NAME mw_home)
-DOMAIN_HOME=$(getWLSjvmAttr $ADMIN_NAME -Ddomain.home)
-DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
+
+DOMAIN_HOME=$(getDomainHome)
+DOMAIN_NAMEe=$(getDomainName)
+# DOMAIN_HOME=$(getWLSjvmAttr $ADMIN_NAME -Ddomain.home)
+# DOMAIN_NAME=$(getWLSjvmAttr $ADMIN_NAME domain_name)
 
 # take OSB cluster, and osb servers
 OSB_CLUSTER=$(get_domain_param "/domain/app-deployment/name[text()='Service Bus Message Reporting Purger']/../target/text()")
